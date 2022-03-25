@@ -1,0 +1,43 @@
+{
+  "name": "lexical-solid",
+  "source": "src/index.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c rollup.config.js"
+  },
+  "exports": {
+    ".": {
+      "solid": "./dist/source/index.js",
+      "import": "./dist/esm/index.js",
+      "browser": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "node": "./dist/cjs/index.js"
+    }
+  },
+  "peerDependencies": {
+    "lexical": "^0.1.16",
+    "utility-types": "^3.10.0"
+  },
+  "devDependencies": {
+    "lexical": "^0.1.16",
+    "rollup": "^2.70.1",
+    "rollup-preset-solid": "^1.4.0",
+    "utility-types": "^3.10.0"
+  },
+  "dependencies": {
+    "@lexical/clipboard": "0.1.16",
+    "@lexical/hashtag": "0.1.16",
+    "@lexical/list": "0.1.16",
+    "@lexical/selection": "0.1.16",
+    "@lexical/table": "0.1.16",
+    "@lexical/text": "0.1.16",
+    "@lexical/utils": "0.1.16",
+    "@lexical/yjs": "0.1.16",
+    "solid-js": "^1.0.0"
+  }
+}

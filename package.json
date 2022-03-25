@@ -1,0 +1,7 @@
+{
+  "name": "lexical-solid-repo",
+  "workspaces": [
+    "lexical-solid",
+    "docs"
+  ]
+}
