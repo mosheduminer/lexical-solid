@@ -281,7 +281,7 @@ function useLexicalDragonSupport(editor: LexicalEditor) {
     }
   };
 
-  if (isServer) window.addEventListener("message", handler, true);
+  if (!isServer) window.addEventListener("message", handler, true);
   onCleanup(() => {
     window.removeEventListener("message", handler, true);
   });
