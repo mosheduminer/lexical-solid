@@ -8,7 +8,7 @@ import {
   PlainTextPlugin,
   useLexicalComposerContext,
 } from "lexical-solid";
-// import { HistoryPlugin } from "lexical-solid";
+import { HistoryPlugin } from "lexical-solid";
 import TreeViewPlugin from "../plugins/TreeViewPlugin";
 import { onMount } from "solid-js";
 //import { EmojiNode } from "./nodes/EmojiNode";
@@ -65,7 +65,7 @@ export default function Editor() {
           placeholder={<Placeholder />}
         />
         <OnChangePlugin onChange={onChange} />
-        {/*<HistoryPlugin />*/}
+        <HistoryPlugin />
         <TreeViewPlugin />
         {/*<EmoticonPlugin />*/}
         <MyCustomAutoFocusPlugin />

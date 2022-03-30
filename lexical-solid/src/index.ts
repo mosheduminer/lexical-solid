@@ -12,6 +12,7 @@ import ContentEditable from "./LexicalContentEditable";
 import OnChangePlugin from "./LexicalOnChangePlugin";
 import PlainTextPlugin from "./LexicalPlainTextPlugin";
 import LexicalTreeView from "./LexicalTreeView";
+import { HistoryPlugin, createEmptyHistoryState } from "./LexicalHistoryPlugin";
 
 export {
   LexicalComposer,
@@ -24,4 +25,6 @@ export {
   OnChangePlugin,
   PlainTextPlugin,
   LexicalTreeView,
+  HistoryPlugin,
+  createEmptyHistoryState,
 };
