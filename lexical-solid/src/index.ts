@@ -10,9 +10,12 @@ import type {
 } from "./LexicalComposerContext";
 import ContentEditable from "./LexicalContentEditable";
 import OnChangePlugin from "./LexicalOnChangePlugin";
-import PlainTextPlugin from "./LexicalPlainTextPlugin";
 import LexicalTreeView from "./LexicalTreeView";
 import { HistoryPlugin, createEmptyHistoryState } from "./LexicalHistoryPlugin";
+import LinkPlugin from "./LexicalLinkPlugin";
+import LexicalAutoLinkPlugin from "./LexicalAutoLinkPlugin";
+import PlainTextPlugin from "./LexicalPlainTextPlugin";
+import RichTextPlugin from "./LexicalRichTextPlugin";
 
 export {
   LexicalComposer,
@@ -27,4 +30,7 @@ export {
   LexicalTreeView,
   HistoryPlugin,
   createEmptyHistoryState,
+  LinkPlugin,
+  RichTextPlugin,
+  LexicalAutoLinkPlugin,
 };

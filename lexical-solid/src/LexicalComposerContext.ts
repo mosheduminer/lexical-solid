@@ -1,15 +1,15 @@
 import { createContext, useContext } from "solid-js";
 import type { EditorThemeClasses, LexicalEditor } from "lexical";
 
-export type LexicalComposerContextType = {
+type LexicalComposerContextType = {
   getTheme: () => EditorThemeClasses | null | undefined;
 };
-export type LexicalComposerContextWithEditor = [
+type LexicalComposerContextWithEditor = [
   LexicalEditor,
   LexicalComposerContextType
 ];
 
-export function createLexicalComposerContext(
+function createLexicalComposerContext(
   parent: LexicalComposerContextWithEditor | null | undefined,
   theme: EditorThemeClasses | null | undefined
 ): LexicalComposerContextType {
@@ -31,11 +31,11 @@ export function createLexicalComposerContext(
   };
 }
 
-export const LexicalComposerContext = createContext<
+const LexicalComposerContext = createContext<
   LexicalComposerContextWithEditor | null | undefined
 >(null);
 
-export const useLexicalComposerContext =
+const useLexicalComposerContext =
   (): LexicalComposerContextWithEditor => {
     const composerContext = useContext(LexicalComposerContext);
     if (!composerContext) {
@@ -47,3 +47,13 @@ export const useLexicalComposerContext =
     }
     return composerContext;
   };
+
+export {
+  LexicalComposerContext,
+  createLexicalComposerContext,
+  useLexicalComposerContext,
+}
+export type {
+  LexicalComposerContextWithEditor,
+  LexicalComposerContextType,
+}

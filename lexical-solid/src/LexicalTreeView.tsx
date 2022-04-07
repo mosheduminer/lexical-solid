@@ -33,7 +33,7 @@ const SYMBOLS = Object.freeze({
   selectedLine: ">",
 });
 
-export default function TreeView(props: {
+function TreeView(props: {
   timeTravelPanelClassName: string;
   timeTravelPanelSliderClassName: string;
   timeTravelPanelButtonClassName: string;
@@ -56,7 +56,7 @@ export default function TreeView(props: {
       () => {
         setContent(generateContent(props.editor.getEditorState()));
         onCleanup(
-          props.editor.addListener("update", ({ editorState }) => {
+          props.editor.registerUpdateListener(({ editorState }) => {
             const compositionKey = props.editor._compositionKey;
             const treeText = generateContent(props.editor.getEditorState());
             const compositionText =
@@ -168,24 +168,27 @@ export default function TreeView(props: {
               }
             }}
           />
-          <button class={props.timeTravelPanelButtonClassName} onClick={() => {
-            const rootElement = props.editor.getRootElement();
+          <button
+            class={props.timeTravelPanelButtonClassName}
+            onClick={() => {
+              const rootElement = props.editor.getRootElement();
 
-            if (rootElement !== null) {
-              rootElement.contentEditable = "true";
-              const index = timeStampedEditorStates().length - 1;
-              const timeStampedEditorState = timeStampedEditorStates()[index];
-              props.editor.setEditorState(timeStampedEditorState[1]);
-              const input = inputRef;
+              if (rootElement !== null) {
+                rootElement.contentEditable = "true";
+                const index = timeStampedEditorStates().length - 1;
+                const timeStampedEditorState = timeStampedEditorStates()[index];
+                props.editor.setEditorState(timeStampedEditorState[1]);
+                const input = inputRef;
 
-              if (input !== null) {
-                input.value = String(index);
+                if (input !== null) {
+                  input.value = String(index);
+                }
+
+                setTimeTravelEnabled(false);
+                setIsPlaying(false);
               }
-
-              setTimeTravelEnabled(false);
-              setIsPlaying(false);
-            }
-          }}>
+            }}
+          >
             Exit
           </button>
         </div>
@@ -194,20 +197,28 @@ export default function TreeView(props: {
   );
 }
 
-type NodeOrSelection = TextNode | RangeSelection | GridSelection | NodeSelection;
+type NodeOrSelection =
+  | TextNode
+  | RangeSelection
+  | GridSelection
+  | NodeSelection;
 
 function printRangeSelection(selection: NodeOrSelection) {
   let res = "";
   const formatText = printFormatProperties(selection);
   res += `: range ${formatText !== "" ? `{ ${formatText} }` : ""}`;
+  //@ts-ignore
   const anchor = selection.anchor;
+  //@ts-ignore
   const focus = selection.focus;
   const anchorOffset = anchor.offset;
   const focusOffset = focus.offset;
-  res += `\n  ├ anchor { key: ${anchor.key}, offset: ${anchorOffset === null ? "null" : anchorOffset
-    }, type: ${anchor.type} }`;
-  res += `\n  └ focus { key: ${focus.key}, offset: ${focusOffset === null ? "null" : focusOffset
-    }, type: ${focus.type} }`;
+  res += `\n  ├ anchor { key: ${anchor.key}, offset: ${
+    anchorOffset === null ? "null" : anchorOffset
+  }, type: ${anchor.type} }`;
+  res += `\n  └ focus { key: ${focus.key}, offset: ${
+    focusOffset === null ? "null" : focusOffset
+  }, type: ${focus.type} }`;
   return res;
 }
 
@@ -226,7 +237,7 @@ function generateContent(editorState: EditorState) {
       | RangeSelection
       | GridSelection
       | NodeSelection;
-    visitTree($getRoot(), (node: LexicalNode, indent: string[]) => {
+    visitTree($getRoot(), (node, indent) => {
       const nodeKey = node.getKey();
       const nodeKeyDisplay = `(${nodeKey})`;
       const typeDisplay = node.getType() || "";
@@ -246,10 +257,10 @@ function generateContent(editorState: EditorState) {
     return selection === null
       ? ": null"
       : $isRangeSelection(selection)
-        ? printRangeSelection(selection as RangeSelection)
-        : $isGridSelection(selection)
-          ? printGridSelection(selection as GridSelection)
-          : printObjectSelection(selection as NodeSelection);
+      ? printRangeSelection(selection)
+      : $isGridSelection(selection)
+      ? printGridSelection(selection as GridSelection)
+      : printObjectSelection(selection as NodeSelection);
   });
   return res + "\n selection" + selectionString;
 }
@@ -334,6 +345,7 @@ function printAllProperties(node: TextNode) {
 }
 
 function printDetailProperties(nodeOrSelection: NodeOrSelection) {
+  //@ts-ignore
   let str = DETAIL_PREDICATES.map((predicate) => predicate(nodeOrSelection))
     .filter(Boolean)
     .join(", ")
@@ -347,6 +359,7 @@ function printDetailProperties(nodeOrSelection: NodeOrSelection) {
 }
 
 function printModeProperties(nodeOrSelection: NodeOrSelection) {
+  //@ts-ignore
   let str = MODE_PREDICATES.map((predicate) => predicate(nodeOrSelection))
     .filter(Boolean)
     .join(", ")
@@ -360,6 +373,7 @@ function printModeProperties(nodeOrSelection: NodeOrSelection) {
 }
 
 function printFormatProperties(nodeOrSelection: NodeOrSelection) {
+  //@ts-ignore
   let str = FORMAT_PREDICATES.map((predicate) => predicate(nodeOrSelection))
     .filter(Boolean)
     .join(", ")
@@ -490,7 +504,9 @@ function $getSelectionStartEnd(
   return [
     start + numNonSingleWidthCharBeforeSelection,
     end +
-    numNonSingleWidthCharBeforeSelection +
-    numNonSingleWidthCharInSelection,
+      numNonSingleWidthCharBeforeSelection +
+      numNonSingleWidthCharInSelection,
   ];
 }
+
+export default TreeView;

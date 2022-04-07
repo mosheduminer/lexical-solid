@@ -1,14 +1,19 @@
 import { $getRoot, $getSelection, EditorState, LexicalEditor } from "lexical";
+import { LinkNode } from "@lexical/link";
+import { AutoLinkNode } from "@lexical/link";
 
 import ExampleTheme from "../themes/PlainTextTheme";
 import {
   OnChangePlugin,
   LexicalComposer,
   ContentEditable,
-  PlainTextPlugin,
+  RichTextPlugin,
+  LinkPlugin,
+  LexicalAutoLinkPlugin,
 } from "lexical-solid";
 import { HistoryPlugin } from "lexical-solid";
-import TreeViewPlugin from "~/plugins/TreeViewPlugin";
+import TreeViewPlugin from "../plugins/TreeViewPlugin";
+import { onMount } from "solid-js";
 import AutoFocusPlugin from "~/plugins/AutoFocusPlugin";
 //import { EmojiNode } from "./nodes/EmojiNode";
 //import EmoticonPlugin from "./plugins/EmoticonPlugin";
@@ -29,6 +34,7 @@ function onChange(editorState: EditorState, editor: LexicalEditor) {
   });
 }
 
+
 const editorConfig = {
   // The editor theme
   theme: ExampleTheme,
@@ -37,22 +43,22 @@ const editorConfig = {
     throw error;
   },
   // Any custom nodes go here
-  //nodes: [EmojiNode]
+  nodes: [AutoLinkNode, LinkNode] as any
 };
 
 export default function Editor() {
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-container">
-        <PlainTextPlugin
+        <RichTextPlugin
           contentEditable={<ContentEditable className="editor-input" />}
           placeholder={<Placeholder />}
         />
+        <LinkPlugin />
+        <AutoFocusPlugin />
         <OnChangePlugin onChange={onChange} />
         <HistoryPlugin />
         <TreeViewPlugin />
-        {/*<EmoticonPlugin />*/}
-        <AutoFocusPlugin />
       </div>
     </LexicalComposer>
   );

@@ -1,4 +1,5 @@
-const exampleTheme = {
+import { EditorThemeClasses } from "lexical";
+const exampleTheme: EditorThemeClasses = {
   ltr: "ltr",
   rtl: "rtl",
   placeholder: "editor-placeholder",

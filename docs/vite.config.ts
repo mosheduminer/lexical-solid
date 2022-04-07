@@ -18,9 +18,26 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       "lexical",
-      "@lexical/text",
       "@lexical/clipboard",
+      "@lexical/code",
+      "@lexical/dragon",
+      "@lexical/hashtag",
+      "@lexical/history",
+      "@lexical/link",
+      "@lexical/list",
+      "@lexical/overflow",
+      "@lexical/plain-text",
+      "@lexical/rich-text",
       "@lexical/selection",
-    ]
+      "@lexical/table",
+      "@lexical/text",
+      "@lexical/utils",
+      "@lexical/yjs",
+    ],
+  },
+  build: {
+    commonjsOptions: {
+      include: ["../lexical-solid"]
+    }
   }
 });

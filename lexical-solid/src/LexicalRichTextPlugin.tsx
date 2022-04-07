@@ -4,46 +4,62 @@ import {
   createSignal,
   JSX,
   onCleanup,
-  onMount,
   Show,
 } from "solid-js";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
 import { EditorState, LexicalEditor } from "lexical";
-import text, { $canShowPlaceholderCurry } from "@lexical/text";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { $canShowPlaceholderCurry } from "@lexical/text";
+import { isServer, Portal } from "solid-js/web";
+import { registerRichText } from "@lexical/rich-text";
+import { mergeRegister } from "@lexical/utils";
 //@ts-ignore bad typings
 import { registerDragonSupport } from "@lexical/dragon";
-import plainText from "@lexical/plain-text";
-import { mergeRegister } from "@lexical/utils";
-import { isServer, Portal } from "solid-js/web";
 
 type InitialEditorStateType = null | string | EditorState | (() => void);
+function RichTextPlugin(props: {
+  contentEditable: JSX.Element;
+  initialEditorState?: InitialEditorStateType;
+  placeholder: JSX.Element;
+}): JSX.Element {
+  const [editor] = useLexicalComposerContext();
+  const showPlaceholder = useLexicalCanShowPlaceholder(editor);
+  useRichTextSetup(editor, props.initialEditorState);
+  const decorators = useDecorators(editor);
+  return (
+    <>
+      {props.contentEditable}
+      <Show when={showPlaceholder()}>{props.placeholder}</Show>
+      {decorators()}
+    </>
+  );
+}
 
 function useLexicalCanShowPlaceholder(editor: LexicalEditor) {
   const [canShowPlaceholder, setCanShowPlaceholder] = createSignal(
     editor.getEditorState().read($canShowPlaceholderCurry(editor.isComposing()))
   );
-  onMount(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
+  onCleanup(
+    editor.registerUpdateListener(({ editorState }) => {
       const isComposing = editor.isComposing();
       const currentCanShowPlaceholder = editorState.read(
-        text.$canShowPlaceholderCurry(isComposing)
+        $canShowPlaceholderCurry(isComposing)
       );
       setCanShowPlaceholder(currentCanShowPlaceholder);
-    });
-  });
+    })
+  );
   return canShowPlaceholder;
 }
 
 function useDecorators(editor: LexicalEditor) {
   const [decorators, setDecorators] = createSignal(
-    editor.getDecorators<JSX.Element>()
+    editor.getDecorators<Element>()
   ); // Subscribe to changes
 
   onCleanup(
     editor.registerDecoratorListener((nextDecorators) => {
       setDecorators(nextDecorators);
     })
-  ); // Return decorators defined as React Portals
+  );
 
   return createMemo(() => {
     const decoratedPortals = [];
@@ -56,7 +72,10 @@ function useDecorators(editor: LexicalEditor) {
 
       if (element !== null) {
         decoratedPortals.push(
-          createComponent(Portal, { mount: element, children: decorator })
+          createComponent(Portal, {
+            mount: element,
+            children: decorator,
+          })
         );
       }
     }
@@ -65,34 +84,18 @@ function useDecorators(editor: LexicalEditor) {
   });
 }
 
-function usePlainTextSetup(
+function useRichTextSetup(
   editor: LexicalEditor,
   initialEditorState?: InitialEditorStateType
 ) {
   if (!isServer) {
     onCleanup(
       mergeRegister(
-        plainText.registerPlainText(editor, initialEditorState),
+        registerRichText(editor, initialEditorState),
         registerDragonSupport(editor)
       ) // We only do this for init
-    );  
+    );
   }
 }
 
-export default function PlainTextPlugin(props: {
-  contentEditable: JSX.Element;
-  initialEditorState?: InitialEditorStateType;
-  placeholder: JSX.Element;
-}): JSX.Element {
-  const [editor] = useLexicalComposerContext();
-  const showPlaceholder = useLexicalCanShowPlaceholder(editor);
-  usePlainTextSetup(editor, props.initialEditorState);
-  const decorators = useDecorators(editor);
-  return (
-    <>
-      {props.contentEditable}
-      <Show when={showPlaceholder()}>{props.placeholder}</Show>
-      {decorators()}
-    </>
-  );
-}
+export default RichTextPlugin;

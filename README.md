@@ -2,8 +2,8 @@
 
 > SolidJS port of `@lexical/react`
 
-Currently based on [@lexical/react](https://www.npmjs.com/package/@lexical/react) version `0.1.16`.
+Currently based on [@lexical/react](https://www.npmjs.com/package/@lexical/react) version `0.1.18`.
 
 # License
 
-This code in this repository is very similar to the source react code, with modifications for use with SolidJS. The license distributed with `@lexical/react can be found in [LICENSE-UPSTREAM](./LICENSE-UPSTREAM).
+This code in this repository is very similar to the source react code, with modifications for use with SolidJS. The license distributed with `@lexical/react` can be found in [LICENSE-UPSTREAM](./LICENSE-UPSTREAM).

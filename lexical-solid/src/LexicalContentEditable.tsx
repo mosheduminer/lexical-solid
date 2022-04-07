@@ -1,8 +1,8 @@
-import { createSignal, JSX, onMount } from "solid-js";
+import { createSignal, JSX, mergeProps, onCleanup, onMount } from "solid-js";
 import { $ReadOnly } from "utility-types";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 
-export type Props = $ReadOnly<{
+type Props = $ReadOnly<{
   ariaActiveDescendantID?: string;
   ariaAutoComplete?: string;
   ariaControls?: string;
@@ -25,7 +25,8 @@ export type Props = $ReadOnly<{
   testid?: string;
 }>;
 
-export default function LexicalContentEditable(props: Props): JSX.Element {
+function LexicalContentEditable(props: Props): JSX.Element {
+  props = mergeProps({ role: "textbox", spellCheck: true }, props);
   const [editor] = useLexicalComposerContext();
   const [isReadOnly, setReadOnly] = createSignal(true);
   const ref = (rootElement: HTMLElement) => {
@@ -33,9 +34,11 @@ export default function LexicalContentEditable(props: Props): JSX.Element {
   };
   onMount(() => {
     setReadOnly(editor.isReadOnly());
-    return editor.addListener("readonly", (currentIsReadOnly) => {
-      setReadOnly(currentIsReadOnly);
-    });
+    onCleanup(
+      editor.registerReadOnlyListener((currentIsReadOnly) => {
+        setReadOnly(currentIsReadOnly);
+      })
+    );
   });
   function ifNotReadonly<T>(value: T): T | undefined {
     if (isReadOnly()) return undefined;
@@ -70,3 +73,6 @@ export default function LexicalContentEditable(props: Props): JSX.Element {
     />
   );
 }
+
+export default LexicalContentEditable;
+export type { Props };

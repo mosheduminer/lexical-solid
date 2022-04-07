@@ -1,4 +1,4 @@
-import { createEffect, JSX, useContext } from "solid-js";
+import { JSX, onMount, useContext } from "solid-js";
 import { createEditor } from "lexical";
 import type { EditorThemeClasses, LexicalEditor, LexicalNode } from "lexical";
 import type { Class } from "utility-types";
@@ -9,7 +9,6 @@ import {
 
 type Props = {
   initialConfig: {
-    editor?: LexicalEditor | null;
     readOnly?: boolean;
     namespace?: string;
     nodes?: Array<Class<LexicalNode>>;
@@ -20,47 +19,20 @@ type Props = {
 };
 
 function LexicalComposer(props: Props) {
-  const parentContext = useContext(LexicalComposerContext);
-  let composerTheme;
-  let parentEditor;
-  const {
-    theme,
+  const { theme, namespace, nodes, onError } = props.initialConfig;
+  const context = createLexicalComposerContext(null, theme);
+  const editor: LexicalEditor = createEditor({
+    context,
     namespace,
-    editor: initialEditor,
     nodes,
-    onError,
-  } = props.initialConfig;
+    onError: (error) => onError(error, editor),
+    readOnly: true,
+    theme,
+  });
 
-  if (theme != null) {
-    composerTheme = theme;
-  } else if (parentContext != null) {
-    parentEditor = parentContext[0];
-    const parentTheme = parentContext[1].getTheme();
-
-    if (parentTheme != null) {
-      composerTheme = parentTheme;
-    }
-  }
-
-  const context = createLexicalComposerContext(parentContext, composerTheme);
-  let editor = initialEditor;
-
-  if (!editor) {
-    const newEditor: LexicalEditor = createEditor({
-      context,
-      namespace,
-      nodes,
-      onError: (error) => onError(error, newEditor),
-      parentEditor,
-      readOnly: true,
-      theme: composerTheme,
-    });
-    editor = newEditor;
-  }
-
-  createEffect(() => {
+  onMount(() => {
     const isReadOnly = props.initialConfig.readOnly;
-    editor!.setReadOnly(isReadOnly || false);
+    editor.setReadOnly(isReadOnly || false);
   });
   return (
     <LexicalComposerContext.Provider value={[editor, context]}>

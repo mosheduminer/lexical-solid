@@ -3,5 +3,8 @@
   "workspaces": [
     "lexical-solid",
     "docs"
+  ],
+  "nohoist": [
+    "**/solid-start"
   ]
 }
