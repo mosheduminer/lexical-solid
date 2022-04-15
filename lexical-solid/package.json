@@ -1,14 +1,16 @@
 {
   "name": "lexical-solid",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "source": "src/index.ts",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "LICENSE-UPSTREAM"
   ],
+  "type": "module",
   "scripts": {
     "build": "rollup -c rollup.config.js"
   },
