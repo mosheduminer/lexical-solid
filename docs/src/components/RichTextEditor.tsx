@@ -1,20 +1,25 @@
 import { $getRoot, $getSelection, EditorState, LexicalEditor } from "lexical";
 import { LinkNode } from "@lexical/link";
 import { AutoLinkNode } from "@lexical/link";
-
-import ExampleTheme from "../themes/PlainTextTheme";
+import "./RichTextEditor.css";
 import {
   OnChangePlugin,
   LexicalComposer,
   ContentEditable,
   RichTextPlugin,
   LinkPlugin,
-  LexicalAutoLinkPlugin,
 } from "lexical-solid";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+//import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
+import { ListItemNode, ListNode } from "@lexical/list";
+//@ts-ignore
+import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { HistoryPlugin } from "lexical-solid";
 import TreeViewPlugin from "../plugins/TreeViewPlugin";
-import { onMount } from "solid-js";
 import AutoFocusPlugin from "~/plugins/AutoFocusPlugin";
+import CodeHighlightPlugin from "~/plugins/CodeHighlightPlugin";
+import ToolbarPlugin from "~/plugins/ToolbarPlugin";
+import RichTextTheme from "./RichTextTheme";
 //import { EmojiNode } from "./nodes/EmojiNode";
 //import EmoticonPlugin from "./plugins/EmoticonPlugin";
 
@@ -37,28 +42,45 @@ function onChange(editorState: EditorState, editor: LexicalEditor) {
 
 const editorConfig = {
   // The editor theme
-  theme: ExampleTheme,
+  theme: RichTextTheme,
   // Handling of errors during update
   onError(error: any) {
     throw error;
   },
   // Any custom nodes go here
-  nodes: [AutoLinkNode, LinkNode] as any
+  nodes: [
+    HeadingNode,
+    ListNode,
+    ListItemNode,
+    QuoteNode,
+    CodeNode,
+    CodeHighlightNode,
+//    TableNode,
+//    TableCellNode,
+//    TableRowNode,
+    AutoLinkNode,
+    LinkNode
+  ] as any
 };
 
 export default function Editor() {
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-container">
-        <RichTextPlugin
-          contentEditable={<ContentEditable className="editor-input" />}
-          placeholder={<Placeholder />}
-        />
-        <LinkPlugin />
-        <AutoFocusPlugin />
-        <OnChangePlugin onChange={onChange} />
-        <HistoryPlugin />
-        <TreeViewPlugin />
+        <ToolbarPlugin />
+        <div className="editor-inner">
+          <RichTextPlugin
+            contentEditable={<ContentEditable className="editor-input" />}
+            placeholder={<Placeholder />}
+          />
+          <LinkPlugin />
+          <AutoFocusPlugin />
+          <OnChangePlugin onChange={onChange} />
+          <HistoryPlugin />
+          <TreeViewPlugin />
+          <AutoFocusPlugin />
+          <CodeHighlightPlugin />
+        </div>
       </div>
     </LexicalComposer>
   );
