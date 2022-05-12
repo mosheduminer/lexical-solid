@@ -6,10 +6,10 @@ import {
   LexicalComposer,
   ContentEditable,
   PlainTextPlugin,
+  AutoFocusPlugin,
 } from "lexical-solid";
 import { HistoryPlugin } from "lexical-solid";
 import TreeViewPlugin from "~/plugins/TreeViewPlugin";
-import AutoFocusPlugin from "~/plugins/AutoFocusPlugin";
 //import { EmojiNode } from "./nodes/EmojiNode";
 //import EmoticonPlugin from "./plugins/EmoticonPlugin";
 

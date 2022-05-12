@@ -1,4 +1,4 @@
-import { JSX, onMount, useContext } from "solid-js";
+import { JSX, onMount } from "solid-js";
 import { createEditor } from "lexical";
 import type { EditorThemeClasses, LexicalEditor, LexicalNode } from "lexical";
 import type { Class } from "utility-types";
@@ -22,12 +22,11 @@ function LexicalComposer(props: Props) {
   const { theme, namespace, nodes, onError } = props.initialConfig;
   const context = createLexicalComposerContext(null, theme);
   const editor: LexicalEditor = createEditor({
-    context,
     namespace,
     nodes,
-    onError: (error) => onError(error, editor),
+    onError: error => onError(error, editor),
     readOnly: true,
-    theme,
+    theme
   });
 
   onMount(() => {

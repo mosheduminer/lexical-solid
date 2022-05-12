@@ -58,21 +58,19 @@ function TreeView(props: {
   const [isPlaying, setIsPlaying] = createSignal(false);
   createEffect(() => {
     setContent(generateContent(props.editor.getEditorState()));
-    onCleanup(
-      props.editor.registerUpdateListener(({ editorState }) => {
-        const compositionKey = props.editor._compositionKey;
-        const treeText = generateContent(props.editor.getEditorState());
-        const compositionText =
-          compositionKey !== null && `Composition key: ${compositionKey}`;
-        setContent([treeText, compositionText].filter(Boolean).join("\n\n"));
-        if (!timeTravelEnabled()) {
-          setTimeStampedEditorStates((currentEditorStates) => [
-            ...currentEditorStates,
-            [Date.now(), editorState],
-          ]);
-        }
-      })
-    );
+    return props.editor.registerUpdateListener(({ editorState }) => {
+      const compositionKey = props.editor._compositionKey;
+      const treeText = generateContent(props.editor.getEditorState());
+      const compositionText =
+        compositionKey !== null && `Composition key: ${compositionKey}`;
+      setContent([treeText, compositionText].filter(Boolean).join("\n\n"));
+      if (!timeTravelEnabled()) {
+        setTimeStampedEditorStates((currentEditorStates) => [
+          ...currentEditorStates,
+          [Date.now(), editorState],
+        ]);
+      }
+    });
   });
   const totalEditorStates = () => timeStampedEditorStates().length;
 
@@ -103,13 +101,15 @@ function TreeView(props: {
       };
 
       play();
-      onCleanup(() => window.clearTimeout(timeoutId));
+
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
     }
   });
 
   createEffect(() => {
     const element = treeElementRef;
-    const editor = props.editor;
 
     if (element !== null) {
       //@ts-ignore
@@ -153,7 +153,7 @@ function TreeView(props: {
           <input
             className={props.timeTravelPanelSliderClassName}
             ref={inputRef}
-            onInput={(event) => {
+            onChange={(event) => {
               const editorStateIndex = Number(event.currentTarget.value);
               const timeStampedEditorState =
                 timeStampedEditorStates()[editorStateIndex];

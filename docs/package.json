@@ -7,22 +7,24 @@
   },
   "type": "module",
   "dependencies": {
-    "@lexical/clipboard": "0.1.20",
-    "@lexical/code": "0.1.20",
-    "@lexical/dragon": "0.1.20",
-    "@lexical/hashtag": "0.1.20",
-    "@lexical/history": "0.1.20",
-    "@lexical/link": "0.1.20",
-    "@lexical/list": "0.1.20",
-    "@lexical/overflow": "0.1.20",
-    "@lexical/plain-text": "0.1.20",
-    "@lexical/rich-text": "0.1.20",
-    "@lexical/selection": "0.1.20",
-    "@lexical/table": "0.1.20",
-    "@lexical/text": "0.1.20",
-    "@lexical/utils": "0.1.20",
-    "@lexical/yjs": "0.1.20",
-    "lexical": "0.1.20"
+    "@lexical/clipboard": "0.2.9",
+    "@lexical/list": "0.2.9",
+    "@lexical/table": "0.2.9",
+    "@lexical/yjs": "0.2.9",
+    "@lexical/hashtag": "0.2.9",
+    "@lexical/selection": "0.2.9",
+    "@lexical/utils": "0.2.9",
+    "@lexical/dragon": "0.2.9",
+    "@lexical/plain-text": "0.2.9",
+    "@lexical/rich-text": "0.2.9",
+    "@lexical/code": "0.2.9",
+    "@lexical/text": "0.2.9",
+    "@lexical/link": "0.2.9",
+    "@lexical/overflow": "0.2.9",
+    "@lexical/history": "0.2.9",
+    "@lexical/markdown": "0.2.9",
+    "@lexical/mark": "0.2.9",
+    "lexical": "0.2.9"
   },
   "devDependencies": {
     "@mdx-js/rollup": "^2.0.0",
@@ -34,7 +36,7 @@
     "solid-start-static": "0.1.0-alpha.73",
     "typescript": "^4.6.3",
     "undici": "^4.12.2",
-    "vite": "^2.8.6"
+    "vite": "^2.9.7"
   },
   "engines": {
     "node": ">=14"

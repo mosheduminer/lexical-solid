@@ -2,7 +2,7 @@ import { createContext, useContext } from "solid-js";
 import type { EditorThemeClasses, LexicalEditor } from "lexical";
 
 type LexicalComposerContextType = {
-  getTheme: () => EditorThemeClasses | null | undefined;
+  getTheme: () => EditorThemeClasses | null;
 };
 type LexicalComposerContextWithEditor = [
   LexicalEditor,
@@ -41,7 +41,7 @@ const useLexicalComposerContext =
     if (!composerContext) {
       {
         throw Error(
-          `LexicalComposerContext.useLexicalComposerContext: cannot find a LexicalComposerContext`
+          `useLexicalComposerContext: cannot find a LexicalComposerContext`
         );
       }
     }

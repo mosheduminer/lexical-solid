@@ -24,32 +24,34 @@
     }
   },
   "peerDependencies": {
-    "lexical": "^0.1.18",
+    "lexical": "0.2.9",
     "utility-types": "^3.10.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "21.0.3",
-    "lexical": "^0.1.19",
+    "lexical": "0.2.9",
     "rollup": "^2.70.1",
     "rollup-preset-solid": "^1.4.0",
     "utility-types": "^3.10.0"
   },
   "dependencies": {
-    "@lexical/clipboard": "0.1.20",
-    "@lexical/code": "0.1.20",
-    "@lexical/dragon": "0.1.20",
-    "@lexical/hashtag": "0.1.20",
-    "@lexical/history": "0.1.20",
-    "@lexical/link": "0.1.20",
-    "@lexical/list": "0.1.20",
-    "@lexical/overflow": "0.1.20",
-    "@lexical/plain-text": "0.1.20",
-    "@lexical/rich-text": "0.1.20",
-    "@lexical/selection": "0.1.20",
-    "@lexical/table": "0.1.20",
-    "@lexical/text": "0.1.20",
-    "@lexical/utils": "0.1.20",
-    "@lexical/yjs": "0.1.20",
+    "@lexical/clipboard": "0.2.9",
+    "@lexical/list": "0.2.9",
+    "@lexical/table": "0.2.9",
+    "@lexical/yjs": "0.2.9",
+    "@lexical/hashtag": "0.2.9",
+    "@lexical/selection": "0.2.9",
+    "@lexical/utils": "0.2.9",
+    "@lexical/dragon": "0.2.9",
+    "@lexical/plain-text": "0.2.9",
+    "@lexical/rich-text": "0.2.9",
+    "@lexical/code": "0.2.9",
+    "@lexical/text": "0.2.9",
+    "@lexical/link": "0.2.9",
+    "@lexical/overflow": "0.2.9",
+    "@lexical/history": "0.2.9",
+    "@lexical/markdown": "0.2.9",
+    "@lexical/mark": "0.2.9",
     "solid-js": "^1.0.0"
   }
 }

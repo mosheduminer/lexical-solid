@@ -17,6 +17,7 @@ type Props = $ReadOnly<{
   autoComplete?: boolean;
   autoCorrect?: boolean;
   className?: string;
+  id?: string;
   readOnly?: boolean;
   role?: JSX.HTMLAttributes<HTMLDivElement>["role"];
   style?: StyleSheetList;
@@ -65,6 +66,7 @@ function LexicalContentEditable(props: Props): JSX.Element {
       className={props.className}
       contentEditable={!isReadOnly()}
       data-testid={props.testid}
+      id={props.id}
       ref={ref}
       role={ifNotReadonly(props.role)}
       spellcheck={props.spellCheck}

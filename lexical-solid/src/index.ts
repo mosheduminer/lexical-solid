@@ -16,6 +16,17 @@ import LinkPlugin from "./LexicalLinkPlugin";
 import LexicalAutoLinkPlugin from "./LexicalAutoLinkPlugin";
 import PlainTextPlugin from "./LexicalPlainTextPlugin";
 import RichTextPlugin from "./LexicalRichTextPlugin";
+import LexicalAutoFocusPlugin from "./LexicalAutoFocusPlugin";
+import LexicalAutoScrollPlugin from "./LexicalAutoScrollPlugin";
+import { BlockWithAlignableContents } from "./LexicalBlockWithAlignableContents";
+import {
+  DecoratorBlockNode,
+  $isDecoratorBlockNode,
+} from "./LexicalDecoratorBlockNode";
+import useLexicalNodeSelection from "./useLexicalNodeSelection";
+import CharacterLimitPlugin from "./LexicalCharacterLimitPlugin";
+import ListPlugin from "./LexicalCheckListPlugin";
+import LexicalClearEditorPlugin from "./LexicalClearEditorPlugin";
 
 export {
   LexicalComposer,
@@ -33,4 +44,13 @@ export {
   LinkPlugin,
   RichTextPlugin,
   LexicalAutoLinkPlugin,
+  LexicalAutoFocusPlugin,
+  LexicalAutoScrollPlugin,
+  BlockWithAlignableContents,
+  DecoratorBlockNode,
+  $isDecoratorBlockNode,
+  useLexicalNodeSelection,
+  CharacterLimitPlugin,
+  ListPlugin,
+  LexicalClearEditorPlugin,
 };

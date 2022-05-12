@@ -8,18 +8,17 @@ import {
   ContentEditable,
   RichTextPlugin,
   LinkPlugin,
+  AutoFocusPlugin,
 } from "lexical-solid";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
-//import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { ListItemNode, ListNode } from "@lexical/list";
-//@ts-ignore
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { HistoryPlugin } from "lexical-solid";
 import TreeViewPlugin from "../plugins/TreeViewPlugin";
-import AutoFocusPlugin from "~/plugins/AutoFocusPlugin";
 import CodeHighlightPlugin from "~/plugins/CodeHighlightPlugin";
 import ToolbarPlugin from "~/plugins/ToolbarPlugin";
 import RichTextTheme from "./RichTextTheme";
+import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 //import { EmojiNode } from "./nodes/EmojiNode";
 //import EmoticonPlugin from "./plugins/EmoticonPlugin";
 
@@ -39,7 +38,6 @@ function onChange(editorState: EditorState, editor: LexicalEditor) {
   });
 }
 
-
 const editorConfig = {
   // The editor theme
   theme: RichTextTheme,
@@ -55,12 +53,12 @@ const editorConfig = {
     QuoteNode,
     CodeNode,
     CodeHighlightNode,
-//    TableNode,
-//    TableCellNode,
-//    TableRowNode,
+    TableNode,
+    TableCellNode,
+    TableRowNode,
     AutoLinkNode,
-    LinkNode
-  ] as any
+    LinkNode,
+  ] as any,
 };
 
 export default function Editor() {

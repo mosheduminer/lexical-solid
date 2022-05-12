@@ -233,11 +233,9 @@ function useAutoLink(
     const onChange = onChangeAccessor();
     const matchers = matchersAccessor();
     if (!editor.hasNodes([AutoLinkNode] as unknown as Class<LexicalNode>[])) {
-      {
-        throw Error(
-          `LexicalAutoLinkPlugin: AutoLinkNode, TableCellNode or TableRowNode not registered on editor`
-        );
-      }
+      throw Error(
+        `LexicalAutoLinkPlugin: AutoLinkNode, TableCellNode or TableRowNode not registered on editor`
+      );
     }
 
     const onChangeWrapped: ChangeHandler = (...args) => {

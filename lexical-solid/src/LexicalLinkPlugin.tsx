@@ -10,57 +10,47 @@ import {
   $getSelection,
   $isElementNode,
   $setSelection,
-  ElementNode,
   LexicalNode,
+  COMMAND_PRIORITY_EDITOR,
 } from "lexical";
-import { Class } from "utility-types";
 
-const EditorPriority = 0;
-
-function toggleLink(url: string) {
+function toggleLink(url: null | string) {
   const selection = $getSelection();
-
   if (selection !== null) {
     $setSelection(selection);
   }
-
   const sel = $getSelection();
-
   if (sel !== null) {
     const nodes = sel.extract();
-
     if (url === null) {
       // Remove LinkNodes
       nodes.forEach((node) => {
-        const parent = node.getParent()!;
+        const parent = node.getParent();
 
         if ($isLinkNode(parent)) {
           const children = parent.getChildren();
-
           for (let i = 0; i < children.length; i++) {
             parent.insertBefore(children[i]);
           }
-
           parent.remove();
         }
       });
     } else {
       // Add or merge LinkNodes
       if (nodes.length === 1) {
-        const firstNode = nodes[0]; // if the first node is a LinkNode or if its
+        const firstNode = nodes[0];
+        // if the first node is a LinkNode or if its
         // parent is a LinkNode, we update the URL.
-
         if ($isLinkNode(firstNode)) {
-          (firstNode as unknown as LinkNode).setURL(url);
+          firstNode.setURL(url);
           return;
         } else {
-          const parent = firstNode.getParent()!;
-
+          const parent = firstNode.getParent();
           if ($isLinkNode(parent)) {
             // set parent to be the current linkNode
             // so that other nodes in the same parent
             // aren't handled separately below.
-            (parent as unknown as LinkNode).setURL(url);
+            parent.setURL(url);
             return;
           }
         }
@@ -70,19 +60,21 @@ function toggleLink(url: string) {
       let linkNode: LexicalNode | null = null;
       nodes.forEach((node) => {
         const parent = node.getParent();
-
         if (
           parent === linkNode ||
           parent === null ||
-          ($isElementNode(node) && !(node as ElementNode).isInline())
+          ($isElementNode(node) && !node.isInline())
         ) {
           return;
         }
-
+        if ($isLinkNode(parent)) {
+          linkNode = parent;
+          parent.setURL(url);
+          return;
+        }
         if (!parent.is(prevParent)) {
           prevParent = parent;
-          linkNode = $createLinkNode(url) as unknown as LexicalNode;
-
+          linkNode = $createLinkNode(url);
           if ($isLinkNode(parent)) {
             if (node.getPreviousSibling() === null) {
               parent.insertBefore(linkNode);
@@ -93,22 +85,18 @@ function toggleLink(url: string) {
             node.insertBefore(linkNode);
           }
         }
-
         if ($isLinkNode(node)) {
           if (linkNode !== null) {
-            const children = (node as ElementNode).getChildren();
-
+            const children = node.getChildren();
             for (let i = 0; i < children.length; i++) {
-              (linkNode as ElementNode).append(children[i]);
+              (linkNode as LinkNode).append(children[i]);
             }
           }
-
           node.remove();
           return;
         }
-
         if (linkNode !== null) {
-          (linkNode as ElementNode).append(node);
+          (linkNode as LinkNode).append(node);
         }
       });
     }
@@ -118,19 +106,21 @@ function toggleLink(url: string) {
 function LinkPlugin() {
   const [editor] = useLexicalComposerContext();
   onMount(() => {
-    if (!editor.hasNodes([LinkNode] as unknown as Class<LexicalNode>[])) {
+    if (!editor.hasNodes([LinkNode])) {
       throw new Error("LinkPlugin: LinkNode not registered on editor");
     }
   });
-  onCleanup(editor.registerCommand(
-    TOGGLE_LINK_COMMAND,
-    (payload: string) => {
-      const url = payload;
-      toggleLink(url);
-      return true;
-    },
-    EditorPriority
-  ))
+  onCleanup(
+    editor.registerCommand(
+      TOGGLE_LINK_COMMAND,
+      (payload: string | null) => {
+        const url = payload;
+        toggleLink(url);
+        return true;
+      },
+      COMMAND_PRIORITY_EDITOR
+    )
+  );
   return null;
 }
 
