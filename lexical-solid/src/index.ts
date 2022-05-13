@@ -25,8 +25,24 @@ import {
 } from "./LexicalDecoratorBlockNode";
 import useLexicalNodeSelection from "./useLexicalNodeSelection";
 import CharacterLimitPlugin from "./LexicalCharacterLimitPlugin";
-import ListPlugin from "./LexicalCheckListPlugin";
+import CheckListPlugin from "./LexicalCheckListPlugin";
 import LexicalClearEditorPlugin from "./LexicalClearEditorPlugin";
+import {
+  CollaborationPlugin,
+  CollaborationContext,
+  useCollaborationContext,
+} from "./LexicalCollaborationPlugin";
+import {
+  HorizontalRuleNode,
+  INSERT_HORIZONTAL_RULE_COMMAND,
+  $createHorizontalRuleNode,
+  $isHorizontalRuleNode,
+} from "./LexicalHorizontalRuleNode";
+import ListPlugin from "./LexicalListPlugin";
+import LexicalMarkdownShortcutPlugin from "./LexicalMarkdownShortcutPlugin";
+import useLexicalIsTextContentEmpty from "./useLexicalIsContentEmpty";
+import LexicalNestedComposer from "./LexicalNestedComposer";
+import TablePlugin from "./LexicalTablePlugin";
 
 export {
   LexicalComposer,
@@ -53,4 +69,16 @@ export {
   CharacterLimitPlugin,
   ListPlugin,
   LexicalClearEditorPlugin,
+  CollaborationPlugin,
+  CollaborationContext,
+  useCollaborationContext,
+  HorizontalRuleNode,
+  INSERT_HORIZONTAL_RULE_COMMAND,
+  $createHorizontalRuleNode,
+  $isHorizontalRuleNode,
+  CheckListPlugin,
+  LexicalMarkdownShortcutPlugin,
+  useLexicalIsTextContentEmpty,
+  LexicalNestedComposer,
+  TablePlugin,
 };
