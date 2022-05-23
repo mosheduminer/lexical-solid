@@ -1,8 +1,8 @@
 {
   "name": "lexical-solid",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "MIT",
-  "source": "src/index.ts",
+  "source": "src/index.tsx",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
@@ -16,7 +16,7 @@
   },
   "exports": {
     ".": {
-      "solid": "./dist/source/index.js",
+      "solid": "./dist/source/index.jsx",
       "import": "./dist/esm/index.js",
       "browser": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js",
