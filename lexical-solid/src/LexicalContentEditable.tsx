@@ -1,8 +1,7 @@
 import { createSignal, JSX, mergeProps, onCleanup, onMount } from "solid-js";
-import { $ReadOnly } from "utility-types";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 
-type Props = $ReadOnly<{
+type Props = Readonly<{
   ariaActiveDescendantID?: string;
   ariaAutoComplete?: string;
   ariaControls?: string;
@@ -59,16 +58,18 @@ export function ContentEditable(props: Props): JSX.Element {
       aria-multiline={props.ariaMultiline}
       aria-owns={ifNotReadonly(props.ariaOwneeID)}
       aria-required={props.ariaRequired}
-      autoCapitalize={props.autoCapitalize !== undefined ? String(props.autoCapitalize) : undefined}
-      //@ts-ignore
-      autoComplete={props.autoComplete ? "on" : "off"}
+      autoCapitalize={(
+        props.autoCapitalize !== undefined ? String(props.autoCapitalize) : undefined
+        ) as JSX.HTMLAttributes<HTMLDivElement>["autoCapitalize"]}
+      // @ts-ignore
+      autoComplete={props.autoComplete}
       autoCorrect={props.autoCorrect !== undefined ? String(props.autoCorrect) : undefined}
       className={props.className}
       contentEditable={!isReadOnly()}
       data-testid={props.testid}
       id={props.id}
       ref={ref}
-      role={ifNotReadonly(props.role)}
+      role={ifNotReadonly(props.role) as JSX.HTMLAttributes<HTMLDivElement>["role"]}
       spellcheck={props.spellCheck}
       style={props.style}
       tabIndex={props.tabIndex}

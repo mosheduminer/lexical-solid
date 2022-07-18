@@ -1,21 +1,29 @@
 import { JSX, onMount } from "solid-js";
-import { createEditor } from "lexical";
+import { createEditor, EditorState, Klass } from "lexical";
 import type { EditorThemeClasses, LexicalEditor, LexicalNode } from "lexical";
-import type { Class } from "utility-types";
 import {
   LexicalComposerContext,
   createLexicalComposerContext,
 } from "./LexicalComposerContext";
 
+
+export type InitialEditorStateType =
+  | null
+  | string
+  | EditorState
+  | ((editor: LexicalEditor) => void);
+
 type Props = {
-  initialConfig: {
-    readOnly?: boolean;
-    namespace?: string;
-    nodes?: Array<Class<LexicalNode>>;
-    theme?: EditorThemeClasses;
+  children: JSX.Element | string | (JSX.Element | string)[];
+  initialConfig: Readonly<{
+    editor__DEPRECATED?: LexicalEditor | null;
+    namespace: string;
+    nodes?: ReadonlyArray<Klass<LexicalNode>>;
     onError: (error: Error, editor: LexicalEditor) => void;
-  };
-  children: JSX.Element;
+    readOnly?: boolean;
+    theme?: EditorThemeClasses;
+    editorState?: InitialEditorStateType;
+  }>;
 };
 
 export function LexicalComposer(props: Props) {

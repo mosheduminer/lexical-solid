@@ -123,7 +123,7 @@ function TreeView(props: {
   });
 
   return (
-    <div className={props.viewClassName}>
+    <div class={props.viewClassName}>
       {!timeTravelEnabled() && totalEditorStates() > 2 && (
         <button
           onClick={() => {
@@ -134,16 +134,16 @@ function TreeView(props: {
               setTimeTravelEnabled(true);
             }
           }}
-          className={props.timeTravelButtonClassName}
+          class={props.timeTravelButtonClassName}
         >
           Time Travel
         </button>
       )}
       <pre ref={treeElementRef}>{content()}</pre>
       {timeTravelEnabled() && (
-        <div className={props.timeTravelPanelClassName}>
+        <div class={props.timeTravelPanelClassName}>
           <button
-            className={props.timeTravelPanelButtonClassName}
+            class={props.timeTravelPanelButtonClassName}
             onClick={() => {
               setIsPlaying(!isPlaying());
             }}
@@ -151,7 +151,7 @@ function TreeView(props: {
             {isPlaying() ? "Pause" : "Play"}
           </button>
           <input
-            className={props.timeTravelPanelSliderClassName}
+            class={props.timeTravelPanelSliderClassName}
             ref={inputRef}
             onChange={(event) => {
               const editorStateIndex = Number(event.currentTarget.value);
@@ -167,7 +167,7 @@ function TreeView(props: {
             max={totalEditorStates() - 1}
           />
           <button
-            className={props.timeTravelPanelButtonClassName}
+            class={props.timeTravelPanelButtonClassName}
             onClick={() => {
               const rootElement = props.editor.getRootElement();
               if (rootElement !== null) {

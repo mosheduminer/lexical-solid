@@ -15,7 +15,6 @@ import {
   LexicalNode,
   TextNode,
 } from "lexical";
-import { Class } from "utility-types";
 import { mergeRegister } from "@lexical/utils";
 import { $isLinkNode } from "@lexical/link";
 import { isServer } from "solid-js/web";
@@ -232,7 +231,7 @@ function useAutoLink(
   createEffect(() => {
     const onChange = onChangeAccessor();
     const matchers = matchersAccessor();
-    if (!editor.hasNodes([AutoLinkNode] as unknown as Class<LexicalNode>[])) {
+    if (!editor.hasNodes([AutoLinkNode])) {
       throw Error(
         `LexicalAutoLinkPlugin: AutoLinkNode, TableCellNode or TableRowNode not registered on editor`
       );
@@ -265,7 +264,7 @@ function useAutoLink(
             }
           }),
           editor.registerNodeTransform(
-            AutoLinkNode as unknown as Class<LexicalNode>,
+            AutoLinkNode,
             (linkNode) => {
               handleLinkEdit(
                 linkNode as unknown as AutoLinkNode,

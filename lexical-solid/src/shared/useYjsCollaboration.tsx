@@ -1,6 +1,6 @@
 import type {Binding} from '@lexical/yjs';
 import type {LexicalEditor} from 'lexical';
-import type {Doc, Transaction, YEvent} from 'yjs';
+import type {Doc, YEvent} from 'yjs';
 
 import { mergeRegister } from "@lexical/utils";
 import {
@@ -78,7 +78,7 @@ export function useYjsCollaboration(
       syncCursorPositions(binding, provider);
     };
 
-    const onYjsTreeChanges = (events: YjsEvent[], transaction: any) => {
+    const onYjsTreeChanges = (events: YEvent<any>[], transaction: any) => {
       if (transaction.origin !== binding) {
         syncYjsChangesToLexical(binding, provider, events);
       }
