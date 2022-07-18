@@ -1,22 +1,38 @@
 import { createSignal, onMount } from "solid-js";
 import { LexicalEditor } from "lexical";
-import text, { $canShowPlaceholderCurry } from "@lexical/text";
+import { $canShowPlaceholderCurry } from "@lexical/text";
+import { mergeRegister } from "@lexical/utils";
 
+function canShowPlaceholderFromCurrentEditorState(
+  editor: LexicalEditor,
+): boolean {
+  const currentCanShowPlaceholder = editor
+    .getEditorState()
+    .read($canShowPlaceholderCurry(editor.isComposing(), editor.isReadOnly()));
 
-function useLexicalCanShowPlaceholder(editor: LexicalEditor) {
+  return currentCanShowPlaceholder;
+}
+
+export function useCanShowPlaceholder(editor: LexicalEditor) {
   const [canShowPlaceholder, setCanShowPlaceholder] = createSignal(
-    editor.getEditorState().read($canShowPlaceholderCurry(editor.isComposing()))
+   canShowPlaceholderFromCurrentEditorState(editor)
   );
   onMount(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      const isComposing = editor.isComposing();
-      const currentCanShowPlaceholder = editorState.read(
-        text.$canShowPlaceholderCurry(isComposing)
-      );
+    function resetCanShowPlaceholder() {
+      const currentCanShowPlaceholder =
+        canShowPlaceholderFromCurrentEditorState(editor);
       setCanShowPlaceholder(currentCanShowPlaceholder);
-    });
+    }
+    resetCanShowPlaceholder();
+    return mergeRegister(
+      editor.registerUpdateListener(() => {
+        resetCanShowPlaceholder();
+      }),
+      editor.registerReadOnlyListener(() => {
+        resetCanShowPlaceholder();
+      }),
+    );
   });
   return canShowPlaceholder;
 }
 
-export default useLexicalCanShowPlaceholder;

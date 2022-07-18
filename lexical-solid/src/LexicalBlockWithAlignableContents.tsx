@@ -5,7 +5,7 @@ import {
   $isDecoratorBlockNode,
   DecoratorBlockNode,
 } from "./LexicalDecoratorBlockNode";
-import useLexicalNodeSelection from "./useLexicalNodeSelection";
+import { useLexicalNodeSelection } from "./useLexicalNodeSelection";
 import {
   $getNearestBlockElementAncestorOrThrow,
   mergeRegister,
@@ -115,7 +115,7 @@ export function BlockWithAlignableContents({
 
   return (
     <div
-      className={`embed-block${isSelected() ? " focused" : ""}`}
+      class={`embed-block${isSelected() ? " focused" : ""}`}
       ref={ref}
       style={{ textAlign: format }}
     >

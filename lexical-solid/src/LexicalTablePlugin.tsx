@@ -1,4 +1,4 @@
-import type { TableSelection } from "@lexical/table";
+import type { InsertTableCommandPayload, TableSelection } from "@lexical/table";
 import type { ElementNode, NodeKey } from "lexical";
 
 import { useLexicalComposerContext } from "./LexicalComposerContext";
@@ -20,7 +20,7 @@ import {
 } from "lexical";
 import { JSX, onMount } from "solid-js";
 
-export default function TablePlugin(): JSX.Element {
+export function TablePlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext();
 
   onMount(() => {
@@ -29,13 +29,9 @@ export default function TablePlugin(): JSX.Element {
         "TablePlugin: TableNode, TableCellNode or TableRowNode not registered on editor"
       );
     }
-    return editor.registerCommand<{
-      rows: string;
-      columns: string;
-    }>(
+    return editor.registerCommand<InsertTableCommandPayload>(
       INSERT_TABLE_COMMAND,
-      (payload) => {
-        const { columns, rows } = payload;
+      ({columns, rows, includeHeaders}) => {
         const selection = $getSelection();
         if (!$isRangeSelection(selection)) {
           return true;
@@ -46,7 +42,8 @@ export default function TablePlugin(): JSX.Element {
         if (focusNode !== null) {
           const tableNode = $createTableNodeWithDimensions(
             Number(rows),
-            Number(columns)
+            Number(columns),
+            includeHeaders
           );
           if ($isRootNode(focusNode)) {
             const target = focusNode.getChildAtIndex(focus.offset);
@@ -94,7 +91,7 @@ export default function TablePlugin(): JSX.Element {
           });
         } else if (mutation === "destroyed") {
           const tableSelection = tableSelections.get(nodeKey);
-          if (tableSelection) {
+          if (tableSelection !== undefined) {
             tableSelection.removeListeners();
             tableSelections.delete(nodeKey);
           }

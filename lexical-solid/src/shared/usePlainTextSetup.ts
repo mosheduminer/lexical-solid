@@ -7,7 +7,7 @@ import { isServer } from "solid-js/web";
 
 import { InitialEditorStateType } from "./PlainRichTextUtils";
 
-function usePlainTextSetup(
+export function usePlainTextSetup(
   editor: LexicalEditor,
   initialEditorState?: InitialEditorStateType
 ) {
@@ -20,5 +20,3 @@ function usePlainTextSetup(
     );
   }
 }
-
-export default usePlainTextSetup;

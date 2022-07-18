@@ -18,7 +18,7 @@ type Props = {
   children: JSX.Element;
 };
 
-function LexicalComposer(props: Props) {
+export function LexicalComposer(props: Props) {
   const { theme, namespace, nodes, onError } = props.initialConfig;
   const context = createLexicalComposerContext(null, theme);
   const editor: LexicalEditor = createEditor({
@@ -39,5 +39,3 @@ function LexicalComposer(props: Props) {
     </LexicalComposerContext.Provider>
   );
 }
-
-export default LexicalComposer;

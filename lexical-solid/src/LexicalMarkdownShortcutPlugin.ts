@@ -32,7 +32,7 @@ const HR: ElementTransformer = {
 
 const DEFAULT_TRANSFORMERS = [HR, ...TRANSFORMERS];
 
-export default function LexicalMarkdownShortcutPlugin(
+export function LexicalMarkdownShortcutPlugin(
   props: Readonly<{ transformers?: Transformer[] }>
 ): null {
   props = mergeProps(props, { transformers: DEFAULT_TRANSFORMERS });

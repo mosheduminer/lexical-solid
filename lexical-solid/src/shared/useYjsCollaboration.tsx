@@ -1,6 +1,6 @@
-import type { Binding, Provider, YjsEvent } from "@lexical/yjs";
-import type { LexicalEditor } from "lexical";
-import type { Doc } from "yjs";
+import type {Binding} from '@lexical/yjs';
+import type {LexicalEditor} from 'lexical';
+import type {Doc, Transaction, YEvent} from 'yjs';
 
 import { mergeRegister } from "@lexical/utils";
 import {
@@ -26,11 +26,12 @@ import {
 } from "lexical";
 import { createSignal, JSX, onCleanup, onMount } from "solid-js";
 import { Portal } from "solid-js/web";
+import {WebsocketProvider} from 'y-websocket';
 
 export function useYjsCollaboration(
   editor: LexicalEditor,
   id: string,
-  provider: Provider,
+  provider: WebsocketProvider,
   docMap: Map<string, Doc>,
   name: string,
   color: string,
@@ -181,7 +182,7 @@ export function useYjsCollaboration(
 
 export function useYjsFocusTracking(
   editor: LexicalEditor,
-  provider: Provider,
+  provider: WebsocketProvider,
   name: string,
   color: string
 ) {

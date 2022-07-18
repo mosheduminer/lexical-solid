@@ -239,7 +239,7 @@ function getHashtagRegexString(): string {
 
 const REGEX = new RegExp(getHashtagRegexString(), "i");
 
-export default function HashtagPlugin(): JSX.Element {
+export function HashtagPlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext();
 
   onMount(() => {

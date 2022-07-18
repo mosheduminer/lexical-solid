@@ -28,7 +28,7 @@ type LinkMatcherResult = {
   index: number;
 };
 type LinkMatcher = (text: string) => LinkMatcherResult | null;
-function LexicalAutoLinkPlugin(props: {
+export function AutoLinkPlugin(props: {
   matchers: LinkMatcher[];
   onChange?: ChangeHandler;
 }): JSX.Element {
@@ -238,9 +238,9 @@ function useAutoLink(
       );
     }
 
-    const onChangeWrapped: ChangeHandler = (...args) => {
+    const onChangeWrapped: ChangeHandler = (url: string | null, prevUrl: string | null) => {
       if (onChange) {
-        onChange(...args);
+        onChange(url, prevUrl);
       }
     };
 
@@ -281,4 +281,3 @@ function useAutoLink(
 }
 
 export type { LinkMatcher };
-export default LexicalAutoLinkPlugin;

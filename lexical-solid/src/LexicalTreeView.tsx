@@ -20,17 +20,16 @@ import {
 } from "lexical";
 import { createEffect, createSignal, JSX, onCleanup } from "solid-js";
 
-const NON_SINGLE_WIDTH_CHARS_REPLACEMENT: Readonly<{
-  [key: string]: string;
-}> = Object.freeze({
-  "\t": "\\t",
-  "\n": "\\n",
-});
+const NON_SINGLE_WIDTH_CHARS_REPLACEMENT: Readonly<Record<string, string>> = 
+  Object.freeze({
+    "\t": "\\t",
+    "\n": "\\n",
+  });
 const NON_SINGLE_WIDTH_CHARS_REGEX = new RegExp(
   Object.keys(NON_SINGLE_WIDTH_CHARS_REPLACEMENT).join("|"),
   "g"
 );
-const SYMBOLS = Object.freeze({
+const SYMBOLS: Record<string, string> = Object.freeze({
   ancestorHasNextSibling: "|",
   ancestorIsLastChild: " ",
   hasNextSibling: "├",
@@ -39,7 +38,7 @@ const SYMBOLS = Object.freeze({
   selectedLine: ">",
 });
 
-function TreeView(props: {
+export function TreeView(props: {
   editor: LexicalEditor;
   timeTravelButtonClassName: string;
   timeTravelPanelButtonClassName: string;
@@ -123,7 +122,7 @@ function TreeView(props: {
   });
 
   return (
-    <div className={props.viewClassName}>
+    <div class={props.viewClassName}>
       {!timeTravelEnabled() && totalEditorStates() > 2 && (
         <button
           onClick={() => {
@@ -134,16 +133,16 @@ function TreeView(props: {
               setTimeTravelEnabled(true);
             }
           }}
-          className={props.timeTravelButtonClassName}
+          class={props.timeTravelButtonClassName}
         >
           Time Travel
         </button>
       )}
       <pre ref={treeElementRef}>{content()}</pre>
       {timeTravelEnabled() && (
-        <div className={props.timeTravelPanelClassName}>
+        <div class={props.timeTravelPanelClassName}>
           <button
-            className={props.timeTravelPanelButtonClassName}
+            class={props.timeTravelPanelButtonClassName}
             onClick={() => {
               setIsPlaying(!isPlaying());
             }}
@@ -151,7 +150,7 @@ function TreeView(props: {
             {isPlaying() ? "Pause" : "Play"}
           </button>
           <input
-            className={props.timeTravelPanelSliderClassName}
+            class={props.timeTravelPanelSliderClassName}
             ref={inputRef}
             onInput={(event) => {
               const editorStateIndex = Number(event.currentTarget.value);
@@ -167,7 +166,7 @@ function TreeView(props: {
             max={totalEditorStates() - 1}
           />
           <button
-            className={props.timeTravelPanelButtonClassName}
+            class={props.timeTravelPanelButtonClassName}
             onClick={() => {
               const rootElement = props.editor.getRootElement();
               if (rootElement !== null) {
@@ -227,7 +226,7 @@ function generateContent(editorState: EditorState): string {
   const selectionString = editorState.read(() => {
     const selection = $getSelection() as RangeSelection | GridSelection;
 
-    visitTree($getRoot(), (node, indent) => {
+    visitTree($getRoot(), (node: LexicalNode, indent: Array<string>) => {
       const nodeKey = node.getKey();
       const nodeKeyDisplay = `(${nodeKey})`;
       const typeDisplay = node.getType() || "";
@@ -264,8 +263,8 @@ function generateContent(editorState: EditorState): string {
 
 function visitTree(
   currentNode: ElementNode,
-  visitor: (node: LexicalNode, indent: string[]) => void,
-  indent: string[] = []
+  visitor: (node: LexicalNode, indentArr: Array<string>) => void,
+  indent: Array<string> = [],
 ) {
   const childNodes = currentNode.getChildren();
   const childNodesLength = childNodes.length;

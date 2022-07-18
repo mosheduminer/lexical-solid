@@ -13,20 +13,20 @@ type Props = $ReadOnly<{
   ariaMultiline?: boolean;
   ariaOwneeID?: string;
   ariaRequired?: string;
-  autoCapitalize?: boolean;
+  autoCapitalize?: string;
   autoComplete?: boolean;
   autoCorrect?: boolean;
   className?: string;
   id?: string;
   readOnly?: boolean;
-  role?: JSX.HTMLAttributes<HTMLDivElement>["role"];
+  role?: string;
   style?: StyleSheetList;
   spellCheck?: boolean;
   tabIndex?: number;
   testid?: string;
 }>;
 
-function LexicalContentEditable(props: Props): JSX.Element {
+export function ContentEditable(props: Props): JSX.Element {
   props = mergeProps({ role: "textbox", spellCheck: true }, props);
   const [editor] = useLexicalComposerContext();
   const [isReadOnly, setReadOnly] = createSignal(true);
@@ -59,10 +59,10 @@ function LexicalContentEditable(props: Props): JSX.Element {
       aria-multiline={props.ariaMultiline}
       aria-owns={ifNotReadonly(props.ariaOwneeID)}
       aria-required={props.ariaRequired}
-      autoCapitalize={props.autoCapitalize ? "on" : "off"}
+      autoCapitalize={props.autoCapitalize !== undefined ? String(props.autoCapitalize) : undefined}
       //@ts-ignore
       autoComplete={props.autoComplete ? "on" : "off"}
-      autoCorrect={props.autoCorrect ? "on" : "off"}
+      autoCorrect={props.autoCorrect !== undefined ? String(props.autoCorrect) : undefined}
       className={props.className}
       contentEditable={!isReadOnly()}
       data-testid={props.testid}
@@ -76,5 +76,4 @@ function LexicalContentEditable(props: Props): JSX.Element {
   );
 }
 
-export default LexicalContentEditable;
 export type { Props };

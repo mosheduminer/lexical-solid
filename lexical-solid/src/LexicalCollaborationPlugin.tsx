@@ -1,8 +1,10 @@
-import type { Provider } from "@lexical/yjs";
+
 import type { Doc } from "yjs";
 
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 import { JSX, createContext, useContext, Context } from "solid-js";
+import {WebsocketProvider} from 'y-websocket';
+
 import {
   useYjsCollaboration,
   useYjsFocusTracking,
@@ -44,7 +46,7 @@ export function CollaborationPlugin({
   username,
 }: {
   id: string;
-  providerFactory: (id: string, yjsDocMap: Map<string, Doc>) => Provider;
+  providerFactory: (id: string, yjsDocMap: Map<string, Doc>) => WebsocketProvider;
   shouldBootstrap: boolean;
   username?: string;
 }): JSX.Element {

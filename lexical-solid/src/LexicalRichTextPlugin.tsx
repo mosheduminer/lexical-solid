@@ -1,17 +1,17 @@
 import { JSX, Show } from "solid-js";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
-import useRichTextSetup from "./shared/useRichTextSetup";
+import { useRichTextSetup } from "./shared/useRichTextSetup";
 import { InitialEditorStateType } from "./shared/PlainRichTextUtils";
-import useLexicalCanShowPlaceholder from "./shared/useCanShowPlaceholder";
+import { useCanShowPlaceholder } from "./shared/useCanShowPlaceholder";
 import useDecorators from "./shared/useDecorators";
 
-function RichTextPlugin(props: {
+export function RichTextPlugin(props: {
   contentEditable: JSX.Element;
   initialEditorState?: InitialEditorStateType;
   placeholder: JSX.Element;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
-  const showPlaceholder = useLexicalCanShowPlaceholder(editor);
+  const showPlaceholder = useCanShowPlaceholder(editor);
   useRichTextSetup(editor, props.initialEditorState);
   const decorators = useDecorators(editor);
   return (
@@ -22,5 +22,3 @@ function RichTextPlugin(props: {
     </>
   );
 }
-
-export default RichTextPlugin;

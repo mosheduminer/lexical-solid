@@ -1,4 +1,4 @@
-import LexicalComposer from "./LexicalComposer";
+import { LexicalComposer } from "./LexicalComposer";
 import {
   createLexicalComposerContext,
   LexicalComposerContext,
@@ -8,25 +8,25 @@ import type {
   LexicalComposerContextType,
   LexicalComposerContextWithEditor,
 } from "./LexicalComposerContext";
-import ContentEditable from "./LexicalContentEditable";
-import OnChangePlugin from "./LexicalOnChangePlugin";
+import { ContentEditable } from "./LexicalContentEditable";
+import { OnChangePlugin } from "./LexicalOnChangePlugin";
 import LexicalTreeView from "./LexicalTreeView";
 import { HistoryPlugin, createEmptyHistoryState } from "./LexicalHistoryPlugin";
-import LinkPlugin from "./LexicalLinkPlugin";
-import LexicalAutoLinkPlugin from "./LexicalAutoLinkPlugin";
-import PlainTextPlugin from "./LexicalPlainTextPlugin";
-import RichTextPlugin from "./LexicalRichTextPlugin";
-import LexicalAutoFocusPlugin from "./LexicalAutoFocusPlugin";
-import LexicalAutoScrollPlugin from "./LexicalAutoScrollPlugin";
+import { LinkPlugin } from "./LexicalLinkPlugin";
+import { AutoLinkPlugin } from "./LexicalAutoLinkPlugin";
+import { PlainTextPlugin } from "./LexicalPlainTextPlugin";
+import { RichTextPlugin } from "./LexicalRichTextPlugin";
+import { LexicalAutoFocusPlugin } from "./LexicalAutoFocusPlugin";
+import { AutoScrollPlugin } from "./LexicalAutoScrollPlugin";
 import { BlockWithAlignableContents } from "./LexicalBlockWithAlignableContents";
 import {
   DecoratorBlockNode,
   $isDecoratorBlockNode,
 } from "./LexicalDecoratorBlockNode";
-import useLexicalNodeSelection from "./useLexicalNodeSelection";
-import CharacterLimitPlugin from "./LexicalCharacterLimitPlugin";
-import CheckListPlugin from "./LexicalCheckListPlugin";
-import LexicalClearEditorPlugin from "./LexicalClearEditorPlugin";
+import { useLexicalNodeSelection } from "./useLexicalNodeSelection";
+import { CharacterLimitPlugin } from "./LexicalCharacterLimitPlugin";
+import { CheckListPlugin } from "./LexicalCheckListPlugin";
+import { ClearEditorPlugin } from "./LexicalClearEditorPlugin";
 import {
   CollaborationPlugin,
   CollaborationContext,
@@ -38,11 +38,11 @@ import {
   $createHorizontalRuleNode,
   $isHorizontalRuleNode,
 } from "./LexicalHorizontalRuleNode";
-import ListPlugin from "./LexicalListPlugin";
-import LexicalMarkdownShortcutPlugin from "./LexicalMarkdownShortcutPlugin";
-import useLexicalIsTextContentEmpty from "./useLexicalIsContentEmpty";
-import LexicalNestedComposer from "./LexicalNestedComposer";
-import TablePlugin from "./LexicalTablePlugin";
+import { ListPlugin } from "./LexicalListPlugin";
+import { LexicalMarkdownShortcutPlugin } from "./LexicalMarkdownShortcutPlugin";
+import { useLexicalIsTextContentEmpty } from "./useLexicalIsContentEmpty";
+import { LexicalNestedComposer } from "./LexicalNestedComposer";
+import { TablePlugin } from "./LexicalTablePlugin";
 
 export {
   LexicalComposer,
@@ -59,16 +59,16 @@ export {
   createEmptyHistoryState,
   LinkPlugin,
   RichTextPlugin,
-  LexicalAutoLinkPlugin,
+  AutoLinkPlugin,
   LexicalAutoFocusPlugin,
-  LexicalAutoScrollPlugin,
+  AutoScrollPlugin,
   BlockWithAlignableContents,
   DecoratorBlockNode,
   $isDecoratorBlockNode,
   useLexicalNodeSelection,
   CharacterLimitPlugin,
   ListPlugin,
-  LexicalClearEditorPlugin,
+  ClearEditorPlugin,
   CollaborationPlugin,
   CollaborationContext,
   useCollaborationContext,

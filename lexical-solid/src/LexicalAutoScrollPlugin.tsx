@@ -6,7 +6,7 @@ type Props = Readonly<{
   scrollRef: () => HTMLElement;
 }>;
 
-export default function LexicalAutoScrollPlugin({
+export function AutoScrollPlugin({
   scrollRef,
 }: Props): JSX.Element {
   const [editor] = useLexicalComposerContext();

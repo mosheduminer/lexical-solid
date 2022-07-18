@@ -6,6 +6,7 @@ import {
   createSignal,
   JSX,
   onCleanup,
+  onMount,
 } from "solid-js";
 import { Portal } from "solid-js/web";
 
@@ -21,6 +22,8 @@ export default function useDecorators(
       setDecorators(nextDecorators);
     })
   );
+
+  onMount(() => setDecorators(editor.getDecorators()));
 
   // Return decorators defined as Solid Portals
 

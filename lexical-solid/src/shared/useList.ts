@@ -19,7 +19,7 @@ import {
 } from "lexical";
 import { onCleanup } from "solid-js";
 
-export default function useList(editor: LexicalEditor): void {
+export function useList(editor: LexicalEditor): void {
   onCleanup(
     mergeRegister(
       editor.registerCommand(
