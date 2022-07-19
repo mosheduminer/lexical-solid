@@ -1,7 +1,7 @@
 import type { HTMLTableElementWithWithTableSelectionState, InsertTableCommandPayload, TableSelection } from "@lexical/table";
 import type { ElementNode, NodeKey } from "lexical";
 
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import {
   $createTableNodeWithDimensions,
   applyTableHandlers,

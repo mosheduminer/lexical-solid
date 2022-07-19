@@ -1,9 +1,9 @@
 import { JSX, Show } from "solid-js";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
-import { useRichTextSetup } from "./shared/useRichTextSetup";
-import { InitialEditorStateType } from "./shared/PlainRichTextUtils";
-import { useCanShowPlaceholder } from "./shared/useCanShowPlaceholder";
-import useDecorators from "./shared/useDecorators";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useRichTextSetup } from "lexical-solid/shared/useRichTextSetup";
+import { InitialEditorStateType } from "lexical-solid/shared/PlainRichTextUtils";
+import { useCanShowPlaceholder } from "lexical-solid/shared/useCanShowPlaceholder";
+import useDecorators from "lexical-solid/shared/useDecorators";
 
 export function RichTextPlugin(props: {
   contentEditable: JSX.Element;

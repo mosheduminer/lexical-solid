@@ -7,7 +7,7 @@ import {
   INSERT_CHECK_LIST_COMMAND,
   insertList,
 } from "@lexical/list";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import { $findMatchingParent, mergeRegister } from "@lexical/utils";
 import {
   $getNearestNodeFromDOMNode,

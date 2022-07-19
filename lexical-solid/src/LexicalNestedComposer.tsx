@@ -1,11 +1,11 @@
-import type { LexicalComposerContextWithEditor } from "./LexicalComposerContext";
+import type { LexicalComposerContextWithEditor } from "lexical-solid/LexicalComposerContext";
 import type { EditorThemeClasses, LexicalEditor } from "lexical";
 
-import { useCollaborationContext } from "./LexicalCollaborationPlugin";
+import { useCollaborationContext } from "lexical-solid/LexicalCollaborationPlugin";
 import {
   createLexicalComposerContext,
   LexicalComposerContext,
-} from "./LexicalComposerContext";
+} from "lexical-solid/LexicalComposerContext";
 import { JSX, useContext } from "solid-js";
 
 export function LexicalNestedComposer(props: {

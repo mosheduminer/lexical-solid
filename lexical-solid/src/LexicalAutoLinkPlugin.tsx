@@ -1,5 +1,5 @@
 import { Accessor, createEffect, JSX, onCleanup } from "solid-js";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import {
   $createAutoLinkNode,
   $isAutoLinkNode,

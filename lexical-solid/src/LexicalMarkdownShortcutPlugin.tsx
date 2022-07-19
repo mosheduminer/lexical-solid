@@ -2,12 +2,12 @@ import type { ElementTransformer, Transformer } from "@lexical/markdown";
 import type { LexicalNode } from "lexical";
 
 import { registerMarkdownShortcuts, TRANSFORMERS } from "@lexical/markdown";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 
 import {
   $createHorizontalRuleNode,
   $isHorizontalRuleNode,
-} from "./LexicalHorizontalRuleNode";
+} from "lexical-solid/LexicalHorizontalRuleNode";
 import { createEffect, mergeProps, onCleanup } from "solid-js";
 
 const HR: ElementTransformer = {

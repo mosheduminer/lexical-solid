@@ -1,4 +1,4 @@
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import { $getSelection, $isRangeSelection } from "lexical";
 import { createEffect, JSX } from "solid-js";
 

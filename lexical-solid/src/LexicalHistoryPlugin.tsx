@@ -1,6 +1,6 @@
 import { JSX } from "solid-js";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
-import { useHistory } from "./shared/useHistory";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useHistory } from "lexical-solid/shared/useHistory";
 import type { HistoryState, HistoryStateEntry } from "@lexical/history";
 
 function HistoryPlugin(props: {

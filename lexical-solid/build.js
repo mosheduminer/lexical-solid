@@ -1,25 +1,22 @@
 import { rollup } from 'rollup';
-import ts from "typescript";
-import { readdirSync, rmdirSync } from "fs";
-import { resolve, basename, join } from "path";
-import { babel } from "@rollup/plugin-babel";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
+import ts from 'typescript';
+import { existsSync, mkdirSync, rmSync } from 'fs';
+import { resolve, basename } from 'path';
+import { babel } from '@rollup/plugin-babel';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import fg from 'fast-glob';
 
 const lexicalSolidModules =
-  readdirSync(resolve('./src'))
-    .filter(
-      (str) =>
-        !str.includes('__tests__') &&
-        !str.includes('shared') &&
-        !str.includes('test-utils'),
-    ).map((module) => {
-      const fileName = basename(basename(module, '.ts'), '.tsx');
+  fg.sync('./src/**')
+    .map((module) => {
+      const fileName =
+        (module.includes('shared') ? 'shared/' : '') + basename(basename(module, '.ts'), '.tsx');
       return {
         sourceFileName: module,
         outputFileName: fileName
       };
-    });
+    })
 
 const externals = [
   'lexical',
@@ -47,12 +44,14 @@ const externals = [
   'solid-js',
   'yjs',
   'y-websocket',
+  ...(lexicalSolidModules.map(n => 'lexical-solid/' + n.outputFileName)),
 ]
 
-rmdirSync(resolve('./dist'), { recursive: true });
-const src = resolve('./src');
+if (existsSync('./dist')) rmSync(resolve('./dist'), { recursive: true });
+mkdirSync('./dist')
+
 for (const module of lexicalSolidModules) {
-  let inputFile = resolve(join(`${src}/${module.sourceFileName}`));
+  let inputFile = resolve(module.sourceFileName);
   const inputOptions = {
     external(modulePath, src) {
       return externals.includes(modulePath);
@@ -69,8 +68,8 @@ for (const module of lexicalSolidModules) {
         exclude: '/**/node_modules/**',
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
         presets: [
-          '@babel/preset-typescript',
           'babel-preset-solid',
+          '@babel/preset-typescript',
         ]
       }),
       commonjs()
@@ -78,42 +77,26 @@ for (const module of lexicalSolidModules) {
     treeshake: true,
   }
   const result = await rollup(inputOptions);
-  result.write({ format: "cjs", file: resolve('dist/cjs/' + module.outputFileName + '.cjs') })
-  result.write({ format: "esm", file: resolve('dist/esm/' + module.outputFileName) + '.js' })
+  result.write({ format: 'cjs', file: resolve('dist/cjs/' + module.outputFileName + '.cjs') })
+  result.write({ format: 'esm', file: resolve('dist/esm/' + module.outputFileName) + '.js' })
   result.close()
 }
 
-console.log(lexicalSolidModules.map(module => module.sourceFileName))
-
-const program = ts.createProgram(lexicalSolidModules.map(module => './src/' + module.sourceFileName), {
+const program = ts.createProgram(lexicalSolidModules.map(module => module.sourceFileName), {
   target: ts.ScriptTarget.ESNext,
   module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
   jsx: ts.JsxEmit.Preserve,
-  jsxImportSource: "solid-js",
+  jsxImportSource: 'solid-js',
   allowSyntheticDefaultImports: true,
   esModuleInterop: true,
   outDir: `dist/source`,
   declarationDir: `dist/types`,
   declaration: true,
   allowJs: true,
-});
-
-let emitResult = program.emit();
-
-let allDiagnostics = ts
-  .getPreEmitDiagnostics(program)
-  .concat(emitResult.diagnostics);
-
-allDiagnostics.forEach(diagnostic => {
-  if (diagnostic.file) {
-    let { line, character } = ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start);
-    let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
-    console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
-  } else {
-    console.log(ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"));
+  paths: {
+    'lexical-solid/*': ['./src/*']
   }
 });
 
-let exitCode = emitResult.emitSkipped ? 1 : 0;
-console.log(`Process exiting with code '${exitCode}'.`); 
+program.emit();

@@ -4,7 +4,7 @@ import type { EditorThemeClasses, LexicalEditor, LexicalNode } from "lexical";
 import {
   LexicalComposerContext,
   createLexicalComposerContext,
-} from "./LexicalComposerContext";
+} from "lexical-solid/LexicalComposerContext";
 
 
 export type InitialEditorStateType =

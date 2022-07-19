@@ -1,5 +1,5 @@
 import { createSignal, JSX, mergeProps, onCleanup, onMount } from "solid-js";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 
 type Props = Readonly<{
   ariaActiveDescendantID?: string;

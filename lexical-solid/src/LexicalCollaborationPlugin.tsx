@@ -1,7 +1,7 @@
 
 import type { Doc } from "yjs";
 
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import { JSX, createContext, useContext, Context } from "solid-js";
 import {WebsocketProvider} from 'y-websocket';
 
@@ -9,7 +9,7 @@ import {
   useYjsCollaboration,
   useYjsFocusTracking,
   useYjsHistory,
-} from "./shared/useYjsCollaboration";
+} from "lexical-solid/shared/useYjsCollaboration";
 
 type CollaborationContextType = {
   clientID: number;

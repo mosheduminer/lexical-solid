@@ -1,7 +1,7 @@
 import type { EntityMatch } from "@lexical/text";
 import type { Klass, TextNode } from "lexical";
 
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import { registerLexicalTextEntity } from "@lexical/text";
 import { mergeRegister } from "@lexical/utils";
 import { onCleanup } from "solid-js";
