@@ -25,6 +25,8 @@ export default defineConfig({
       "@lexical/history",
       "@lexical/link",
       "@lexical/list",
+      "@lexical/mark",
+      "@lexical/markdown",
       "@lexical/overflow",
       "@lexical/plain-text",
       "@lexical/rich-text",
@@ -35,9 +37,4 @@ export default defineConfig({
       "@lexical/yjs",
     ],
   },
-  build: {
-    commonjsOptions: {
-      include: ["../lexical-solid"]
-    }
-  }
 });

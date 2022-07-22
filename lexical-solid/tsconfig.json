@@ -8,5 +8,10 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
+    "rootDir": "./src",
+    "outDir": "./dist/source",
+    "paths": {
+      "lexical-solid/*": ["./src/*"],
+    }
   }
 }

@@ -1,8 +1,8 @@
 import type { TextNode } from "lexical";
 
 import { $createHashtagNode, HashtagNode } from "@lexical/hashtag";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
-import useLexicalTextEntity from "./useLexicalTextEntity";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import useLexicalTextEntity from "lexical-solid/useLexicalTextEntity";
 
 import { JSX, onMount } from "solid-js";
 
@@ -239,7 +239,7 @@ function getHashtagRegexString(): string {
 
 const REGEX = new RegExp(getHashtagRegexString(), "i");
 
-export default function HashtagPlugin(): JSX.Element {
+export function HashtagPlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext();
 
   onMount(() => {

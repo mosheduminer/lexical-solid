@@ -1,14 +1,15 @@
-import { useLexicalComposerContext, LexicalTreeView } from "lexical-solid";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import LexicalTreeView from "lexical-solid/LexicalTreeView";
 
 export default function TreeViewPlugin() {
   const [editor] = useLexicalComposerContext();
   return (
     <LexicalTreeView
-      viewClassName="tree-view-output"
-      timeTravelPanelClassName="debug-timetravel-panel"
-      timeTravelButtonClassName="debug-timetravel-button"
-      timeTravelPanelSliderClassName="debug-timetravel-panel-slider"
-      timeTravelPanelButtonClassName="debug-timetravel-panel-button"
+      viewClass="tree-view-output"
+      timeTravelPanelClass="debug-timetravel-panel"
+      timeTravelButtonClass="debug-timetravel-button"
+      timeTravelPanelSliderClass="debug-timetravel-panel-slider"
+      timeTravelPanelButtonClass="debug-timetravel-panel-button"
       editor={editor}
     />
   );

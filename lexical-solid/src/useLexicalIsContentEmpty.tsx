@@ -2,9 +2,9 @@ import type { LexicalEditor } from "lexical";
 
 import { $isRootTextContentEmptyCurry } from "@lexical/text";
 import { Accessor, createEffect, createSignal, onCleanup } from "solid-js";
-import { MaybeAccessor, resolve } from "./utils";
+import { MaybeAccessor, resolve } from "lexical-solid/utils";
 
-export default function useLexicalIsTextContentEmpty(
+export function useLexicalIsTextContentEmpty(
   editor: LexicalEditor,
   trim?: MaybeAccessor<boolean>
 ): Accessor<boolean> {

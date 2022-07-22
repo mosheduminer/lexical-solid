@@ -1,6 +1,6 @@
 import type { LexicalEditor, NodeKey } from "lexical";
 
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import {
   $createNodeSelection,
   $getNodeByKey,
@@ -20,7 +20,7 @@ function isNodeSelected(editor: LexicalEditor, key: NodeKey): boolean {
   });
 }
 
-export default function useLexicalNodeSelection(
+export function useLexicalNodeSelection(
   key: NodeKey
 ): [() => boolean, (arg: boolean) => void, () => void] {
   const [editor] = useLexicalComposerContext();

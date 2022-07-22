@@ -1,8 +1,7 @@
 import { createSignal, JSX, mergeProps, onCleanup, onMount } from "solid-js";
-import { $ReadOnly } from "utility-types";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 
-type Props = $ReadOnly<{
+type Props = Readonly<{
   ariaActiveDescendantID?: string;
   ariaAutoComplete?: string;
   ariaControls?: string;
@@ -13,20 +12,20 @@ type Props = $ReadOnly<{
   ariaMultiline?: boolean;
   ariaOwneeID?: string;
   ariaRequired?: string;
-  autoCapitalize?: boolean;
+  autoCapitalize?: string;
   autoComplete?: boolean;
   autoCorrect?: boolean;
-  className?: string;
+  class?: string;
   id?: string;
   readOnly?: boolean;
-  role?: JSX.HTMLAttributes<HTMLDivElement>["role"];
+  role?: string;
   style?: StyleSheetList;
   spellCheck?: boolean;
   tabIndex?: number;
   testid?: string;
 }>;
 
-function LexicalContentEditable(props: Props): JSX.Element {
+export function ContentEditable(props: Props): JSX.Element {
   props = mergeProps({ role: "textbox", spellCheck: true }, props);
   const [editor] = useLexicalComposerContext();
   const [isReadOnly, setReadOnly] = createSignal(true);
@@ -59,16 +58,18 @@ function LexicalContentEditable(props: Props): JSX.Element {
       aria-multiline={props.ariaMultiline}
       aria-owns={ifNotReadonly(props.ariaOwneeID)}
       aria-required={props.ariaRequired}
-      autoCapitalize={props.autoCapitalize ? "on" : "off"}
-      //@ts-ignore
-      autoComplete={props.autoComplete ? "on" : "off"}
-      autoCorrect={props.autoCorrect ? "on" : "off"}
-      className={props.className}
+      autoCapitalize={(
+        props.autoCapitalize !== undefined ? String(props.autoCapitalize) : undefined
+        ) as JSX.HTMLAttributes<HTMLDivElement>["autoCapitalize"]}
+      // @ts-ignore
+      autoComplete={props.autoComplete}
+      autoCorrect={props.autoCorrect !== undefined ? String(props.autoCorrect) : undefined}
+      class={props.class}
       contentEditable={!isReadOnly()}
       data-testid={props.testid}
       id={props.id}
       ref={ref}
-      role={ifNotReadonly(props.role)}
+      role={ifNotReadonly(props.role) as JSX.HTMLAttributes<HTMLDivElement>["role"]}
       spellcheck={props.spellCheck}
       style={props.style}
       tabIndex={props.tabIndex}
@@ -76,5 +77,4 @@ function LexicalContentEditable(props: Props): JSX.Element {
   );
 }
 
-export default LexicalContentEditable;
 export type { Props };

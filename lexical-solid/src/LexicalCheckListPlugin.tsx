@@ -7,7 +7,7 @@ import {
   INSERT_CHECK_LIST_COMMAND,
   insertList,
 } from "@lexical/list";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import { $findMatchingParent, mergeRegister } from "@lexical/utils";
 import {
   $getNearestNodeFromDOMNode,
@@ -23,7 +23,7 @@ import {
 } from "lexical";
 import { onCleanup } from "solid-js";
 
-export default function ListPlugin(): null {
+export function CheckListPlugin(): null {
   const [editor] = useLexicalComposerContext();
 
   onCleanup(
@@ -36,25 +36,25 @@ export default function ListPlugin(): null {
         },
         COMMAND_PRIORITY_LOW
       ),
-      editor.registerCommand(
+      editor.registerCommand<KeyboardEvent>(
         KEY_ARROW_DOWN_COMMAND,
         (event: KeyboardEvent) => {
           return handleArrownUpOrDown(event, editor, false);
         },
         COMMAND_PRIORITY_LOW
       ),
-      editor.registerCommand(
+      editor.registerCommand<KeyboardEvent>(
         KEY_ARROW_UP_COMMAND,
         (event: KeyboardEvent) => {
           return handleArrownUpOrDown(event, editor, true);
         },
         COMMAND_PRIORITY_LOW
       ),
-      editor.registerCommand(
+      editor.registerCommand<KeyboardEvent>(
         KEY_ESCAPE_COMMAND,
         (event) => {
           const activeItem = getActiveCheckListItem();
-          if (activeItem != null) {
+          if (activeItem != null && !editor.isReadOnly()) {
             const rootElement = editor.getRootElement();
             if (rootElement != null) {
               rootElement.focus();
@@ -65,11 +65,11 @@ export default function ListPlugin(): null {
         },
         COMMAND_PRIORITY_LOW
       ),
-      editor.registerCommand(
+      editor.registerCommand<KeyboardEvent>(
         KEY_SPACE_COMMAND,
         (event: KeyboardEvent) => {
           const activeItem = getActiveCheckListItem();
-          if (activeItem != null) {
+          if (activeItem != null && !editor.isReadOnly()) {
             editor.update(() => {
               const listItemNode = $getNearestNodeFromDOMNode(activeItem)!;
               if ($isListItemNode(listItemNode)) {
@@ -83,7 +83,7 @@ export default function ListPlugin(): null {
         },
         COMMAND_PRIORITY_LOW
       ),
-      editor.registerCommand(
+      editor.registerCommand<KeyboardEvent>(
         KEY_ARROW_LEFT_COMMAND,
         (event: KeyboardEvent) => {
           return editor.getEditorState().read(() => {
@@ -127,17 +127,13 @@ export default function ListPlugin(): null {
 let listenersCount = 0;
 function listenPointerDown() {
   if (listenersCount++ === 0) {
-    // $FlowFixMe[speculation-ambiguous]
     document.addEventListener("click", handleClick);
-    // $FlowFixMe[speculation-ambiguous]
     document.addEventListener("pointerdown", handlePointerDown);
   }
 
   return () => {
     if (--listenersCount === 0) {
-      // $FlowFixMe[speculation-ambiguous]
       document.removeEventListener("click", handleClick);
-      // $FlowFixMe[speculation-ambiguous]
       document.removeEventListener("pointerdown", handlePointerDown);
     }
   };
@@ -150,10 +146,10 @@ function handleCheckItemEvent(event: PointerEvent, callback: () => void) {
   }
 
   // Ignore clicks on LI that have nested lists
-  // $FlowFixMe
-  const firstChild: HTMLElement | null = target.firstChild as HTMLElement;
+  const firstChild = target.firstChild;
   if (
     firstChild != null &&
+    firstChild instanceof HTMLElement &&
     (firstChild.tagName === "UL" || firstChild.tagName === "OL")
   ) {
     return;

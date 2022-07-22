@@ -5,7 +5,7 @@ import {
   $isOverflowNode,
   OverflowNode,
 } from "@lexical/overflow";
-import { $rootTextContentCurry } from "@lexical/text";
+import { $rootTextContent } from "@lexical/text";
 import { $dfs, mergeRegister } from "@lexical/utils";
 import {
   $getSelection,
@@ -44,7 +44,7 @@ export function useCharacterLimit(
   });
 
   createEffect(() => {
-    let text = editor.getEditorState().read($rootTextContentCurry);
+    let text = editor.getEditorState().read($rootTextContent);
     let lastComputedTextLength = 0;
 
     onCleanup(

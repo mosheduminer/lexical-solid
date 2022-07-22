@@ -1,4 +1,4 @@
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import {
   $createParagraphNode,
   $getRoot,
@@ -12,7 +12,7 @@ type Props = Readonly<{
   onClear?: () => void;
 }>;
 
-export default function LexicalClearEditorPlugin(props: Props): JSX.Element {
+export function ClearEditorPlugin(props: Props): JSX.Element {
   const [editor] = useLexicalComposerContext();
   onCleanup(
     editor.registerCommand(

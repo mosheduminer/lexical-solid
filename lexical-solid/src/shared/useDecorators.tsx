@@ -6,21 +6,24 @@ import {
   createSignal,
   JSX,
   onCleanup,
+  onMount,
 } from "solid-js";
 import { Portal } from "solid-js/web";
 
 export default function useDecorators(
   editor: LexicalEditor
 ): Accessor<JSX.Element[]> {
-  const [decorators, setDecorators] = createSignal<{
-    [key: string]: JSX.Element;
-  }>(editor.getDecorators<JSX.Element>());
+  const [decorators, setDecorators] = createSignal<Record<string, JSX.Element>>(
+    editor.getDecorators<JSX.Element>()
+  );
   // Subscribe to changes
   onCleanup(
-    editor.registerDecoratorListener((nextDecorators) => {
+    editor.registerDecoratorListener<JSX.Element>((nextDecorators) => {
       setDecorators(nextDecorators);
     })
   );
+
+  onMount(() => setDecorators(editor.getDecorators<JSX.Element>()));
 
   // Return decorators defined as Solid Portals
 

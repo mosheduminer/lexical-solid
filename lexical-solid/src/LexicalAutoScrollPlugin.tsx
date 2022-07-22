@@ -1,4 +1,4 @@
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import { $getSelection, $isRangeSelection } from "lexical";
 import { createEffect, JSX } from "solid-js";
 
@@ -6,7 +6,7 @@ type Props = Readonly<{
   scrollRef: () => HTMLElement;
 }>;
 
-export default function LexicalAutoScrollPlugin({
+export function AutoScrollPlugin({
   scrollRef,
 }: Props): JSX.Element {
   const [editor] = useLexicalComposerContext();

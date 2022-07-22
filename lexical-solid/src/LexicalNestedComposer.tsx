@@ -1,14 +1,14 @@
-import type { LexicalComposerContextWithEditor } from "./LexicalComposerContext";
+import type { LexicalComposerContextWithEditor } from "lexical-solid/LexicalComposerContext";
 import type { EditorThemeClasses, LexicalEditor } from "lexical";
 
-import { useCollaborationContext } from "./LexicalCollaborationPlugin";
+import { useCollaborationContext } from "lexical-solid/LexicalCollaborationPlugin";
 import {
   createLexicalComposerContext,
   LexicalComposerContext,
-} from "./LexicalComposerContext";
+} from "lexical-solid/LexicalComposerContext";
 import { JSX, useContext } from "solid-js";
 
-export default function LexicalNestedComposer(props: {
+export function LexicalNestedComposer(props: {
   children: JSX.Element;
   initialEditor: LexicalEditor;
   initialTheme?: EditorThemeClasses;
@@ -28,6 +28,8 @@ export default function LexicalNestedComposer(props: {
   }
   props.initialEditor._parentEditor = parentEditor;
   props.initialEditor._nodes = parentEditor._nodes;
+  props.initialEditor._config.namespace = parentEditor._config.namespace;
+
   const composerContext: LexicalComposerContextWithEditor = [
     props.initialEditor,
     context,

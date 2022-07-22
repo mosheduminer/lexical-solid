@@ -1,4 +1,4 @@
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 import {
   $createLinkNode,
   $isLinkNode,
@@ -103,7 +103,7 @@ function toggleLink(url: null | string) {
   }
 }
 
-function LinkPlugin() {
+export function LinkPlugin() {
   const [editor] = useLexicalComposerContext();
   onMount(() => {
     if (!editor.hasNodes([LinkNode])) {
@@ -123,5 +123,3 @@ function LinkPlugin() {
   );
   return null;
 }
-
-export default LinkPlugin;

@@ -1,84 +1,45 @@
-import LexicalComposer from "./LexicalComposer";
-import {
+export { LexicalComposer } from "./LexicalComposer";
+export {
   createLexicalComposerContext,
   LexicalComposerContext,
   useLexicalComposerContext,
 } from "./LexicalComposerContext";
-import type {
+export type {
   LexicalComposerContextType,
   LexicalComposerContextWithEditor,
 } from "./LexicalComposerContext";
-import ContentEditable from "./LexicalContentEditable";
-import OnChangePlugin from "./LexicalOnChangePlugin";
-import LexicalTreeView from "./LexicalTreeView";
-import { HistoryPlugin, createEmptyHistoryState } from "./LexicalHistoryPlugin";
-import LinkPlugin from "./LexicalLinkPlugin";
-import LexicalAutoLinkPlugin from "./LexicalAutoLinkPlugin";
-import PlainTextPlugin from "./LexicalPlainTextPlugin";
-import RichTextPlugin from "./LexicalRichTextPlugin";
-import LexicalAutoFocusPlugin from "./LexicalAutoFocusPlugin";
-import LexicalAutoScrollPlugin from "./LexicalAutoScrollPlugin";
-import { BlockWithAlignableContents } from "./LexicalBlockWithAlignableContents";
-import {
+export { ContentEditable } from "./LexicalContentEditable";
+export { OnChangePlugin } from "./LexicalOnChangePlugin";
+export { default as LexicalTreeView } from "./LexicalTreeView";
+export { HistoryPlugin, createEmptyHistoryState } from "./LexicalHistoryPlugin";
+export { LinkPlugin } from "./LexicalLinkPlugin";
+export { AutoLinkPlugin } from "./LexicalAutoLinkPlugin";
+export { PlainTextPlugin } from "./LexicalPlainTextPlugin";
+export { RichTextPlugin } from "./LexicalRichTextPlugin";
+export { LexicalAutoFocusPlugin } from "./LexicalAutoFocusPlugin";
+export { AutoScrollPlugin } from "./LexicalAutoScrollPlugin";
+export { BlockWithAlignableContents } from "./LexicalBlockWithAlignableContents";
+export {
   DecoratorBlockNode,
   $isDecoratorBlockNode,
 } from "./LexicalDecoratorBlockNode";
-import useLexicalNodeSelection from "./useLexicalNodeSelection";
-import CharacterLimitPlugin from "./LexicalCharacterLimitPlugin";
-import CheckListPlugin from "./LexicalCheckListPlugin";
-import LexicalClearEditorPlugin from "./LexicalClearEditorPlugin";
-import {
+export { useLexicalNodeSelection } from "./useLexicalNodeSelection";
+export { CharacterLimitPlugin } from "./LexicalCharacterLimitPlugin";
+export { CheckListPlugin } from "./LexicalCheckListPlugin";
+export { ClearEditorPlugin as LexicalClearEditorPlugin } from "./LexicalClearEditorPlugin";
+export {
   CollaborationPlugin,
   CollaborationContext,
   useCollaborationContext,
 } from "./LexicalCollaborationPlugin";
-import {
+export {
   HorizontalRuleNode,
   INSERT_HORIZONTAL_RULE_COMMAND,
   $createHorizontalRuleNode,
   $isHorizontalRuleNode,
 } from "./LexicalHorizontalRuleNode";
-import ListPlugin from "./LexicalListPlugin";
-import LexicalMarkdownShortcutPlugin from "./LexicalMarkdownShortcutPlugin";
-import useLexicalIsTextContentEmpty from "./useLexicalIsContentEmpty";
-import LexicalNestedComposer from "./LexicalNestedComposer";
-import TablePlugin from "./LexicalTablePlugin";
-
-export {
-  LexicalComposer,
-  createLexicalComposerContext,
-  useLexicalComposerContext,
-  LexicalComposerContext,
-  LexicalComposerContextType,
-  LexicalComposerContextWithEditor,
-  ContentEditable,
-  OnChangePlugin,
-  PlainTextPlugin,
-  LexicalTreeView,
-  HistoryPlugin,
-  createEmptyHistoryState,
-  LinkPlugin,
-  RichTextPlugin,
-  LexicalAutoLinkPlugin,
-  LexicalAutoFocusPlugin,
-  LexicalAutoScrollPlugin,
-  BlockWithAlignableContents,
-  DecoratorBlockNode,
-  $isDecoratorBlockNode,
-  useLexicalNodeSelection,
-  CharacterLimitPlugin,
-  ListPlugin,
-  LexicalClearEditorPlugin,
-  CollaborationPlugin,
-  CollaborationContext,
-  useCollaborationContext,
-  HorizontalRuleNode,
-  INSERT_HORIZONTAL_RULE_COMMAND,
-  $createHorizontalRuleNode,
-  $isHorizontalRuleNode,
-  CheckListPlugin,
-  LexicalMarkdownShortcutPlugin,
-  useLexicalIsTextContentEmpty,
-  LexicalNestedComposer,
-  TablePlugin,
-};
+export { ListPlugin } from "./LexicalListPlugin";
+export { LexicalMarkdownShortcutPlugin } from "./LexicalMarkdownShortcutPlugin";
+export { useLexicalIsTextContentEmpty } from "./useLexicalIsContentEmpty";
+export { LexicalNestedComposer } from "./LexicalNestedComposer";
+export { TablePlugin } from "./LexicalTablePlugin";

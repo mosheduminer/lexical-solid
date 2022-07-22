@@ -1,8 +1,8 @@
 import type { EditorState, LexicalEditor } from "lexical";
 import { createEffect, mergeProps, onCleanup } from "solid-js";
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 
-function OnChangePlugin(props: {
+export function OnChangePlugin(props: {
   onChange?: (editorState: EditorState, editor: LexicalEditor) => void;
   ignoreInitialChange?: boolean;
   ignoreSelectionChange?: boolean;
@@ -37,5 +37,3 @@ function OnChangePlugin(props: {
   });
   return null;
 }
-
-export default OnChangePlugin;

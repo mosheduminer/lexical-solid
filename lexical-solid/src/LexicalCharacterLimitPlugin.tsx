@@ -1,12 +1,12 @@
-import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
 
-import { useCharacterLimit } from "./shared/useCharacterLimit";
+import { useCharacterLimit } from "lexical-solid/shared/useCharacterLimit";
 
 import { createMemo, createSignal, JSX, mergeProps } from "solid-js";
 
 const CHARACTER_LIMIT = 5;
 
-let textEncoderInstance: TextEncoder | null = null;
+let textEncoderInstance: null | TextEncoder = null;
 function textEncoder(): null | TextEncoder {
   if (window.TextEncoder === undefined) {
     return null;
@@ -27,10 +27,10 @@ function utf8Length(text: string) {
   return currentTextEncoder.encode(text).length;
 }
 
-export default function CharacterLimitPlugin(props: {
+export function CharacterLimitPlugin(props: {
   charset: "UTF-8" | "UTF-16";
 }): JSX.Element {
-  props = mergeProps(props, { charset: "UTF-16" });
+  props = mergeProps({ charset: "UTF-16" }, props);
   const [editor] = useLexicalComposerContext();
   const [remainingCharacters, setRemainingCharacters] = createSignal(0);
   const characterLimitProps = createMemo(() => ({
@@ -49,7 +49,7 @@ export default function CharacterLimitPlugin(props: {
 
   return (
     <span
-      className={`characters-limit ${
+      class={`characters-limit ${
         remainingCharacters() < 0 ? "characters-limit-exceeded" : ""
       }`}
     >

@@ -1,14 +1,18 @@
 import type {
-  DOMConversionMap,
   DOMConversionOutput,
-  DOMExportOutput,
   LexicalCommand,
   LexicalNode,
+  SerializedLexicalNode,
 } from "lexical";
 
 import { JSX } from "solid-js";
 
 import { createCommand, DecoratorNode } from "lexical";
+
+export type SerializedHorizontalRuleNode = SerializedLexicalNode & {
+  type: 'horizontalrule';
+  version: 1;
+};
 
 export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> =
   createCommand();
@@ -26,17 +30,17 @@ export class HorizontalRuleNode extends DecoratorNode<JSX.Element> {
     return new HorizontalRuleNode(node.__key);
   }
 
-  static importDOM(): DOMConversionMap | null {
-    return {
-      hr: (node: Node) => ({
-        conversion: convertHorizontalRuleElement,
-        priority: 0,
-      }),
-    };
+  static importJSON(
+    serializedNode: SerializedHorizontalRuleNode,
+  ): HorizontalRuleNode {
+    return $createHorizontalRuleNode();
   }
 
-  exportDOM(): DOMExportOutput {
-    return { element: document.createElement("hr") };
+  exportJSON(): SerializedLexicalNode {
+    return {
+      type: 'horizontalrule',
+      version: 1,
+    };
   }
 
   createDOM(): HTMLElement {

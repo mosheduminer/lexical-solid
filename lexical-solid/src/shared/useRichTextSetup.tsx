@@ -6,7 +6,7 @@ import { mergeRegister } from "@lexical/utils";
 import { registerDragonSupport } from "@lexical/dragon";
 import { InitialEditorStateType } from "@lexical/rich-text";
 
-function useRichTextSetup(
+export function useRichTextSetup(
   editor: LexicalEditor,
   initialEditorState?: InitialEditorStateType
 ) {
@@ -19,5 +19,3 @@ function useRichTextSetup(
     );
   }
 }
-
-export default useRichTextSetup;
