@@ -15,7 +15,7 @@ type Props = Readonly<{
   autoCapitalize?: string;
   autoComplete?: boolean;
   autoCorrect?: boolean;
-  className?: string;
+  class?: string;
   id?: string;
   readOnly?: boolean;
   role?: string;
@@ -64,7 +64,7 @@ export function ContentEditable(props: Props): JSX.Element {
       // @ts-ignore
       autoComplete={props.autoComplete}
       autoCorrect={props.autoCorrect !== undefined ? String(props.autoCorrect) : undefined}
-      className={props.className}
+      class={props.class}
       contentEditable={!isReadOnly()}
       data-testid={props.testid}
       id={props.id}

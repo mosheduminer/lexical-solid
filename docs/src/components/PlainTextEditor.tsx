@@ -1,15 +1,14 @@
 import { $getRoot, $getSelection, EditorState, LexicalEditor } from "lexical";
 
 import ExampleTheme from "../themes/PlainTextTheme";
-import {
-  OnChangePlugin,
-  LexicalComposer,
-  ContentEditable,
-  PlainTextPlugin,
-  AutoFocusPlugin,
-} from "lexical-solid";
-import { HistoryPlugin } from "lexical-solid";
+import { OnChangePlugin } from "lexical-solid/LexicalOnChangePlugin";
+import { LexicalAutoFocusPlugin } from "lexical-solid/LexicalAutoFocusPlugin";
+import { LexicalComposer } from "lexical-solid/LexicalComposer";
+import { PlainTextPlugin } from "lexical-solid/LexicalPlainTextPlugin";
+import { ContentEditable } from "lexical-solid/LexicalContentEditable";
+import { HistoryPlugin } from "lexical-solid/LexicalHistoryPlugin";
 import TreeViewPlugin from "~/plugins/TreeViewPlugin";
+
 //import { EmojiNode } from "./nodes/EmojiNode";
 //import EmoticonPlugin from "./plugins/EmoticonPlugin";
 
@@ -32,6 +31,7 @@ function onChange(editorState: EditorState, editor: LexicalEditor) {
 const editorConfig = {
   // The editor theme
   theme: ExampleTheme,
+  namespace: "",
   // Handling of errors during update
   onError(error: any) {
     throw error;
@@ -43,16 +43,16 @@ const editorConfig = {
 export default function Editor() {
   return (
     <LexicalComposer initialConfig={editorConfig}>
-      <div className="editor-container">
+      <div class="editor-container">
         <PlainTextPlugin
-          contentEditable={<ContentEditable className="editor-input" />}
+          contentEditable={<ContentEditable class="editor-input" />}
           placeholder={<Placeholder />}
         />
         <OnChangePlugin onChange={onChange} />
         <HistoryPlugin />
         <TreeViewPlugin />
         {/*<EmoticonPlugin />*/}
-        <AutoFocusPlugin />
+        <LexicalAutoFocusPlugin />
       </div>
     </LexicalComposer>
   );

@@ -40,11 +40,11 @@ const SYMBOLS: Record<string, string> = Object.freeze({
 
 export function TreeView(props: {
   editor: LexicalEditor;
-  timeTravelButtonClassName: string;
-  timeTravelPanelButtonClassName: string;
-  timeTravelPanelClassName: string;
-  timeTravelPanelSliderClassName: string;
-  viewClassName: string;
+  timeTravelButtonClass: string;
+  timeTravelPanelButtonClass: string;
+  timeTravelPanelClass: string;
+  timeTravelPanelSliderClass: string;
+  viewClass: string;
 }): JSX.Element {
   const [timeStampedEditorStates, setTimeStampedEditorStates] = createSignal<
     [number, EditorState][]
@@ -122,7 +122,7 @@ export function TreeView(props: {
   });
 
   return (
-    <div class={props.viewClassName}>
+    <div class={props.viewClass}>
       {!timeTravelEnabled() && totalEditorStates() > 2 && (
         <button
           onClick={() => {
@@ -133,16 +133,16 @@ export function TreeView(props: {
               setTimeTravelEnabled(true);
             }
           }}
-          class={props.timeTravelButtonClassName}
+          class={props.timeTravelButtonClass}
         >
           Time Travel
         </button>
       )}
       <pre ref={treeElementRef}>{content()}</pre>
       {timeTravelEnabled() && (
-        <div class={props.timeTravelPanelClassName}>
+        <div class={props.timeTravelPanelClass}>
           <button
-            class={props.timeTravelPanelButtonClassName}
+            class={props.timeTravelPanelButtonClass}
             onClick={() => {
               setIsPlaying(!isPlaying());
             }}
@@ -150,7 +150,7 @@ export function TreeView(props: {
             {isPlaying() ? "Pause" : "Play"}
           </button>
           <input
-            class={props.timeTravelPanelSliderClassName}
+            class={props.timeTravelPanelSliderClass}
             ref={inputRef}
             onInput={(event) => {
               const editorStateIndex = Number(event.currentTarget.value);
@@ -166,7 +166,7 @@ export function TreeView(props: {
             max={totalEditorStates() - 1}
           />
           <button
-            class={props.timeTravelPanelButtonClassName}
+            class={props.timeTravelPanelButtonClass}
             onClick={() => {
               const rootElement = props.editor.getRootElement();
               if (rootElement !== null) {

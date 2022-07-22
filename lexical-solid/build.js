@@ -42,6 +42,8 @@ const externals = [
   '@lexical/link',
   '@lexical/markdown',
   'solid-js',
+  'solid-js/web',
+  'solid-js/store',
   'yjs',
   'y-websocket',
   ...(lexicalSolidModules.map(n => 'lexical-solid/' + n.outputFileName)),
@@ -52,7 +54,8 @@ mkdirSync('./dist')
 
 for (const module of lexicalSolidModules) {
   let inputFile = resolve(module.sourceFileName);
-  const inputOptions = {
+  const inputOptions = (generate) => (
+    {
     external(modulePath, src) {
       return externals.includes(modulePath);
     },
@@ -68,18 +71,18 @@ for (const module of lexicalSolidModules) {
         exclude: '/**/node_modules/**',
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
         presets: [
-          'babel-preset-solid',
+          ["babel-preset-solid", { generate, hydratable: true }],
           '@babel/preset-typescript',
         ]
       }),
       commonjs()
     ],
     treeshake: true,
-  }
-  const result = await rollup(inputOptions);
-  result.write({ format: 'cjs', file: resolve('dist/cjs/' + module.outputFileName + '.cjs') })
-  result.write({ format: 'esm', file: resolve('dist/esm/' + module.outputFileName) + '.js' })
-  result.close()
+  })
+  const resultDom = await rollup(inputOptions("dom"));
+  resultDom.write({ format: 'esm', file: resolve('dist/esm/' + module.outputFileName) + '.js' }).then(() => resultDom.close())
+  const resultSsr = await rollup({...inputOptions("ssr")});
+  resultSsr.write({ format: 'cjs', file: resolve('dist/cjs/' + module.outputFileName + '.cjs') }).then(() => resultSsr.close())
 }
 
 const program = ts.createProgram(lexicalSolidModules.map(module => module.sourceFileName), {

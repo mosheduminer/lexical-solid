@@ -2,18 +2,16 @@ import { $getRoot, $getSelection, EditorState, LexicalEditor } from "lexical";
 import { LinkNode } from "@lexical/link";
 import { AutoLinkNode } from "@lexical/link";
 import "./RichTextEditor.css";
-import {
-  OnChangePlugin,
-  LexicalComposer,
-  ContentEditable,
-  RichTextPlugin,
-  LinkPlugin,
-  AutoFocusPlugin,
-} from "lexical-solid";
+import { LinkPlugin } from "lexical-solid/LexicalLinkPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListItemNode, ListNode } from "@lexical/list";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
-import { HistoryPlugin } from "lexical-solid";
+import { OnChangePlugin } from "lexical-solid/LexicalOnChangePlugin";
+import { LexicalAutoFocusPlugin as AutoFocusPlugin } from "lexical-solid/LexicalAutoFocusPlugin";
+import { LexicalComposer } from "lexical-solid/LexicalComposer";
+import { RichTextPlugin } from "lexical-solid/LexicalRichTextPlugin";
+import { ContentEditable } from "lexical-solid/LexicalContentEditable";
+import { HistoryPlugin } from "lexical-solid/LexicalHistoryPlugin";
 import TreeViewPlugin from "../plugins/TreeViewPlugin";
 import CodeHighlightPlugin from "~/plugins/CodeHighlightPlugin";
 import ToolbarPlugin from "~/plugins/ToolbarPlugin";
@@ -41,6 +39,7 @@ function onChange(editorState: EditorState, editor: LexicalEditor) {
 const editorConfig = {
   // The editor theme
   theme: RichTextTheme,
+  namespace: "",
   // Handling of errors during update
   onError(error: any) {
     throw error;
@@ -64,11 +63,11 @@ const editorConfig = {
 export default function Editor() {
   return (
     <LexicalComposer initialConfig={editorConfig}>
-      <div className="editor-container">
+      <div class="editor-container">
         <ToolbarPlugin />
-        <div className="editor-inner">
+        <div class="editor-inner">
           <RichTextPlugin
-            contentEditable={<ContentEditable className="editor-input" />}
+            contentEditable={<ContentEditable class="editor-input" />}
             placeholder={<Placeholder />}
           />
           <LinkPlugin />
