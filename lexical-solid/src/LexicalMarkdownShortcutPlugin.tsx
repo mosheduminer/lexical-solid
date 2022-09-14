@@ -2,15 +2,17 @@ import type { ElementTransformer, Transformer } from "@lexical/markdown";
 import type { LexicalNode } from "lexical";
 
 import { registerMarkdownShortcuts, TRANSFORMERS } from "@lexical/markdown";
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
 
 import {
   $createHorizontalRuleNode,
   $isHorizontalRuleNode,
-} from "lexical-solid/LexicalHorizontalRuleNode";
+  HorizontalRuleNode,
+} from "./LexicalHorizontalRuleNode";
 import { createEffect, mergeProps, onCleanup } from "solid-js";
 
 const HR: ElementTransformer = {
+  dependencies: [HorizontalRuleNode],
   export: (node: LexicalNode) => {
     return $isHorizontalRuleNode(node) ? "***" : null;
   },
@@ -30,7 +32,7 @@ const HR: ElementTransformer = {
   type: "element",
 };
 
-const DEFAULT_TRANSFORMERS = [HR, ...TRANSFORMERS];
+export const DEFAULT_TRANSFORMERS = [HR, ...TRANSFORMERS];
 
 export function LexicalMarkdownShortcutPlugin(
   props: Readonly<{ transformers?: Transformer[] }>

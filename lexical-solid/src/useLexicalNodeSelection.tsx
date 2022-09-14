@@ -1,6 +1,6 @@
 import type { LexicalEditor, NodeKey } from "lexical";
 
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
 import {
   $createNodeSelection,
   $getNodeByKey,

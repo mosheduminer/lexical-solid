@@ -1,9 +1,9 @@
 import { ListItemNode } from "@lexical/list";
 import { ListNode } from "@lexical/list";
 import { createEffect } from "solid-js";
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
 
-import { useList } from "lexical-solid/shared/useList";
+import { useList } from "./shared/useList";
 
 export function ListPlugin(): null {
   const [editor] = useLexicalComposerContext();

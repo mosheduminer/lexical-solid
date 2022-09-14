@@ -1,5 +1,5 @@
 import { Accessor, createEffect, JSX, onCleanup } from "solid-js";
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
 import {
   $createAutoLinkNode,
   $isAutoLinkNode,
@@ -132,9 +132,10 @@ function handleLinkCreation(
         );
       }
 
+      const nodeFormat = node.__format;
       const linkNode = $createAutoLinkNode(match.url);
       //@ts-ignore
-      linkNode.append($createTextNode(match.text));
+      linkNode.append($createTextNode(match.text).setFormat(nodeFormat));
       //@ts-ignore
       middleNode.replace(linkNode);
       onChange(match.url, null);
@@ -233,7 +234,7 @@ function useAutoLink(
     const matchers = matchersAccessor();
     if (!editor.hasNodes([AutoLinkNode])) {
       throw Error(
-        `LexicalAutoLinkPlugin: AutoLinkNode, TableCellNode or TableRowNode not registered on editor`
+        `LexicalAutoLinkPlugin: AutoLinkNode not registered on editor`
       );
     }
 

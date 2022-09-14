@@ -7,7 +7,7 @@ import {
   INSERT_CHECK_LIST_COMMAND,
   insertList,
 } from "@lexical/list";
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
 import { $findMatchingParent, mergeRegister } from "@lexical/utils";
 import {
   $getNearestNodeFromDOMNode,
@@ -54,7 +54,7 @@ export function CheckListPlugin(): null {
         KEY_ESCAPE_COMMAND,
         (event) => {
           const activeItem = getActiveCheckListItem();
-          if (activeItem != null && !editor.isReadOnly()) {
+          if (activeItem != null && editor.isEditable()) {
             const rootElement = editor.getRootElement();
             if (rootElement != null) {
               rootElement.focus();
@@ -69,7 +69,7 @@ export function CheckListPlugin(): null {
         KEY_SPACE_COMMAND,
         (event: KeyboardEvent) => {
           const activeItem = getActiveCheckListItem();
-          if (activeItem != null && !editor.isReadOnly()) {
+          if (activeItem != null && editor.isEditable()) {
             editor.update(() => {
               const listItemNode = $getNearestNodeFromDOMNode(activeItem)!;
               if ($isListItemNode(listItemNode)) {

@@ -1,4 +1,4 @@
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
 import { onMount } from "solid-js";
 
 export function LexicalAutoFocusPlugin(props: { defaultSelection?: 'rootStart' | 'rootEnd' }): null {

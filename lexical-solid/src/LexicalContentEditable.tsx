@@ -1,5 +1,5 @@
 import { createSignal, JSX, mergeProps, onCleanup, onMount } from "solid-js";
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
 
 type Props = Readonly<{
   ariaActiveDescendantID?: string;
@@ -19,7 +19,7 @@ type Props = Readonly<{
   id?: string;
   readOnly?: boolean;
   role?: string;
-  style?: StyleSheetList;
+  style?: JSX.HTMLAttributes<HTMLDivElement>["style"];
   spellCheck?: boolean;
   tabIndex?: number;
   testid?: string;
@@ -28,20 +28,21 @@ type Props = Readonly<{
 export function ContentEditable(props: Props): JSX.Element {
   props = mergeProps({ role: "textbox", spellCheck: true }, props);
   const [editor] = useLexicalComposerContext();
-  const [isReadOnly, setReadOnly] = createSignal(true);
-  const ref = (rootElement: HTMLElement) => {
-    editor.setRootElement(rootElement);
-  };
+  const [isEditable, setEditable] = createSignal(false);
+  let rootElementRef!: HTMLDivElement
   onMount(() => {
-    setReadOnly(editor.isReadOnly());
+    editor.setRootElement(rootElementRef)
+  })
+  onMount(() => {
+    setEditable(editor.isEditable());
     onCleanup(
-      editor.registerReadOnlyListener((currentIsReadOnly) => {
-        setReadOnly(currentIsReadOnly);
+      editor.registerEditableListener((currentIsReadOnly) => {
+        setEditable(currentIsReadOnly);
       })
     );
   });
   function ifNotReadonly<T>(value: T): T | undefined {
-    if (isReadOnly()) return undefined;
+    if (!isEditable()) return undefined;
     return value;
   }
   return (
@@ -58,18 +59,24 @@ export function ContentEditable(props: Props): JSX.Element {
       aria-multiline={props.ariaMultiline}
       aria-owns={ifNotReadonly(props.ariaOwneeID)}
       aria-required={props.ariaRequired}
-      autoCapitalize={(
-        props.autoCapitalize !== undefined ? String(props.autoCapitalize) : undefined
-        ) as JSX.HTMLAttributes<HTMLDivElement>["autoCapitalize"]}
+      autoCapitalize={
+        (props.autoCapitalize !== undefined
+          ? String(props.autoCapitalize)
+          : undefined) as JSX.HTMLAttributes<HTMLDivElement>["autoCapitalize"]
+      }
       // @ts-ignore
       autoComplete={props.autoComplete}
-      autoCorrect={props.autoCorrect !== undefined ? String(props.autoCorrect) : undefined}
+      autoCorrect={
+        props.autoCorrect !== undefined ? String(props.autoCorrect) : undefined
+      }
       class={props.class}
-      contentEditable={!isReadOnly()}
+      contentEditable={isEditable()}
       data-testid={props.testid}
       id={props.id}
-      ref={ref}
-      role={ifNotReadonly(props.role) as JSX.HTMLAttributes<HTMLDivElement>["role"]}
+      ref={rootElementRef}
+      role={
+        ifNotReadonly(props.role) as JSX.HTMLAttributes<HTMLDivElement>["role"]
+      }
       spellcheck={props.spellCheck}
       style={props.style}
       tabIndex={props.tabIndex}

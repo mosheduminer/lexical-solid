@@ -1,6 +1,6 @@
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
 
-import { useCharacterLimit } from "lexical-solid/shared/useCharacterLimit";
+import { useCharacterLimit } from "./shared/useCharacterLimit";
 
 import { createMemo, createSignal, JSX, mergeProps } from "solid-js";
 

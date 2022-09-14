@@ -19,8 +19,9 @@ import {
   $isTextNode,
 } from "lexical";
 import { createEffect, createSignal, JSX, onCleanup } from "solid-js";
+import { $isLinkNode, LinkNode } from "@lexical/link";
 
-const NON_SINGLE_WIDTH_CHARS_REPLACEMENT: Readonly<Record<string, string>> = 
+const NON_SINGLE_WIDTH_CHARS_REPLACEMENT: Readonly<Record<string, string>> =
   Object.freeze({
     "\t": "\\t",
     "\n": "\\n",
@@ -77,7 +78,7 @@ export function TreeView(props: {
 
   createEffect(() => {
     if (isPlaying()) {
-      let timeoutId: number;
+      let timeoutId: ReturnType<typeof setTimeout>;
 
       const play = () => {
         const currentIndex = playingIndexRef;
@@ -102,7 +103,7 @@ export function TreeView(props: {
       };
 
       play();
-      onCleanup(() => window.clearTimeout(timeoutId));
+      onCleanup(() => clearTimeout(timeoutId));
     }
   });
 
@@ -134,6 +135,7 @@ export function TreeView(props: {
             }
           }}
           class={props.timeTravelButtonClass}
+          type="button"
         >
           Time Travel
         </button>
@@ -182,6 +184,7 @@ export function TreeView(props: {
                 setIsPlaying(false);
               }
             }}
+            type="button"
           >
             Exit
           </button>
@@ -264,7 +267,7 @@ function generateContent(editorState: EditorState): string {
 function visitTree(
   currentNode: ElementNode,
   visitor: (node: LexicalNode, indentArr: Array<string>) => void,
-  indent: Array<string> = [],
+  indent: Array<string> = []
 ) {
   const childNodes = currentNode.getChildren();
   const childNodesLength = childNodes.length;
@@ -304,7 +307,15 @@ function printNode(node: LexicalNode) {
   if ($isTextNode(node)) {
     const text = node.getTextContent(true);
     const title = text.length === 0 ? "(empty)" : `"${normalize(text)}"`;
-    const properties = printAllProperties(node);
+    const properties = printAllTextNodeProperties(node);
+    return [title, properties.length !== 0 ? `{ ${properties} }` : null]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+  } else if ($isLinkNode(node)) {
+    const link = node.getURL();
+    const title = link.length === 0 ? "(empty)" : `"${normalize(link)}"`;
+    const properties = printAllLinkNodeProperties(node);
     return [title, properties.length !== 0 ? `{ ${properties} }` : null]
       .filter(Boolean)
       .join(" ")
@@ -335,7 +346,7 @@ const MODE_PREDICATES = [
   (node: TextNode) => node.isInert() && "Inert",
 ];
 
-function printAllProperties(node: TextNode) {
+function printAllTextNodeProperties(node: TextNode) {
   return [
     printFormatProperties(node),
     printDetailProperties(node),
@@ -345,11 +356,11 @@ function printAllProperties(node: TextNode) {
     .join(", ");
 }
 
-type NodeOrSelection =
-  | TextNode
-  | RangeSelection
-  | GridSelection
-  | NodeSelection;
+function printAllLinkNodeProperties(node: LinkNode) {
+  return [printTargetProperties(node), printRelProperties(node)]
+    .filter(Boolean)
+    .join(", ");
+}
 
 function printDetailProperties(nodeOrSelection: TextNode) {
   let str = DETAIL_PREDICATES.map((predicate) => predicate(nodeOrSelection))
@@ -380,6 +391,24 @@ function printFormatProperties(nodeOrSelection: TextNode) {
     .toLocaleLowerCase();
   if (str !== "") {
     str = "format: " + str;
+  }
+  return str;
+}
+
+function printTargetProperties(node: LinkNode) {
+  let str = node.getTarget();
+  // TODO Fix nullish on LinkNode
+  if (str != null) {
+    str = "target: " + str;
+  }
+  return str;
+}
+
+function printRelProperties(node: LinkNode) {
+  let str = node.getRel();
+  // TODO Fix nullish on LinkNode
+  if (str != null) {
+    str = "rel: " + str;
   }
   return str;
 }

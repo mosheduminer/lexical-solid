@@ -16,6 +16,7 @@ export { LinkPlugin } from "./LexicalLinkPlugin";
 export { AutoLinkPlugin } from "./LexicalAutoLinkPlugin";
 export { PlainTextPlugin } from "./LexicalPlainTextPlugin";
 export { RichTextPlugin } from "./LexicalRichTextPlugin";
+export { LexicalAutoEmbedPlugin } from "./LexicalAutoEmbedPlugin";
 export { LexicalAutoFocusPlugin } from "./LexicalAutoFocusPlugin";
 export { AutoScrollPlugin } from "./LexicalAutoScrollPlugin";
 export { BlockWithAlignableContents } from "./LexicalBlockWithAlignableContents";
@@ -28,10 +29,10 @@ export { CharacterLimitPlugin } from "./LexicalCharacterLimitPlugin";
 export { CheckListPlugin } from "./LexicalCheckListPlugin";
 export { ClearEditorPlugin as LexicalClearEditorPlugin } from "./LexicalClearEditorPlugin";
 export {
-  CollaborationPlugin,
   CollaborationContext,
   useCollaborationContext,
-} from "./LexicalCollaborationPlugin";
+} from "./LexicalCollaborationContext";
+export { CollaborationPlugin } from "./LexicalCollaborationPlugin";
 export {
   HorizontalRuleNode,
   INSERT_HORIZONTAL_RULE_COMMAND,
@@ -43,3 +44,8 @@ export { LexicalMarkdownShortcutPlugin } from "./LexicalMarkdownShortcutPlugin";
 export { useLexicalIsTextContentEmpty } from "./useLexicalIsContentEmpty";
 export { LexicalNestedComposer } from "./LexicalNestedComposer";
 export { TablePlugin } from "./LexicalTablePlugin";
+export {
+  LexicalTypeaheadMenuPlugin,
+  LexicalNodeMenuPlugin,
+  useBasicTypeaheadTriggerMatch,
+} from "./LexicalTypeaheadMenuPlugin";

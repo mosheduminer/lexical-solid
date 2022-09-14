@@ -4,8 +4,7 @@ import type { EditorThemeClasses, LexicalEditor, LexicalNode } from "lexical";
 import {
   LexicalComposerContext,
   createLexicalComposerContext,
-} from "lexical-solid/LexicalComposerContext";
-
+} from "./LexicalComposerContext";
 
 export type InitialEditorStateType =
   | null
@@ -19,7 +18,7 @@ type Props = {
     namespace: string;
     nodes?: ReadonlyArray<Klass<LexicalNode>>;
     onError: (error: Error, editor: LexicalEditor) => void;
-    readOnly?: boolean;
+    editable?: boolean;
     theme?: EditorThemeClasses;
     editorState?: InitialEditorStateType;
   }>;
@@ -31,14 +30,14 @@ export function LexicalComposer(props: Props) {
   const editor: LexicalEditor = createEditor({
     namespace,
     nodes,
-    onError: error => onError(error, editor),
-    readOnly: true,
-    theme
+    onError: (error) => onError(error, editor),
+    editable: false,
+    theme,
   });
 
   onMount(() => {
-    const isReadOnly = props.initialConfig.readOnly;
-    editor.setReadOnly(isReadOnly || false);
+    const isEditable = props.initialConfig.editable;
+    editor.setEditable(isEditable !== undefined ? isEditable : true);
   });
   return (
     <LexicalComposerContext.Provider value={[editor, context]}>

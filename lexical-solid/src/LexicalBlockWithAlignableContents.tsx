@@ -1,11 +1,11 @@
 import type { ElementFormatType, NodeKey } from "lexical";
 
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
 import {
   $isDecoratorBlockNode,
   DecoratorBlockNode,
-} from "lexical-solid/LexicalDecoratorBlockNode";
-import { useLexicalNodeSelection } from "lexical-solid/useLexicalNodeSelection";
+} from "./LexicalDecoratorBlockNode";
+import { useLexicalNodeSelection } from "./useLexicalNodeSelection";
 import {
   $getNearestBlockElementAncestorOrThrow,
   mergeRegister,

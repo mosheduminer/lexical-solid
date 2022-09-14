@@ -1,10 +1,10 @@
 import { JSX, Show } from "solid-js";
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
 
-import useDecorators from "lexical-solid/shared/useDecorators";
-import { usePlainTextSetup } from "lexical-solid/shared/usePlainTextSetup";
-import { useCanShowPlaceholder } from "lexical-solid/shared/useCanShowPlaceholder";
-import { InitialEditorStateType } from "lexical-solid/shared/PlainRichTextUtils";
+import useDecorators from "./shared/useDecorators";
+import { usePlainTextSetup } from "./shared/usePlainTextSetup";
+import { useCanShowPlaceholder } from "./shared/useCanShowPlaceholder";
+import { InitialEditorStateType } from "./shared/PlainRichTextUtils";
 
 export function PlainTextPlugin(props: {
   contentEditable: JSX.Element;

@@ -1,8 +1,8 @@
 import type { TextNode } from "lexical";
 
 import { $createHashtagNode, HashtagNode } from "@lexical/hashtag";
-import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
-import useLexicalTextEntity from "lexical-solid/useLexicalTextEntity";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
+import useLexicalTextEntity from "./useLexicalTextEntity";
 
 import { JSX, onMount } from "solid-js";
 

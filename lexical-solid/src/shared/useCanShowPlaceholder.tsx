@@ -1,21 +1,21 @@
-import { createSignal, onMount } from "solid-js";
+import { createSignal, onMount, onCleanup } from "solid-js";
 import { LexicalEditor } from "lexical";
 import { $canShowPlaceholderCurry } from "@lexical/text";
 import { mergeRegister } from "@lexical/utils";
 
 function canShowPlaceholderFromCurrentEditorState(
-  editor: LexicalEditor,
+  editor: LexicalEditor
 ): boolean {
   const currentCanShowPlaceholder = editor
     .getEditorState()
-    .read($canShowPlaceholderCurry(editor.isComposing(), editor.isReadOnly()));
+    .read($canShowPlaceholderCurry(editor.isComposing(), editor.isEditable()));
 
   return currentCanShowPlaceholder;
 }
 
 export function useCanShowPlaceholder(editor: LexicalEditor) {
   const [canShowPlaceholder, setCanShowPlaceholder] = createSignal(
-   canShowPlaceholderFromCurrentEditorState(editor)
+    canShowPlaceholderFromCurrentEditorState(editor)
   );
   onMount(() => {
     function resetCanShowPlaceholder() {
@@ -24,15 +24,16 @@ export function useCanShowPlaceholder(editor: LexicalEditor) {
       setCanShowPlaceholder(currentCanShowPlaceholder);
     }
     resetCanShowPlaceholder();
-    return mergeRegister(
-      editor.registerUpdateListener(() => {
-        resetCanShowPlaceholder();
-      }),
-      editor.registerReadOnlyListener(() => {
-        resetCanShowPlaceholder();
-      }),
+    onCleanup(
+      mergeRegister(
+        editor.registerUpdateListener(() => {
+          resetCanShowPlaceholder();
+        }),
+        editor.registerEditableListener(() => {
+          resetCanShowPlaceholder();
+        })
+      )
     );
   });
   return canShowPlaceholder;
 }
-
