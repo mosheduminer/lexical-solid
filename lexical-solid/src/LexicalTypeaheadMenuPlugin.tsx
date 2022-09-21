@@ -245,7 +245,7 @@ function LexicalPopoverMenu<TOption extends TypeaheadOption>(props: {
       props.onSelectOption(
         selectedEntry,
         textNodeContainingQuery,
-        close,
+        props.close,
         props.resolution.match.matchingString
       );
     });
@@ -454,12 +454,12 @@ function useAnchorElementRef(
     if (resolution !== null) {
       positionMenu();
       window.addEventListener("resize", positionMenu);
-      return () => {
+      onCleanup(() => {
         window.removeEventListener("resize", positionMenu);
         if (rootElement !== null) {
           rootElement.removeAttribute("aria-controls");
         }
-      };
+      });
     }
   });
 
