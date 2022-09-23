@@ -375,7 +375,7 @@ function LexicalPopoverMenu<TOption extends TypeaheadOption>(props: {
 
   const listItemProps = {
     selectOptionAndCleanUp,
-    selectedIndex: createMemo(() => selectedIndex()),
+    selectedIndex: createMemo(selectedIndex),
     setHighlightedIndex,
   };
 
@@ -493,7 +493,6 @@ export function LexicalTypeaheadMenuPlugin<TOption extends TypeaheadOption>(
 
   createEffect(() => {
     let activeRange: Range | null = document.createRange();
-    let previousText: string | null = null;
 
     const updateListener = () => {
       editor.getEditorState().read(() => {
@@ -504,14 +503,12 @@ export function LexicalTypeaheadMenuPlugin<TOption extends TypeaheadOption>(
         if (
           !$isRangeSelection(selection) ||
           !selection.isCollapsed() ||
-          text === previousText ||
           text === null ||
           range === null
         ) {
           setResolution(null);
           return;
         }
-        previousText = text;
 
         const match = props.triggerFn(text, editor);
         props.onQueryChange(match ? match.matchingString : null);
