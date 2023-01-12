@@ -3,7 +3,7 @@ import { useLexicalEditable } from "./useLexicalEditable";
 import { useCanShowPlaceholder } from "./shared/useCanShowPlaceholder";
 import { ErrorBoundaryType, useDecorators } from "./shared/useDecorators";
 import { useRichTextSetup } from "./shared/useRichTextSetup";
-import { JSX } from "solid-js";
+import { JSX, Show } from "solid-js";
 
 export function RichTextPlugin(params: {
   contentEditable: JSX.Element;
@@ -26,20 +26,23 @@ export function RichTextPlugin(params: {
   );
 }
 
+type ContentFunction = (isEditable: boolean) => null | JSX.Element;
+
 function Placeholder(props: {
-  content: ((isEditable: boolean) => null | JSX.Element) | null | JSX.Element;
+  content: ContentFunction | null | JSX.Element;
 }): null | JSX.Element {
   const [editor] = useLexicalComposerContext();
   const showPlaceholder = useCanShowPlaceholder(editor);
   const editable = useLexicalEditable();
 
-  if (!showPlaceholder()) {
-    return null;
-  }
-
-  if (typeof props.content === "function") {
-    return props.content(editable);
-  } else {
-    return props.content;
-  }
+  return (
+    <Show when={showPlaceholder()}>
+      <Show
+        when={typeof props.content === "function"}
+        fallback={props.content as JSX.Element}
+      >
+        {(props.content as ContentFunction)(editable)}
+      </Show>
+    </Show>
+  );
 }

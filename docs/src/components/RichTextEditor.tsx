@@ -14,7 +14,7 @@ import { ContentEditable } from "lexical-solid/LexicalContentEditable";
 import { HistoryPlugin } from "lexical-solid/LexicalHistoryPlugin";
 import TreeViewPlugin from "../plugins/TreeViewPlugin";
 import CodeHighlightPlugin from "~/plugins/CodeHighlightPlugin";
-import ToolbarPlugin from "~/plugins/ToolbarPlugin";
+// import ToolbarPlugin from "~/plugins/ToolbarPlugin";
 import RichTextTheme from "./RichTextTheme";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { LexicalErrorBoundary } from "lexical-solid/LexicalErrorBoundary";
@@ -65,7 +65,7 @@ export default function Editor() {
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div class="editor-container">
-        <ToolbarPlugin />
+        {/* <ToolbarPlugin /> */}
         <div class="editor-inner">
           <RichTextPlugin
             contentEditable={<ContentEditable class="editor-input" />}
