@@ -1,21 +1,20 @@
-import { LexicalEditor } from "lexical";
 import {
-  registerHistory,
   HistoryState,
   createEmptyHistoryState,
+  registerHistory,
 } from "@lexical/history";
-import { Accessor, createEffect, onCleanup } from "solid-js";
+import { LexicalEditor } from "lexical";
+import { createEffect, Accessor, onCleanup } from "solid-js";
 
-function useHistory(
+export function useHistory(
   editor: LexicalEditor,
   externalHistoryState: Accessor<HistoryState | undefined>,
-  delay: number = 1000
+  delay = 1000
 ) {
   const historyState = () =>
     externalHistoryState() || createEmptyHistoryState();
+
   createEffect(() => {
     onCleanup(registerHistory(editor, historyState(), delay));
   });
 }
-
-export { useHistory };

@@ -1,16 +1,6 @@
-import type { ElementFormatType, NodeKey } from "lexical";
-
-import { useLexicalComposerContext } from "./LexicalComposerContext";
 import {
-  $isDecoratorBlockNode,
-  DecoratorBlockNode,
-} from "./LexicalDecoratorBlockNode";
-import { useLexicalNodeSelection } from "./useLexicalNodeSelection";
-import {
-  $getNearestBlockElementAncestorOrThrow,
-  mergeRegister,
-} from "@lexical/utils";
-import {
+  ElementFormatType,
+  NodeKey,
   $getNodeByKey,
   $getSelection,
   $isDecoratorNode,
@@ -22,104 +12,130 @@ import {
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
 } from "lexical";
-import { JSX, onCleanup } from "solid-js";
+import { useLexicalComposerContext } from "./LexicalComposerContext";
+import { $isDecoratorBlockNode } from "./LexicalDecoratorBlockNode";
+import { useLexicalNodeSelection } from "./useLexicalNodeSelection";
+import {
+  $getNearestBlockElementAncestorOrThrow,
+  mergeRegister,
+} from "@lexical/utils";
+import { JSX } from "solid-js/jsx-runtime";
+import { createEffect, onCleanup } from "solid-js";
 
 type Props = Readonly<{
   children: JSX.Element;
-  format: ElementFormatType | null;
+  format: ElementFormatType | null | undefined;
   nodeKey: NodeKey;
+  classes: Readonly<{
+    base: string;
+    focus: string;
+  }>;
 }>;
 
-export function BlockWithAlignableContents({
-  children,
-  format,
-  nodeKey,
-}: Props): JSX.Element {
+export function BlockWithAlignableContents(props: Props): JSX.Element {
   const [editor] = useLexicalComposerContext();
-  const [isSelected, setSelected, clearSelection] =
-    useLexicalNodeSelection(nodeKey);
-  let ref!: HTMLDivElement;
 
-  const onDelete = (payload: KeyboardEvent) => {
+  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(
+    props.nodeKey
+  );
+  let ref: HTMLDivElement | undefined;
+
+  const onDelete = (event: KeyboardEvent) => {
     if (isSelected() && $isNodeSelection($getSelection())) {
-      const event = payload;
       event.preventDefault();
       editor.update(() => {
-        const node = $getNodeByKey(nodeKey);
-        if ($isDecoratorNode(node) && node.isTopLevel()) {
+        const node = $getNodeByKey(props.nodeKey);
+
+        if ($isDecoratorNode(node)) {
           node.remove();
         }
+
         setSelected(false);
       });
     }
+
     return false;
   };
 
-  onCleanup(
-    mergeRegister(
-      editor.registerCommand(
-        FORMAT_ELEMENT_COMMAND,
-        (payload: ElementFormatType) => {
-          if (isSelected()) {
-            const selection = $getSelection();
-            if ($isNodeSelection(selection)) {
-              const node = $getNodeByKey(nodeKey)!;
-              if ($isDecoratorBlockNode(node)) {
-                (node as DecoratorBlockNode).setFormat(payload);
-              }
-            } else if ($isRangeSelection(selection)) {
-              const nodes = selection.getNodes();
-              for (const node of nodes) {
+  createEffect(() => {
+    onCleanup(
+      mergeRegister(
+        editor.registerCommand<ElementFormatType>(
+          FORMAT_ELEMENT_COMMAND,
+          (formatType) => {
+            if (isSelected()) {
+              const selection = $getSelection();
+
+              if ($isNodeSelection(selection)) {
+                const node = $getNodeByKey(props.nodeKey)!;
+
                 if ($isDecoratorBlockNode(node)) {
-                  (node as DecoratorBlockNode).setFormat(payload);
-                } else {
-                  const element = $getNearestBlockElementAncestorOrThrow(node);
-                  element.setFormat(payload);
+                  node.setFormat(formatType);
+                }
+              } else if ($isRangeSelection(selection)) {
+                const nodes = selection.getNodes();
+
+                for (const node of nodes) {
+                  if ($isDecoratorBlockNode(node)) {
+                    node.setFormat(formatType);
+                  } else {
+                    const element =
+                      $getNearestBlockElementAncestorOrThrow(node);
+                    element.setFormat(formatType);
+                  }
                 }
               }
+
+              return true;
             }
-            return true;
-          }
-          return false;
-        },
-        COMMAND_PRIORITY_LOW
-      ),
-      editor.registerCommand(
-        CLICK_COMMAND,
-        (payload: MouseEvent) => {
-          const event = payload;
-          event.preventDefault();
-          if (event.currentTarget === ref) {
-            if (!event.shiftKey) {
-              clearSelection();
+
+            return false;
+          },
+          COMMAND_PRIORITY_LOW
+        ),
+        editor.registerCommand<MouseEvent>(
+          CLICK_COMMAND,
+          (event) => {
+            if (event.target === ref) {
+              event.preventDefault();
+              if (!event.shiftKey) {
+                clearSelection();
+              }
+
+              setSelected(!isSelected);
+              return true;
             }
-            setSelected(!isSelected);
-            return true;
-          }
-          return false;
-        },
-        COMMAND_PRIORITY_LOW
-      ),
-      editor.registerCommand(
-        KEY_DELETE_COMMAND,
-        onDelete,
-        COMMAND_PRIORITY_LOW
-      ),
-      editor.registerCommand(
-        KEY_BACKSPACE_COMMAND,
-        onDelete,
-        COMMAND_PRIORITY_LOW
+
+            return false;
+          },
+          COMMAND_PRIORITY_LOW
+        ),
+        editor.registerCommand(
+          KEY_DELETE_COMMAND,
+          onDelete,
+          COMMAND_PRIORITY_LOW
+        ),
+        editor.registerCommand(
+          KEY_BACKSPACE_COMMAND,
+          onDelete,
+          COMMAND_PRIORITY_LOW
+        )
       )
-    )
-  );
+    );
+  });
 
   return (
     <div
-      class={`embed-block${isSelected() ? " focused" : ""}`}
+      classList={{
+        [props.classes.base]: true,
+        [props.classes.focus]: isSelected(),
+      }}
       ref={ref}
-      style={{ textAlign: format }}
+      style={{
+        "text-align": props.format ? props.format : undefined,
+      }}
     >
-      {children}
+      {props.children}
     </div>
   );
 }

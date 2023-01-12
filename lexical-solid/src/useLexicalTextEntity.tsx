@@ -6,7 +6,7 @@ import { registerLexicalTextEntity } from "@lexical/text";
 import { mergeRegister } from "@lexical/utils";
 import { onCleanup } from "solid-js";
 
-export default function useLexicalTextEntity<T extends TextNode>(
+export function useLexicalTextEntity<T extends TextNode>(
   getMatch: (text: string) => null | EntityMatch,
   targetNode: Klass<T>,
   createNode: (textNode: TextNode) => T

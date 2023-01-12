@@ -4,18 +4,11 @@ import { isServer } from "solid-js/web";
 import { registerRichText } from "@lexical/rich-text";
 import { mergeRegister } from "@lexical/utils";
 import { registerDragonSupport } from "@lexical/dragon";
-import { InitialEditorStateType } from "@lexical/rich-text";
 
-export function useRichTextSetup(
-  editor: LexicalEditor,
-  initialEditorState?: InitialEditorStateType
-) {
+export function useRichTextSetup(editor: LexicalEditor) {
   if (!isServer) {
     onCleanup(
-      mergeRegister(
-        registerRichText(editor, initialEditorState),
-        registerDragonSupport(editor)
-      ) // We only do this for init
+      mergeRegister(registerRichText(editor), registerDragonSupport(editor)) // We only do this for init
     );
   }
 }

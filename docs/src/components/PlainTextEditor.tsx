@@ -2,11 +2,12 @@ import { $getRoot, $getSelection, EditorState, LexicalEditor } from "lexical";
 
 import ExampleTheme from "../themes/PlainTextTheme";
 import { OnChangePlugin } from "lexical-solid/LexicalOnChangePlugin";
-import { LexicalAutoFocusPlugin } from "lexical-solid/LexicalAutoFocusPlugin";
+import { AutoFocusPlugin } from "lexical-solid/LexicalAutoFocusPlugin";
 import { LexicalComposer } from "lexical-solid/LexicalComposer";
 import { PlainTextPlugin } from "lexical-solid/LexicalPlainTextPlugin";
 import { ContentEditable } from "lexical-solid/LexicalContentEditable";
 import { HistoryPlugin } from "lexical-solid/LexicalHistoryPlugin";
+import { LexicalErrorBoundary } from "lexical-solid/LexicalErrorBoundary";
 import TreeViewPlugin from "~/plugins/TreeViewPlugin";
 
 //import { EmojiNode } from "./nodes/EmojiNode";
@@ -47,12 +48,13 @@ export default function Editor() {
         <PlainTextPlugin
           contentEditable={<ContentEditable class="editor-input" />}
           placeholder={<Placeholder />}
+          errorBoundary={LexicalErrorBoundary}
         />
         <OnChangePlugin onChange={onChange} />
         <HistoryPlugin />
         <TreeViewPlugin />
         {/*<EmoticonPlugin />*/}
-        <LexicalAutoFocusPlugin />
+        <AutoFocusPlugin />
       </div>
     </LexicalComposer>
   );

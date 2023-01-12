@@ -1,22 +1,25 @@
-import { createSignal, onMount, onCleanup } from "solid-js";
 import { LexicalEditor } from "lexical";
 import { $canShowPlaceholderCurry } from "@lexical/text";
 import { mergeRegister } from "@lexical/utils";
+import { Accessor, createSignal, onCleanup, onMount } from "solid-js";
 
 function canShowPlaceholderFromCurrentEditorState(
   editor: LexicalEditor
 ): boolean {
   const currentCanShowPlaceholder = editor
     .getEditorState()
-    .read($canShowPlaceholderCurry(editor.isComposing(), editor.isEditable()));
+    .read($canShowPlaceholderCurry(editor.isComposing()));
 
   return currentCanShowPlaceholder;
 }
 
-export function useCanShowPlaceholder(editor: LexicalEditor) {
+export function useCanShowPlaceholder(
+  editor: LexicalEditor
+): Accessor<boolean> {
   const [canShowPlaceholder, setCanShowPlaceholder] = createSignal(
     canShowPlaceholderFromCurrentEditorState(editor)
   );
+
   onMount(() => {
     function resetCanShowPlaceholder() {
       const currentCanShowPlaceholder =
@@ -35,5 +38,6 @@ export function useCanShowPlaceholder(editor: LexicalEditor) {
       )
     );
   });
+
   return canShowPlaceholder;
 }

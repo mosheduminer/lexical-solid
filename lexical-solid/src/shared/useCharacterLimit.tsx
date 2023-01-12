@@ -1,5 +1,12 @@
-import type { LexicalEditor, LexicalNode } from "lexical";
-
+import {
+  LexicalEditor,
+  LexicalNode,
+  $getSelection,
+  $isLeafNode,
+  $isRangeSelection,
+  $isTextNode,
+  $setSelection,
+} from "lexical";
 import {
   $createOverflowNode,
   $isOverflowNode,
@@ -7,15 +14,8 @@ import {
 } from "@lexical/overflow";
 import { $rootTextContent } from "@lexical/text";
 import { $dfs, mergeRegister } from "@lexical/utils";
-import {
-  $getSelection,
-  $isLeafNode,
-  $isRangeSelection,
-  $isTextNode,
-  $setSelection,
-} from "lexical";
-import { createEffect, onCleanup, onMount } from "solid-js";
 import { MaybeAccessor, resolve } from "../utils";
+import { createEffect, on, onCleanup, onMount } from "solid-js";
 
 type OptionalProps = {
   remainingCharacters?: (characters: number) => void;
@@ -55,16 +55,20 @@ export function useCharacterLimit(
         editor.registerUpdateListener(({ dirtyLeaves }) => {
           const isComposing = editor.isComposing();
           const hasDirtyLeaves = dirtyLeaves.size > 0;
+
           if (isComposing || !hasDirtyLeaves) {
             return;
           }
+
           const textLength = strlen(text);
           const textLengthAboveThreshold =
             textLength > maxCharacters ||
             (lastComputedTextLength !== null &&
               lastComputedTextLength > maxCharacters);
           const diff = resolve(maxCharacters) - textLength;
+
           remainingCharacters(diff);
+
           if (lastComputedTextLength === null || textLengthAboveThreshold) {
             const offset = findOffset(text, resolve(maxCharacters), strlen);
             editor.update(
@@ -76,6 +80,7 @@ export function useCharacterLimit(
               }
             );
           }
+
           lastComputedTextLength = textLength;
         })
       )
@@ -88,34 +93,42 @@ function findOffset(
   maxCharacters: number,
   strlen: (input: string) => number
 ): number {
-  //@ts-ignore don't know why TS won't recognize it
+  // @ts-ignore This is due to be added in a later version of TS
   const Segmenter = Intl.Segmenter;
   let offsetUtf16 = 0;
   let offset = 0;
+
   if (typeof Segmenter === "function") {
     const segmenter = new Segmenter();
     const graphemes = segmenter.segment(text);
+
     for (const { segment: grapheme } of graphemes) {
       const nextOffset = offset + strlen(grapheme);
+
       if (nextOffset > maxCharacters) {
         break;
       }
+
       offset = nextOffset;
       offsetUtf16 += grapheme.length;
     }
   } else {
     const codepoints = Array.from(text);
     const codepointsLength = codepoints.length;
+
     for (let i = 0; i < codepointsLength; i++) {
       const codepoint = codepoints[i];
       const nextOffset = offset + strlen(codepoint);
+
       if (nextOffset > maxCharacters) {
         break;
       }
+
       offset = nextOffset;
       offsetUtf16 += codepoint.length;
     }
   }
+
   return offsetUtf16;
 }
 
@@ -123,17 +136,21 @@ function $wrapOverflowedNodes(offset: number): void {
   const dfsNodes = $dfs();
   const dfsNodesLength = dfsNodes.length;
   let accumulatedLength = 0;
+
   for (let i = 0; i < dfsNodesLength; i += 1) {
     const { node } = dfsNodes[i];
+
     if ($isOverflowNode(node)) {
       const previousLength = accumulatedLength;
       const nextLength = accumulatedLength + node.getTextContentSize();
+
       if (nextLength <= offset) {
         const parent = node.getParent();
         const previousSibling = node.getPreviousSibling();
         const nextSibling = node.getNextSibling();
         $unwrapNode(node);
         const selection = $getSelection();
+
         // Restore selection when the overflow children are removed
         if (
           $isRangeSelection(selection) &&
@@ -159,6 +176,7 @@ function $wrapOverflowedNodes(offset: number): void {
           $isTextNode(descendant) && descendant.isSimpleText();
         const firstDescendantDoesNotOverflow =
           previousPlusDescendantLength <= offset;
+
         if (firstDescendantIsSimpleText || firstDescendantDoesNotOverflow) {
           $unwrapNode(node);
         }
@@ -166,9 +184,11 @@ function $wrapOverflowedNodes(offset: number): void {
     } else if ($isLeafNode(node)) {
       const previousAccumulatedLength = accumulatedLength;
       accumulatedLength += node.getTextContentSize();
+
       if (accumulatedLength > offset && !$isOverflowNode(node.getParent())) {
         const previousSelection = $getSelection();
         let overflowNode;
+
         // For simple text we can improve the limit accuracy by splitting the TextNode
         // on the split point
         if (
@@ -183,9 +203,11 @@ function $wrapOverflowedNodes(offset: number): void {
         } else {
           overflowNode = $wrapNode(node);
         }
+
         if (previousSelection !== null) {
           $setSelection(previousSelection);
         }
+
         mergePrevious(overflowNode);
       }
     }
@@ -202,15 +224,18 @@ function $wrapNode(node: LexicalNode): OverflowNode {
 function $unwrapNode(node: OverflowNode): LexicalNode | null {
   const children = node.getChildren();
   const childrenLength = children.length;
+
   for (let i = 0; i < childrenLength; i++) {
     node.insertBefore(children[i]);
   }
+
   node.remove();
   return childrenLength > 0 ? children[childrenLength - 1] : null;
 }
 
 export function mergePrevious(overflowNode: OverflowNode): void {
   const previousNode = overflowNode.getPreviousSibling();
+
   if (!$isOverflowNode(previousNode)) {
     return;
   }
@@ -218,6 +243,7 @@ export function mergePrevious(overflowNode: OverflowNode): void {
   const firstChild = overflowNode.getFirstChild();
   const previousNodeChildren = previousNode.getChildren();
   const previousNodeChildrenLength = previousNodeChildren.length;
+
   if (firstChild === null) {
     overflowNode.append(...previousNodeChildren);
   } else {
@@ -227,11 +253,13 @@ export function mergePrevious(overflowNode: OverflowNode): void {
   }
 
   const selection = $getSelection();
+
   if ($isRangeSelection(selection)) {
     const anchor = selection.anchor;
     const anchorNode = anchor.getNode();
     const focus = selection.focus;
     const focusNode = anchor.getNode();
+
     if (anchorNode.is(previousNode)) {
       anchor.set(overflowNode.getKey(), anchor.offset, "element");
     } else if (anchorNode.is(overflowNode)) {
@@ -241,6 +269,7 @@ export function mergePrevious(overflowNode: OverflowNode): void {
         "element"
       );
     }
+
     if (focusNode.is(previousNode)) {
       focus.set(overflowNode.getKey(), focus.offset, "element");
     } else if (focusNode.is(overflowNode)) {
