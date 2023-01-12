@@ -1,24 +1,45 @@
-import { JSX, Show } from "solid-js";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
-import { useRichTextSetup } from "./shared/useRichTextSetup";
-import { InitialEditorStateType } from "./shared/PlainRichTextUtils";
+import { useLexicalEditable } from "./useLexicalEditable";
 import { useCanShowPlaceholder } from "./shared/useCanShowPlaceholder";
-import useDecorators from "./shared/useDecorators";
+import { ErrorBoundaryType, useDecorators } from "./shared/useDecorators";
+import { useRichTextSetup } from "./shared/useRichTextSetup";
+import { JSX } from "solid-js";
 
-export function RichTextPlugin(props: {
+export function RichTextPlugin(params: {
   contentEditable: JSX.Element;
-  initialEditorState?: InitialEditorStateType;
-  placeholder: JSX.Element;
+  placeholder:
+    | ((isEditable: boolean) => null | JSX.Element)
+    | null
+    | JSX.Element;
+  errorBoundary: ErrorBoundaryType;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
-  const showPlaceholder = useCanShowPlaceholder(editor);
-  useRichTextSetup(editor, props.initialEditorState);
-  const decorators = useDecorators(editor);
+  const decorators = useDecorators(editor, params.errorBoundary);
+  useRichTextSetup(editor);
+
   return (
     <>
-      {props.contentEditable}
-      <Show when={showPlaceholder()}>{props.placeholder}</Show>
-      {decorators()}
+      {params.contentEditable}
+      <Placeholder content={params.placeholder} />
+      {decorators}
     </>
   );
+}
+
+function Placeholder(props: {
+  content: ((isEditable: boolean) => null | JSX.Element) | null | JSX.Element;
+}): null | JSX.Element {
+  const [editor] = useLexicalComposerContext();
+  const showPlaceholder = useCanShowPlaceholder(editor);
+  const editable = useLexicalEditable();
+
+  if (!showPlaceholder()) {
+    return null;
+  }
+
+  if (typeof props.content === "function") {
+    return props.content(editable);
+  } else {
+    return props.content;
+  }
 }

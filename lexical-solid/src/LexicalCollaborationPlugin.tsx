@@ -1,31 +1,43 @@
-
-import type { Doc } from "yjs";
-
+import { Doc } from "yjs";
+import { useCollaborationContext } from "./LexicalCollaborationContext";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
-import { createEffect, JSX, onCleanup } from "solid-js";
-import {WebsocketProvider} from 'y-websocket';
-
+import { WebsocketProvider } from "y-websocket";
+import { InitialEditorStateType } from "./LexicalComposer";
 import {
+  CursorsContainerRef,
   useYjsCollaboration,
   useYjsFocusTracking,
   useYjsHistory,
 } from "./shared/useYjsCollaboration";
-import { useCollaborationContext } from "./LexicalCollaborationContext";
+import { createEffect, createMemo, JSX, onCleanup } from "solid-js";
 
 export function CollaborationPlugin({
   id,
   providerFactory,
   shouldBootstrap,
   username,
+  cursorColor,
+  cursorsContainerRef,
+  initialEditorState,
 }: {
   id: string;
-  providerFactory: (id: string, yjsDocMap: Map<string, Doc>) => WebsocketProvider;
+  providerFactory: (
+    // eslint-disable-next-line no-shadow
+    id: string,
+    yjsDocMap: Map<string, Doc>
+  ) => WebsocketProvider;
   shouldBootstrap: boolean;
   username?: string;
+  cursorColor?: string;
+  cursorsContainerRef?: CursorsContainerRef;
+  initialEditorState?: InitialEditorStateType;
 }): JSX.Element {
-  const collabContext = useCollaborationContext(username);
+  const collabContext = useCollaborationContext(username, cursorColor);
+
   const { yjsDocMap, name, color } = collabContext;
+
   const [editor] = useLexicalComposerContext();
+
   createEffect(() => {
     collabContext.isCollabActive = true;
 
@@ -37,19 +49,25 @@ export function CollaborationPlugin({
       }
     });
   });
-  const provider = providerFactory(id, yjsDocMap);
+
+  const provider = createMemo(() => providerFactory(id, yjsDocMap));
+
   const [cursors, binding] = useYjsCollaboration(
     editor,
     id,
-    provider,
+    provider(),
     yjsDocMap,
     name,
     color,
-    shouldBootstrap
+    shouldBootstrap,
+    cursorsContainerRef,
+    initialEditorState
   );
-  collabContext.clientID = binding.clientID;
-  useYjsHistory(editor, binding);
-  useYjsFocusTracking(editor, provider, name, color);
+
+  collabContext.clientID = binding().clientID;
+
+  useYjsHistory(editor, binding());
+  useYjsFocusTracking(editor, provider(), name, color);
 
   return cursors;
 }

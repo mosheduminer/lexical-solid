@@ -7,7 +7,7 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListItemNode, ListNode } from "@lexical/list";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { OnChangePlugin } from "lexical-solid/LexicalOnChangePlugin";
-import { LexicalAutoFocusPlugin as AutoFocusPlugin } from "lexical-solid/LexicalAutoFocusPlugin";
+import { AutoFocusPlugin } from "lexical-solid/LexicalAutoFocusPlugin";
 import { LexicalComposer } from "lexical-solid/LexicalComposer";
 import { RichTextPlugin } from "lexical-solid/LexicalRichTextPlugin";
 import { ContentEditable } from "lexical-solid/LexicalContentEditable";
@@ -17,6 +17,7 @@ import CodeHighlightPlugin from "~/plugins/CodeHighlightPlugin";
 import ToolbarPlugin from "~/plugins/ToolbarPlugin";
 import RichTextTheme from "./RichTextTheme";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
+import { LexicalErrorBoundary } from "lexical-solid/LexicalErrorBoundary";
 //import { EmojiNode } from "./nodes/EmojiNode";
 //import EmoticonPlugin from "./plugins/EmoticonPlugin";
 
@@ -69,6 +70,7 @@ export default function Editor() {
           <RichTextPlugin
             contentEditable={<ContentEditable class="editor-input" />}
             placeholder={<Placeholder />}
+            errorBoundary={LexicalErrorBoundary}
           />
           <LinkPlugin />
           <AutoFocusPlugin />

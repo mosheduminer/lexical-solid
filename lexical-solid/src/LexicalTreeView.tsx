@@ -1,4 +1,5 @@
 import type {
+  EditorConfig,
   EditorState,
   ElementNode,
   GridSelection,
@@ -6,20 +7,20 @@ import type {
   LexicalNode,
   NodeSelection,
   RangeSelection,
-  TextNode,
 } from "lexical";
 
+import { $isLinkNode, LinkNode } from "@lexical/link";
 import { $isMarkNode } from "@lexical/mark";
+import { mergeRegister } from "@lexical/utils";
 import {
   $getRoot,
   $getSelection,
   $isElementNode,
-  $isGridSelection,
   $isRangeSelection,
   $isTextNode,
+  DEPRECATED_$isGridSelection,
 } from "lexical";
 import { createEffect, createSignal, JSX, onCleanup } from "solid-js";
-import { $isLinkNode, LinkNode } from "@lexical/link";
 
 const NON_SINGLE_WIDTH_CHARS_REPLACEMENT: Readonly<Record<string, string>> =
   Object.freeze({
@@ -56,25 +57,68 @@ export function TreeView(props: {
   let treeElementRef!: HTMLPreElement;
   let inputRef!: HTMLInputElement;
   const [isPlaying, setIsPlaying] = createSignal(false);
+  const [isLimited, setIsLimited] = createSignal(false);
+  const [showLimited, setShowLimited] = createSignal(false);
+  let lastEditorStateRef: EditorState | null = null;
+
+  const generateTree = (editorState: EditorState) => {
+    const treeText = generateContent(
+      props.editor.getEditorState(),
+      props.editor._config,
+      props.editor._compositionKey,
+      props.editor._editable
+    );
+    setContent(treeText);
+
+    if (!timeTravelEnabled) {
+      setTimeStampedEditorStates((currentEditorStates) => [
+        ...currentEditorStates,
+        [Date.now(), editorState],
+      ]);
+    }
+  };
+
   createEffect(() => {
-    setContent(generateContent(props.editor.getEditorState()));
+    const editorState = props.editor.getEditorState();
+    if (!showLimited() && editorState._nodeMap.size > 1000) {
+      setContent(
+        generateContent(
+          editorState,
+          props.editor._config,
+          props.editor._compositionKey,
+          props.editor._editable
+        )
+      );
+    }
+  });
+
+  createEffect(() => {
     onCleanup(
-      props.editor.registerUpdateListener(({ editorState }) => {
-        const compositionKey = props.editor._compositionKey;
-        const treeText = generateContent(props.editor.getEditorState());
-        const compositionText =
-          compositionKey !== null && `Composition key: ${compositionKey}`;
-        setContent([treeText, compositionText].filter(Boolean).join("\n\n"));
-        if (!timeTravelEnabled()) {
-          setTimeStampedEditorStates((currentEditorStates) => [
-            ...currentEditorStates,
-            [Date.now(), editorState],
-          ]);
-        }
-      })
+      mergeRegister(
+        props.editor.registerUpdateListener(({ editorState }) => {
+          if (!showLimited() && editorState._nodeMap.size > 1000) {
+            lastEditorStateRef = editorState;
+            setIsLimited(true);
+            if (!showLimited) {
+              return;
+            }
+          }
+          generateTree(editorState);
+        }),
+        props.editor.registerEditableListener(() => {
+          const treeText = generateContent(
+            props.editor.getEditorState(),
+            props.editor._config,
+            props.editor._compositionKey,
+            props.editor._editable
+          );
+          setContent(treeText);
+        })
+      )
     );
   });
-  const totalEditorStates = () => timeStampedEditorStates().length;
+
+  const totalEditorStates = timeStampedEditorStates.length;
 
   createEffect(() => {
     if (isPlaying()) {
@@ -82,10 +126,12 @@ export function TreeView(props: {
 
       const play = () => {
         const currentIndex = playingIndexRef;
-        if (currentIndex === totalEditorStates() - 1) {
+
+        if (currentIndex === totalEditorStates - 1) {
           setIsPlaying(false);
           return;
         }
+
         const timeStampedEditorStatesRaw = timeStampedEditorStates();
         const currentTime = timeStampedEditorStatesRaw[currentIndex][0];
         const nextTime = timeStampedEditorStatesRaw[currentIndex + 1][0];
@@ -94,29 +140,33 @@ export function TreeView(props: {
           playingIndexRef++;
           const index = playingIndexRef;
           const input = inputRef;
+
           if (input !== null) {
             input.value = String(index);
           }
+
           props.editor.setEditorState(timeStampedEditorStatesRaw[index][1]);
           play();
-        }, timeDiff) as unknown as number;
+        }, timeDiff);
       };
 
       play();
-      onCleanup(() => clearTimeout(timeoutId));
+
+      onCleanup(() => {
+        clearTimeout(timeoutId);
+      });
     }
   });
 
   createEffect(() => {
     const element = treeElementRef;
-    const editor = props.editor;
 
     if (element !== null) {
-      //@ts-ignore
-      element.__lexicalEditor = editor;
+      // @ts-ignore Internal field
+      element.__lexicalEditor = props.editor;
 
       onCleanup(() => {
-        //@ts-ignore
+        // @ts-ignore Internal field
         element.__lexicalEditor = null;
       });
     }
@@ -124,40 +174,76 @@ export function TreeView(props: {
 
   return (
     <div class={props.viewClass}>
-      {!timeTravelEnabled() && totalEditorStates() > 2 && (
-        <button
-          onClick={() => {
-            const rootElement = props.editor.getRootElement();
-            if (rootElement !== null) {
-              rootElement.contentEditable = "false";
-              playingIndexRef = totalEditorStates() - 1;
-              setTimeTravelEnabled(true);
-            }
-          }}
-          class={props.timeTravelButtonClass}
-          type="button"
-        >
-          Time Travel
-        </button>
+      {!showLimited() && isLimited() ? (
+        <div style={{ padding: "20px" }}>
+          <span style={{ "margin-right": "20px" }}>
+            Detected large EditorState, this can impact debugging performance.
+          </span>
+          <button
+            onClick={() => {
+              setShowLimited(true);
+              const editorState = lastEditorStateRef;
+              if (editorState !== null) {
+                lastEditorStateRef = null;
+                generateTree(editorState);
+              }
+            }}
+            style={{
+              background: "transparent",
+              border: "1px solid white",
+              color: "white",
+              cursor: "pointer",
+              padding: "5px",
+            }}
+          >
+            Show full tree
+          </button>
+        </div>
+      ) : null}
+      {!timeTravelEnabled() &&
+        (showLimited() || !isLimited()) &&
+        totalEditorStates > 2 && (
+          <button
+            onClick={() => {
+              const rootElement = props.editor.getRootElement();
+
+              if (rootElement !== null) {
+                rootElement.contentEditable = "false";
+                playingIndexRef = totalEditorStates - 1;
+                setTimeTravelEnabled(true);
+              }
+            }}
+            class={props.timeTravelButtonClass}
+            type="button"
+          >
+            Time Travel
+          </button>
+        )}
+      {(showLimited() || !isLimited()) && (
+        <pre ref={treeElementRef}>{content}</pre>
       )}
-      <pre ref={treeElementRef}>{content()}</pre>
-      {timeTravelEnabled() && (
+      {timeTravelEnabled() && (showLimited() || !isLimited()) && (
         <div class={props.timeTravelPanelClass}>
           <button
             class={props.timeTravelPanelButtonClass}
             onClick={() => {
+              if (playingIndexRef === totalEditorStates - 1) {
+                playingIndexRef = 1;
+              }
               setIsPlaying(!isPlaying());
             }}
+            type="button"
           >
             {isPlaying() ? "Pause" : "Play"}
           </button>
           <input
             class={props.timeTravelPanelSliderClass}
             ref={inputRef}
-            onInput={(event) => {
+            onChange={(event) => {
               const editorStateIndex = Number(event.currentTarget.value);
               const timeStampedEditorState =
                 timeStampedEditorStates()[editorStateIndex];
+
               if (timeStampedEditorState) {
                 playingIndexRef = editorStateIndex;
                 props.editor.setEditorState(timeStampedEditorState[1]);
@@ -165,21 +251,24 @@ export function TreeView(props: {
             }}
             type="range"
             min="1"
-            max={totalEditorStates() - 1}
+            max={totalEditorStates - 1}
           />
           <button
             class={props.timeTravelPanelButtonClass}
             onClick={() => {
               const rootElement = props.editor.getRootElement();
+
               if (rootElement !== null) {
                 rootElement.contentEditable = "true";
                 const index = timeStampedEditorStates.length - 1;
                 const timeStampedEditorState = timeStampedEditorStates()[index];
                 props.editor.setEditorState(timeStampedEditorState[1]);
                 const input = inputRef;
+
                 if (input !== null) {
                   input.value = String(index);
                 }
+
                 setTimeTravelEnabled(false);
                 setIsPlaying(false);
               }
@@ -197,8 +286,8 @@ export function TreeView(props: {
 function printRangeSelection(selection: RangeSelection): string {
   let res = "";
 
-  //@ts-ignore
   const formatText = printFormatProperties(selection);
+
   res += `: range ${formatText !== "" ? `{ ${formatText} }` : ""}`;
 
   const anchor = selection.anchor;
@@ -212,6 +301,7 @@ function printRangeSelection(selection: RangeSelection): string {
   res += `\n  └ focus { key: ${focus.key}, offset: ${
     focusOffset === null ? "null" : focusOffset
   }, type: ${focus.type} }`;
+
   return res;
 }
 
@@ -223,11 +313,16 @@ function printGridSelection(selection: GridSelection): string {
   return `: grid\n  └ { grid: ${selection.gridKey}, anchorCell: ${selection.anchor.key}, focusCell: ${selection.focus.key} }`;
 }
 
-function generateContent(editorState: EditorState): string {
+function generateContent(
+  editorState: EditorState,
+  editorConfig: EditorConfig,
+  compositionKey: null | string,
+  editable: boolean
+): string {
   let res = " root\n";
 
   const selectionString = editorState.read(() => {
-    const selection = $getSelection() as RangeSelection | GridSelection;
+    const selection = $getSelection();
 
     visitTree($getRoot(), (node: LexicalNode, indent: Array<string>) => {
       const nodeKey = node.getKey();
@@ -256,12 +351,21 @@ function generateContent(editorState: EditorState): string {
       ? ": null"
       : $isRangeSelection(selection)
       ? printRangeSelection(selection)
-      : $isGridSelection(selection)
+      : DEPRECATED_$isGridSelection(selection)
       ? printGridSelection(selection)
       : printObjectSelection(selection);
   });
 
-  return res + "\n selection" + selectionString;
+  res += "\n selection" + selectionString;
+
+  res += "\n\n editor:";
+  res += `\n  └ namespace ${editorConfig.namespace}`;
+  if (compositionKey !== null) {
+    res += `\n  └ compositionKey ${compositionKey}`;
+  }
+  res += `\n  └ editable ${String(editable)}`;
+
+  return res;
 }
 
 function visitTree(
@@ -303,9 +407,10 @@ function normalize(text: string) {
   );
 }
 
+// TODO Pass via props to allow customizability
 function printNode(node: LexicalNode) {
   if ($isTextNode(node)) {
-    const text = node.getTextContent(true);
+    const text = node.getTextContent();
     const title = text.length === 0 ? "(empty)" : `"${normalize(text)}"`;
     const properties = printAllTextNodeProperties(node);
     return [title, properties.length !== 0 ? `{ ${properties} }` : null]
@@ -320,33 +425,36 @@ function printNode(node: LexicalNode) {
       .filter(Boolean)
       .join(" ")
       .trim();
+  } else {
+    return "";
   }
-
-  return "";
 }
 
 const FORMAT_PREDICATES = [
-  (node: TextNode) => node.hasFormat("bold") && "Bold",
-  (node: TextNode) => node.hasFormat("code") && "Code",
-  (node: TextNode) => node.hasFormat("italic") && "Italic",
-  (node: TextNode) => node.hasFormat("strikethrough") && "Strikethrough",
-  (node: TextNode) => node.hasFormat("subscript") && "Subscript",
-  (node: TextNode) => node.hasFormat("superscript") && "Superscript",
-  (node: TextNode) => node.hasFormat("underline") && "Underline",
+  (node: LexicalNode | RangeSelection) => node.hasFormat("bold") && "Bold",
+  (node: LexicalNode | RangeSelection) => node.hasFormat("code") && "Code",
+  (node: LexicalNode | RangeSelection) => node.hasFormat("italic") && "Italic",
+  (node: LexicalNode | RangeSelection) =>
+    node.hasFormat("strikethrough") && "Strikethrough",
+  (node: LexicalNode | RangeSelection) =>
+    node.hasFormat("subscript") && "Subscript",
+  (node: LexicalNode | RangeSelection) =>
+    node.hasFormat("superscript") && "Superscript",
+  (node: LexicalNode | RangeSelection) =>
+    node.hasFormat("underline") && "Underline",
 ];
 
 const DETAIL_PREDICATES = [
-  (node: TextNode) => node.isDirectionless() && "Directionless",
-  (node: TextNode) => node.isUnmergeable() && "Unmergeable",
+  (node: LexicalNode) => node.isDirectionless() && "Directionless",
+  (node: LexicalNode) => node.isUnmergeable() && "Unmergeable",
 ];
 
 const MODE_PREDICATES = [
-  (node: TextNode) => node.isToken() && "Token",
-  (node: TextNode) => node.isSegmented() && "Segmented",
-  (node: TextNode) => node.isInert() && "Inert",
+  (node: LexicalNode) => node.isToken() && "Token",
+  (node: LexicalNode) => node.isSegmented() && "Segmented",
 ];
 
-function printAllTextNodeProperties(node: TextNode) {
+function printAllTextNodeProperties(node: LexicalNode) {
   return [
     printFormatProperties(node),
     printDetailProperties(node),
@@ -362,36 +470,42 @@ function printAllLinkNodeProperties(node: LinkNode) {
     .join(", ");
 }
 
-function printDetailProperties(nodeOrSelection: TextNode) {
+function printDetailProperties(nodeOrSelection: LexicalNode) {
   let str = DETAIL_PREDICATES.map((predicate) => predicate(nodeOrSelection))
     .filter(Boolean)
     .join(", ")
     .toLocaleLowerCase();
+
   if (str !== "") {
     str = "detail: " + str;
   }
+
   return str;
 }
 
-function printModeProperties(nodeOrSelection: TextNode) {
+function printModeProperties(nodeOrSelection: LexicalNode) {
   let str = MODE_PREDICATES.map((predicate) => predicate(nodeOrSelection))
     .filter(Boolean)
     .join(", ")
     .toLocaleLowerCase();
+
   if (str !== "") {
     str = "mode: " + str;
   }
+
   return str;
 }
 
-function printFormatProperties(nodeOrSelection: TextNode) {
+function printFormatProperties(nodeOrSelection: LexicalNode | RangeSelection) {
   let str = FORMAT_PREDICATES.map((predicate) => predicate(nodeOrSelection))
     .filter(Boolean)
     .join(", ")
     .toLocaleLowerCase();
+
   if (str !== "") {
     str = "format: " + str;
   }
+
   return str;
 }
 
@@ -421,11 +535,11 @@ function printSelectedCharsLine({
   selection,
   typeDisplay,
 }: {
-  indent: string[];
+  indent: Array<string>;
   isSelected: boolean;
   node: LexicalNode;
   nodeKeyDisplay: string;
-  selection: RangeSelection | GridSelection | NodeSelection;
+  selection: GridSelection | NodeSelection | RangeSelection | null;
   typeDisplay: string;
 }) {
   // No selection or node is not selected.
@@ -441,6 +555,7 @@ function printSelectedCharsLine({
   // No selected characters.
   const anchor = selection.anchor;
   const focus = selection.focus;
+
   if (
     node.getTextContent() === "" ||
     (anchor.getNode() === selection.focus.getNode() &&
@@ -464,9 +579,10 @@ function printSelectedCharsLine({
     ...indent.slice(0, indent.length - 1),
     selectionLastIndent,
   ];
-  const unselectedChars = Array(start).fill(" ");
+  const unselectedChars = Array(start + 1).fill(" ");
   const selectedChars = Array(end - start).fill(SYMBOLS.selectedChar);
   const paddingLength = typeDisplay.length + 3; // 2 for the spaces around + 1 for the double quote.
+
   const nodePrintSpaces = Array(nodeKeyDisplay.length + paddingLength).fill(
     " "
   );
@@ -486,15 +602,17 @@ function $getSelectionStartEnd(
 ): [number, number] {
   const anchor = selection.anchor;
   const focus = selection.focus;
-  const textContent = node.getTextContent(true);
+  const textContent = node.getTextContent();
   const textLength = textContent.length;
 
   let start = -1;
   let end = -1;
+
   // Only one node is being selected.
   if (anchor.type === "text" && focus.type === "text") {
     const anchorNode = anchor.getNode();
     const focusNode = focus.getNode();
+
     if (
       anchorNode === focusNode &&
       node === anchorNode &&
@@ -533,5 +651,3 @@ function $getSelectionStartEnd(
       numNonSingleWidthCharInSelection,
   ];
 }
-
-export default TreeView;

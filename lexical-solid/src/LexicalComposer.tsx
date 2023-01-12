@@ -1,18 +1,20 @@
-import { JSX, onMount } from "solid-js";
+import {
+  LexicalComposerContextType,
+  createLexicalComposerContext,
+  LexicalComposerContext,
+} from "./LexicalComposerContext";
 import {
   $createParagraphNode,
   $getRoot,
   $getSelection,
   createEditor,
   EditorState,
+  EditorThemeClasses,
   Klass,
+  LexicalEditor,
+  LexicalNode,
 } from "lexical";
-import type { EditorThemeClasses, LexicalEditor, LexicalNode } from "lexical";
-import {
-  LexicalComposerContext,
-  createLexicalComposerContext,
-  LexicalComposerContextType,
-} from "./LexicalComposerContext";
+import { JSX, onMount } from "solid-js";
 
 const HISTORY_MERGE_OPTIONS = { tag: "history-merge" };
 
@@ -22,16 +24,27 @@ export type InitialEditorStateType =
   | EditorState
   | ((editor: LexicalEditor) => void);
 
+export type InitialConfigType = Readonly<{
+  namespace: string;
+  nodes?: ReadonlyArray<
+    | Klass<LexicalNode>
+    | {
+        replace: Klass<LexicalNode>;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        with: <T extends { new (...args: any): any }>(
+          node: InstanceType<T>
+        ) => LexicalNode;
+      }
+  >;
+  onError: (error: Error, editor: LexicalEditor) => void;
+  editable?: boolean;
+  theme?: EditorThemeClasses;
+  editorState?: InitialEditorStateType;
+}>;
+
 type Props = {
   children: JSX.Element | string | (JSX.Element | string)[];
-  initialConfig: Readonly<{
-    namespace: string;
-    nodes?: ReadonlyArray<Klass<LexicalNode>>;
-    onError: (error: Error, editor: LexicalEditor) => void;
-    editable?: boolean;
-    theme?: EditorThemeClasses;
-    editorState?: InitialEditorStateType;
-  }>;
+  initialConfig: InitialConfigType;
 };
 
 export function LexicalComposer(props: Props): JSX.Element {
@@ -81,7 +94,8 @@ function initializeEditor(
       if (root.isEmpty()) {
         const paragraph = $createParagraphNode();
         root.append(paragraph);
-        const activeElement = document.activeElement;
+        const activeElement =
+          typeof window !== "undefined" ? document.activeElement : null;
         if (
           $getSelection() !== null ||
           (activeElement !== null && activeElement === editor.getRootElement())

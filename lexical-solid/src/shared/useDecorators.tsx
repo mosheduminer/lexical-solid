@@ -14,7 +14,7 @@ import { Portal } from "solid-js/web";
 
 type ErrorBoundaryProps = {
   children: JSX.Element;
-  onError: (error: Error) => void;
+  onError: (err: any, reset: () => void) => JSX.Element;
 };
 export type ErrorBoundaryType = Component<ErrorBoundaryProps>;
 
@@ -48,7 +48,9 @@ export function useDecorators(
     for (let i = 0; i < decoratorKeys.length; i++) {
       const nodeKey = decoratorKeys[i];
       const decorator = (
-        <ErrorBoundary onError={(e) => editor._onError(e)}>
+        <ErrorBoundary
+          onError={(error, reset) => editor._onError(error) as undefined}
+        >
           <Suspense fallback={null}>{decorators()[nodeKey]}</Suspense>
         </ErrorBoundary>
       );
