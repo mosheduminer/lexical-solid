@@ -1,6 +1,12 @@
 import { LexicalEditor } from "lexical";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
-import { createEffect, createMemo, createSignal, onCleanup } from "solid-js";
+import {
+  Accessor,
+  createEffect,
+  createMemo,
+  createSignal,
+  onCleanup,
+} from "solid-js";
 
 export type LexicalSubscription<T> = {
   initialValueFn: () => T;
@@ -12,7 +18,7 @@ export type LexicalSubscription<T> = {
  */
 export function useLexicalSubscription<T>(
   subscription: (editor: LexicalEditor) => LexicalSubscription<T>
-): T {
+): Accessor<T> {
   const [editor] = useLexicalComposerContext();
   const initializedSubscription = createMemo(() => subscription(editor));
   let valueRef = initializedSubscription().initialValueFn();
@@ -31,7 +37,7 @@ export function useLexicalSubscription<T>(
         setValue(() => newValue);
       })
     );
-  }, [initializedSubscription(), subscription]);
+  });
 
-  return value();
+  return value;
 }

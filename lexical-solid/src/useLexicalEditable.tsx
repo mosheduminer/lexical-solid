@@ -1,6 +1,7 @@
 import { LexicalSubscription } from "./useLexicalSubscription";
 import { useLexicalSubscription } from "./useLexicalSubscription";
 import { LexicalEditor } from "lexical";
+import { Accessor } from "solid-js";
 
 function subscription(editor: LexicalEditor): LexicalSubscription<boolean> {
   return {
@@ -11,6 +12,6 @@ function subscription(editor: LexicalEditor): LexicalSubscription<boolean> {
   };
 }
 
-export function useLexicalEditable(): boolean {
+export function useLexicalEditable(): Accessor<boolean> {
   return useLexicalSubscription(subscription);
 }

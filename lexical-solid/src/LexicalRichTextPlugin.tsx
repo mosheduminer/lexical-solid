@@ -3,9 +3,10 @@ import { useLexicalEditable } from "./useLexicalEditable";
 import { useCanShowPlaceholder } from "./shared/useCanShowPlaceholder";
 import { ErrorBoundaryType, useDecorators } from "./shared/useDecorators";
 import { useRichTextSetup } from "./shared/useRichTextSetup";
-import { JSX, Show } from "solid-js";
+import { JSX, Show, createMemo } from "solid-js";
+import { untrack } from "solid-js/web";
 
-export function RichTextPlugin(params: {
+export function RichTextPlugin(props: {
   contentEditable: JSX.Element;
   placeholder:
     | ((isEditable: boolean) => null | JSX.Element)
@@ -14,13 +15,13 @@ export function RichTextPlugin(params: {
   errorBoundary: ErrorBoundaryType;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
-  const decorators = useDecorators(editor, params.errorBoundary);
+  const decorators = useDecorators(editor, props.errorBoundary);
   useRichTextSetup(editor);
 
   return (
     <>
-      {params.contentEditable}
-      <Placeholder content={params.placeholder} />
+      {props.contentEditable}
+      <Placeholder content={props.placeholder} />
       {decorators}
     </>
   );
@@ -30,19 +31,25 @@ type ContentFunction = (isEditable: boolean) => null | JSX.Element;
 
 function Placeholder(props: {
   content: ContentFunction | null | JSX.Element;
-}): null | JSX.Element {
+}): JSX.Element {
   const [editor] = useLexicalComposerContext();
   const showPlaceholder = useCanShowPlaceholder(editor);
   const editable = useLexicalEditable();
 
   return (
     <Show when={showPlaceholder()}>
-      <Show
-        when={typeof props.content === "function"}
-        fallback={props.content as JSX.Element}
-      >
-        {(props.content as ContentFunction)(editable)}
-      </Show>
+      {() =>
+        createMemo(() => {
+          const c = props.content;
+          if (typeof c === "function") {
+            return untrack(() =>
+              (props.content as ContentFunction)(editable())
+            );
+          } else {
+            return c;
+          }
+        })
+      }
     </Show>
   );
 }
