@@ -2,42 +2,19 @@ import type { LexicalEditor } from "lexical";
 
 import {
   $handleListInsertParagraph,
-  indentList,
   INSERT_ORDERED_LIST_COMMAND,
   INSERT_UNORDERED_LIST_COMMAND,
   insertList,
-  outdentList,
   REMOVE_LIST_COMMAND,
   removeList,
 } from "@lexical/list";
 import { mergeRegister } from "@lexical/utils";
-import {
-  COMMAND_PRIORITY_LOW,
-  INDENT_CONTENT_COMMAND,
-  INSERT_PARAGRAPH_COMMAND,
-  OUTDENT_CONTENT_COMMAND,
-} from "lexical";
+import { COMMAND_PRIORITY_LOW, INSERT_PARAGRAPH_COMMAND } from "lexical";
 import { onCleanup } from "solid-js";
 
 export function useList(editor: LexicalEditor): void {
   onCleanup(
     mergeRegister(
-      editor.registerCommand(
-        INDENT_CONTENT_COMMAND,
-        () => {
-          indentList();
-          return false;
-        },
-        COMMAND_PRIORITY_LOW
-      ),
-      editor.registerCommand(
-        OUTDENT_CONTENT_COMMAND,
-        () => {
-          outdentList();
-          return false;
-        },
-        COMMAND_PRIORITY_LOW
-      ),
       editor.registerCommand(
         INSERT_ORDERED_LIST_COMMAND,
         () => {

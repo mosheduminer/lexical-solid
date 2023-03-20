@@ -8,7 +8,7 @@ import {
   $isNodeSelection,
   $setSelection,
 } from "lexical";
-import { createSignal, onMount } from "solid-js";
+import { createSignal, onCleanup, onMount } from "solid-js";
 
 function isNodeSelected(editor: LexicalEditor, key: NodeKey): boolean {
   return editor.getEditorState().read(() => {
@@ -27,8 +27,16 @@ export function useLexicalNodeSelection(
   const [isSelected, setIsSelected] = createSignal(isNodeSelected(editor, key));
 
   onMount(() => {
-    return editor.registerUpdateListener(() => {
-      setIsSelected(isNodeSelected(editor, key));
+    let isMounted = true;
+    const unregister = editor.registerUpdateListener(() => {
+      if (isMounted) {
+        setIsSelected(isNodeSelected(editor, key));
+      }
+    });
+
+    onCleanup(() => {
+      isMounted = false;
+      unregister();
     });
   });
 

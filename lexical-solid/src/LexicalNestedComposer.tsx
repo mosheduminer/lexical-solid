@@ -45,6 +45,7 @@ export function LexicalNestedComposer(props: {
       props.initialEditor._nodes.set(type, {
         klass: entry.klass,
         replace: entry.replace,
+        replaceWithKlass: entry.replaceWithKlass,
         transforms: new Set(),
       });
     }
@@ -54,11 +55,13 @@ export function LexicalNestedComposer(props: {
       props.initialEditor._nodes.set(type, {
         klass,
         replace: null,
+        replaceWithKlass: null,
         transforms: new Set(),
       });
     }
   }
   props.initialEditor._config.namespace = parentEditor._config.namespace;
+  props.initialEditor._editable = parentEditor._editable;
 
   // If collaboration is enabled, make sure we don't render the children until the collaboration subdocument is ready.
   const { isCollabActive, yjsDocMap } = useCollaborationContext();

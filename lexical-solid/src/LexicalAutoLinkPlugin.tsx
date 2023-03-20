@@ -31,6 +31,22 @@ type LinkMatcherResult = {
 
 export type LinkMatcher = (text: string) => LinkMatcherResult | null;
 
+export function createLinkMatcherWithRegExp(
+  regExp: RegExp,
+  urlTransformer: (text: string) => string = (text) => text
+) {
+  return (text: string) => {
+    const match = regExp.exec(text);
+    if (match === null) return null;
+    return {
+      index: match.index,
+      length: match[0].length,
+      text: match[0],
+      url: urlTransformer(text),
+    };
+  };
+}
+
 function findFirstMatch(
   text: string,
   matchers: Array<LinkMatcher>
@@ -212,18 +228,24 @@ function handleLinkEdit(
 
 // Bad neighbours are edits in neighbor nodes that make AutoLinks incompatible.
 // Given the creation preconditions, these can only be simple text nodes.
-function handleBadNeighbors(textNode: TextNode, onChange: ChangeHandler): void {
+function handleBadNeighbors(
+  textNode: TextNode,
+  matchers: Array<LinkMatcher>,
+  onChange: ChangeHandler
+): void {
   const previousSibling = textNode.getPreviousSibling();
   const nextSibling = textNode.getNextSibling();
   const text = textNode.getTextContent();
 
   if ($isAutoLinkNode(previousSibling) && !startsWithSeparator(text)) {
-    replaceWithChildren(previousSibling);
+    previousSibling.append(textNode);
+    handleLinkEdit(previousSibling, matchers, onChange);
     onChange(null, previousSibling.getURL());
   }
 
   if ($isAutoLinkNode(nextSibling) && !endsWithSeparator(text)) {
     replaceWithChildren(nextSibling);
+    handleLinkEdit(nextSibling, matchers, onChange);
     onChange(null, nextSibling.getURL());
   }
 }
@@ -264,14 +286,19 @@ function useAutoLink(
       mergeRegister(
         editor.registerNodeTransform(TextNode, (textNode: TextNode) => {
           const parent = textNode.getParentOrThrow();
+          const previous = textNode.getPreviousSibling();
           if ($isAutoLinkNode(parent)) {
             handleLinkEdit(parent, matchers, onChangeWrapped);
           } else if (!$isLinkNode(parent)) {
-            if (textNode.isSimpleText()) {
+            if (
+              textNode.isSimpleText() &&
+              (startsWithSeparator(textNode.getTextContent()) ||
+                !$isAutoLinkNode(previous))
+            ) {
               handleLinkCreation(textNode, matchers, onChangeWrapped);
             }
 
-            handleBadNeighbors(textNode, onChangeWrapped);
+            handleBadNeighbors(textNode, matchers, onChangeWrapped);
           }
         })
       )

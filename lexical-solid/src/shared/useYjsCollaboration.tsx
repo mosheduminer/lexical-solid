@@ -1,5 +1,6 @@
 import {
   Binding,
+  Provider,
   CONNECTED_COMMAND,
   createBinding,
   createUndoManager,
@@ -21,9 +22,8 @@ import {
   REDO_COMMAND,
   UNDO_COMMAND,
 } from "lexical";
-import { Doc, Transaction, YEvent } from "yjs";
+import { Doc, Transaction, YEvent, UndoManager } from "yjs";
 import { mergeRegister } from "@lexical/utils";
-import { WebsocketProvider } from "y-websocket";
 import { InitialEditorStateType } from "../LexicalComposer";
 import { JSX } from "solid-js/jsx-runtime";
 import { Portal } from "solid-js/web";
@@ -42,7 +42,7 @@ export type CursorsContainerRef = Accessor<HTMLElement | undefined | null>;
 export function useYjsCollaboration(
   editor: LexicalEditor,
   id: string,
-  provider: WebsocketProvider,
+  provider: Provider,
   docMap: Map<string, Doc>,
   name: string,
   color: string,
@@ -102,8 +102,15 @@ export function useYjsCollaboration(
         events: Array<YEvent<any>>,
         transaction: Transaction
       ) => {
-        if (transaction.origin !== binding()) {
-          syncYjsChangesToLexical(binding(), provider, events);
+        const origin = transaction.origin;
+        if (origin !== binding()) {
+          const isFromUndoManager = origin instanceof UndoManager;
+          syncYjsChangesToLexical(
+            binding(),
+            provider,
+            events,
+            isFromUndoManager
+          );
         }
       };
 
@@ -211,7 +218,7 @@ export function useYjsCollaboration(
 
 export function useYjsFocusTracking(
   editor: LexicalEditor,
-  provider: WebsocketProvider,
+  provider: Provider,
   name: string,
   color: string
 ) {

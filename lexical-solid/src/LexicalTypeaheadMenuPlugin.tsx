@@ -75,15 +75,25 @@ export type MenuRenderFn<TOption extends TypeaheadOption> = (
 
 const scrollIntoViewIfNeeded = (target: HTMLElement) => {
   const container = document.getElementById("typeahead-menu");
-  if (container) {
-    const containerRect = container.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-    if (targetRect.bottom > containerRect.bottom) {
-      target.scrollIntoView(false);
-    } else if (targetRect.top < containerRect.top) {
-      target.scrollIntoView();
-    }
+  if (!container) return;
+  const typeaheadContainerNode = container.querySelector(".typeahead-popover");
+  if (!typeaheadContainerNode) return;
+
+  const typeaheadRect = typeaheadContainerNode.getBoundingClientRect();
+
+  if (typeaheadRect.top + typeaheadRect.height > window.innerHeight) {
+    typeaheadContainerNode.scrollIntoView({
+      block: "center",
+    });
   }
+
+  if (typeaheadRect.top < 0) {
+    typeaheadContainerNode.scrollIntoView({
+      block: "center",
+    });
+  }
+
+  target.scrollIntoView({ block: "nearest" });
 };
 
 function getTextUpToAnchor(selection: RangeSelection): string | null {
@@ -618,7 +628,7 @@ function useMenuAnchorRef(
 
   createEffect(() => {
     const rootElement = editor.getRootElement();
-    if (resolution !== null) {
+    if (resolution() !== null) {
       positionMenu();
       onCleanup(() => {
         if (rootElement !== null) {
@@ -634,7 +644,7 @@ function useMenuAnchorRef(
   });
 
   const onVisibilityChange = (isInView: boolean) => {
-    if (resolution !== null) {
+    if (resolution() !== null) {
       if (!isInView) {
         setResolution(null);
       }
@@ -804,35 +814,48 @@ export function LexicalNodeMenuPlugin<TOption extends TypeaheadOption>(
     }
   };
 
-  createEffect(
-    on(
-      () => [closeNodeMenu, editor, props.nodeKey, openNodeMenu, resolution()],
-      () => {
-        if (props.nodeKey && resolution() == null) {
-          editor.update(() => {
-            const node = $getNodeByKey(props.nodeKey!);
-            const domElement = editor.getElementByKey(props.nodeKey!);
+  const positionOrCloseMenu = () => {
+    if (props.nodeKey) {
+      editor.update(() => {
+        const node = $getNodeByKey(props.nodeKey!);
+        const domElement = editor.getElementByKey(props.nodeKey!);
 
-            if (node != null && domElement != null) {
-              const text = node.getTextContent();
-              startTransition(() =>
-                openNodeMenu({
-                  getRect: () => domElement.getBoundingClientRect(),
-                  match: {
-                    leadOffset: text.length,
-                    matchingString: text,
-                    replaceableString: text,
-                  },
-                })
-              );
-            }
-          });
-        } else if (props.nodeKey == null && resolution() != null) {
-          closeNodeMenu();
+        if (node != null && domElement != null) {
+          const text = node.getTextContent();
+          if (
+            resolution() == null ||
+            resolution()!.match.matchingString !== text
+          ) {
+            startTransition(() =>
+              openNodeMenu({
+                getRect: () => domElement.getBoundingClientRect(),
+                match: {
+                  leadOffset: text.length,
+                  matchingString: text,
+                  replaceableString: text,
+                },
+              })
+            );
+          }
         }
-      }
-    )
-  );
+      });
+    } else if (props.nodeKey == null && resolution() != null) {
+      closeNodeMenu();
+    }
+  };
+
+  createEffect(on(() => props.nodeKey, positionOrCloseMenu));
+
+  createEffect(() => {
+    const nodeKey = props.nodeKey;
+    if (nodeKey != null) {
+      return editor.registerUpdateListener(({ dirtyElements }) => {
+        if (dirtyElements.get(nodeKey)) {
+          positionOrCloseMenu();
+        }
+      });
+    }
+  });
 
   return (
     <Show when={resolution() !== null && editor !== null}>

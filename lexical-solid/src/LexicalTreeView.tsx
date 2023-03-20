@@ -1,8 +1,10 @@
-import type {
+import {
+  COMMAND_PRIORITY_HIGH,
   EditorConfig,
   EditorState,
   ElementNode,
   GridSelection,
+  LexicalCommand,
   LexicalEditor,
   LexicalNode,
   NodeSelection,
@@ -20,7 +22,7 @@ import {
   $isTextNode,
   DEPRECATED_$isGridSelection,
 } from "lexical";
-import { createEffect, createSignal, JSX, onCleanup } from "solid-js";
+import { Accessor, createEffect, createSignal, JSX, onCleanup } from "solid-js";
 
 const NON_SINGLE_WIDTH_CHARS_REPLACEMENT: Readonly<Record<string, string>> =
   Object.freeze({
@@ -61,10 +63,13 @@ export function TreeView(props: {
   const [showLimited, setShowLimited] = createSignal(false);
   let lastEditorStateRef: EditorState | null = null;
 
+  const commandsLog = useLexicalCommandsLog(props.editor);
+
   const generateTree = (editorState: EditorState) => {
     const treeText = generateContent(
       props.editor.getEditorState(),
       props.editor._config,
+      commandsLog(),
       props.editor._compositionKey,
       props.editor._editable
     );
@@ -85,6 +90,7 @@ export function TreeView(props: {
         generateContent(
           editorState,
           props.editor._config,
+          commandsLog(),
           props.editor._compositionKey,
           props.editor._editable
         )
@@ -109,6 +115,7 @@ export function TreeView(props: {
           const treeText = generateContent(
             props.editor.getEditorState(),
             props.editor._config,
+            commandsLog(),
             props.editor._compositionKey,
             props.editor._editable
           );
@@ -283,12 +290,58 @@ export function TreeView(props: {
   );
 }
 
+function useLexicalCommandsLog(
+  editor: LexicalEditor
+): Accessor<ReadonlyArray<LexicalCommand<unknown> & { payload: unknown }>> {
+  const [loggedCommands, setLoggedCommands] = createSignal<
+    ReadonlyArray<LexicalCommand<unknown> & { payload: unknown }>
+  >([]);
+
+  createEffect(() => {
+    const unregisterCommandListeners = new Set<() => void>();
+
+    for (const [command] of editor._commands) {
+      unregisterCommandListeners.add(
+        editor.registerCommand(
+          command,
+          (payload) => {
+            setLoggedCommands((state) => {
+              const newState = [...state];
+              newState.push({
+                payload,
+                type: command.type ? command.type : "UNKNOWN",
+              });
+
+              if (newState.length > 10) {
+                newState.shift();
+              }
+
+              return newState;
+            });
+
+            return false;
+          },
+          COMMAND_PRIORITY_HIGH
+        )
+      );
+    }
+
+    onCleanup(() =>
+      unregisterCommandListeners.forEach((unregister) => unregister())
+    );
+  });
+
+  return loggedCommands;
+}
+
 function printRangeSelection(selection: RangeSelection): string {
   let res = "";
 
   const formatText = printFormatProperties(selection);
 
-  res += `: range ${formatText !== "" ? `{ ${formatText} }` : ""}`;
+  res += `: range ${formatText !== "" ? `{ ${formatText} }` : ""} ${
+    selection.style !== "" ? `{ style: ${selection.style} } ` : ""
+  }`;
 
   const anchor = selection.anchor;
   const focus = selection.focus;
@@ -305,7 +358,7 @@ function printRangeSelection(selection: RangeSelection): string {
   return res;
 }
 
-function printObjectSelection(selection: NodeSelection): string {
+function printNodeSelection(selection: NodeSelection): string {
   return `: node\n  └ [${Array.from(selection._nodes).join(", ")}]`;
 }
 
@@ -316,6 +369,7 @@ function printGridSelection(selection: GridSelection): string {
 function generateContent(
   editorState: EditorState,
   editorConfig: EditorConfig,
+  commandsLog: ReadonlyArray<LexicalCommand<unknown> & { payload: unknown }>,
   compositionKey: null | string,
   editable: boolean
 ): string {
@@ -353,10 +407,22 @@ function generateContent(
       ? printRangeSelection(selection)
       : DEPRECATED_$isGridSelection(selection)
       ? printGridSelection(selection)
-      : printObjectSelection(selection);
+      : printNodeSelection(selection);
   });
 
   res += "\n selection" + selectionString;
+
+  res += "\n\n commands:";
+
+  if (commandsLog.length) {
+    for (const { type, payload } of commandsLog) {
+      res += `\n  └ { type: ${type}, payload: ${
+        payload instanceof Event ? payload.constructor.name : payload
+      } }`;
+    }
+  } else {
+    res += "\n  └ None dispatched.";
+  }
 
   res += "\n\n editor:";
   res += `\n  └ namespace ${editorConfig.namespace}`;

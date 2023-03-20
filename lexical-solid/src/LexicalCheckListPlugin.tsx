@@ -19,7 +19,11 @@ import {
   KEY_SPACE_COMMAND,
 } from "lexical";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
-import { $findMatchingParent, mergeRegister } from "@lexical/utils";
+import {
+  $findMatchingParent,
+  isHTMLElement,
+  mergeRegister,
+} from "@lexical/utils";
 import { createEffect, onCleanup } from "solid-js";
 
 export function CheckListPlugin(): null {
@@ -161,7 +165,7 @@ function listenPointerDown() {
 function handleCheckItemEvent(event: PointerEvent, callback: () => void) {
   const target = event.target;
 
-  if (!(target instanceof HTMLElement)) {
+  if (target === null || !isHTMLElement(target)) {
     return;
   }
 
@@ -170,7 +174,7 @@ function handleCheckItemEvent(event: PointerEvent, callback: () => void) {
 
   if (
     firstChild != null &&
-    firstChild instanceof HTMLElement &&
+    isHTMLElement(firstChild) &&
     (firstChild.tagName === "UL" || firstChild.tagName === "OL")
   ) {
     return;

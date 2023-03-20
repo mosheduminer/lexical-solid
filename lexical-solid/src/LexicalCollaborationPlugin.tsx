@@ -1,7 +1,6 @@
 import { Doc } from "yjs";
 import { useCollaborationContext } from "./LexicalCollaborationContext";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
-import { WebsocketProvider } from "y-websocket";
 import { InitialEditorStateType } from "./LexicalComposer";
 import {
   CursorsContainerRef,
@@ -9,6 +8,7 @@ import {
   useYjsFocusTracking,
   useYjsHistory,
 } from "./shared/useYjsCollaboration";
+import { Provider } from "@lexical/yjs";
 import { createEffect, createMemo, JSX, onCleanup } from "solid-js";
 
 export function CollaborationPlugin({
@@ -25,7 +25,7 @@ export function CollaborationPlugin({
     // eslint-disable-next-line no-shadow
     id: string,
     yjsDocMap: Map<string, Doc>
-  ) => WebsocketProvider;
+  ) => Provider;
   shouldBootstrap: boolean;
   username?: string;
   cursorColor?: string;

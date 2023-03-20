@@ -6,6 +6,7 @@ import {
   $isDecoratorNode,
   $isNodeSelection,
   $isRangeSelection,
+  $setSelection,
   CLICK_COMMAND,
   COMMAND_PRIORITY_LOW,
   FORMAT_ELEMENT_COMMAND,
@@ -24,7 +25,7 @@ import { createEffect, onCleanup } from "solid-js";
 
 type Props = Readonly<{
   children: JSX.Element;
-  format: ElementFormatType | null | undefined;
+  format?: ElementFormatType | null;
   nodeKey: NodeKey;
   classes: Readonly<{
     base: string;
@@ -45,7 +46,9 @@ export function BlockWithAlignableContents(props: Props): JSX.Element {
       event.preventDefault();
       editor.update(() => {
         const node = $getNodeByKey(props.nodeKey);
+        if (node === null) return;
 
+        $setSelection(node.selectPrevious());
         if ($isDecoratorNode(node)) {
           node.remove();
         }

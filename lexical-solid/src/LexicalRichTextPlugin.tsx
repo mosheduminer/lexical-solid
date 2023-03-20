@@ -4,7 +4,7 @@ import { useCanShowPlaceholder } from "./shared/useCanShowPlaceholder";
 import { ErrorBoundaryType, useDecorators } from "./shared/useDecorators";
 import { useRichTextSetup } from "./shared/useRichTextSetup";
 import { JSX, Show, createMemo } from "solid-js";
-import { untrack } from "solid-js/web";
+import { untrack } from "solid-js";
 
 export function RichTextPlugin(props: {
   contentEditable: JSX.Element;
@@ -35,21 +35,16 @@ function Placeholder(props: {
   const [editor] = useLexicalComposerContext();
   const showPlaceholder = useCanShowPlaceholder(editor);
   const editable = useLexicalEditable();
+  const content = createMemo(() => props.content);
 
   return (
     <Show when={showPlaceholder()}>
-      {() =>
-        createMemo(() => {
-          const c = props.content;
-          if (typeof c === "function") {
-            return untrack(() =>
-              (props.content as ContentFunction)(editable())
-            );
-          } else {
-            return c;
-          }
-        })
-      }
+      <Show
+        when={typeof content() === "function"}
+        fallback={content() as JSX.Element}
+      >
+        {untrack(() => (content() as ContentFunction)(editable()))}
+      </Show>
     </Show>
   );
 }

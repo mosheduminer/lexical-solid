@@ -3,7 +3,7 @@ import { useLexicalEditable } from "./useLexicalEditable";
 import { useCanShowPlaceholder } from "./shared/useCanShowPlaceholder";
 import { ErrorBoundaryType, useDecorators } from "./shared/useDecorators";
 import { usePlainTextSetup } from "./shared/usePlainTextSetup";
-import { JSX, Show } from "solid-js";
+import { createMemo, JSX, Show, untrack } from "solid-js";
 
 export function PlainTextPlugin(params: {
   contentEditable: JSX.Element;
@@ -34,14 +34,15 @@ function Placeholder(props: {
   const [editor] = useLexicalComposerContext();
   const showPlaceholder = useCanShowPlaceholder(editor);
   const editable = useLexicalEditable();
+  const content = createMemo(() => props.content);
 
   return (
     <Show when={showPlaceholder()}>
       <Show
-        when={typeof props.content === "function"}
-        fallback={props.content as JSX.Element}
+        when={typeof content() === "function"}
+        fallback={content() as JSX.Element}
       >
-        {(props.content as ContentFunction)(editable)}
+        {untrack(() => (content() as ContentFunction)(editable()))}
       </Show>
     </Show>
   );

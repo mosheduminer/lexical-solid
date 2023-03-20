@@ -4,17 +4,17 @@ import { useLexicalComposerContext } from "./LexicalComposerContext";
 
 export function OnChangePlugin(props: {
   ignoreHistoryMergeTagChange?: boolean;
-  onChange?: (editorState: EditorState, editor: LexicalEditor) => void;
-  ignoreInitialChange?: boolean;
-  // TODO 0.4 remove
+  onChange?: (
+    editorState: EditorState,
+    tags: Set<string>,
+    editor: LexicalEditor
+  ) => void;
   ignoreSelectionChange?: boolean;
 }) {
   props = mergeProps(
     {
-      ignoreInitialChange: true,
       ignoreSelectionChange: false,
-      // TODO 0.5 flip to true
-      ignoreHistoryMergeTagChange: false,
+      ignoreHistoryMergeTagChange: true,
     },
     props
   );
@@ -23,21 +23,25 @@ export function OnChangePlugin(props: {
     if (props.onChange) {
       onCleanup(
         editor.registerUpdateListener(
-          ({ editorState, dirtyElements, dirtyLeaves, prevEditorState, tags }) => {
+          ({
+            editorState,
+            dirtyElements,
+            dirtyLeaves,
+            prevEditorState,
+            tags,
+          }) => {
             if (
               (props.ignoreSelectionChange &&
                 dirtyElements.size === 0 &&
                 dirtyLeaves.size === 0) ||
-              (props.ignoreHistoryMergeTagChange && tags.has('history-merge'))
+              (props.ignoreHistoryMergeTagChange &&
+                tags.has("history-merge")) ||
+              prevEditorState.isEmpty()
             ) {
               return;
             }
 
-            if (props.ignoreInitialChange && prevEditorState.isEmpty()) {
-              return;
-            }
-
-            props.onChange!(editorState, editor);
+            props.onChange!(editorState, tags, editor);
           }
         )
       );
