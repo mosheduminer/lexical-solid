@@ -46,7 +46,8 @@ const externals = [
   'solid-js/store',
   'yjs',
   'y-websocket',
-  ...(lexicalSolidModules.map(n => 'lexical-solid/' + n.outputFileName)),
+  ...(lexicalSolidModules.map(n => './' + n.outputFileName)),
+  ...(lexicalSolidModules.map(n => '../' + n.outputFileName)),
 ]
 
 if (existsSync('./dist')) rmSync(resolve('./dist'), { recursive: true });
