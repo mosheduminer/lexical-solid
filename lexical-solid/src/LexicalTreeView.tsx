@@ -1,6 +1,5 @@
 import {
   COMMAND_PRIORITY_HIGH,
-  EditorConfig,
   EditorState,
   ElementNode,
   GridSelection,
@@ -9,12 +8,6 @@ import {
   LexicalNode,
   NodeSelection,
   RangeSelection,
-} from "lexical";
-
-import { $isLinkNode, LinkNode } from "@lexical/link";
-import { $isMarkNode } from "@lexical/mark";
-import { mergeRegister } from "@lexical/utils";
-import {
   $getRoot,
   $getSelection,
   $isElementNode,
@@ -22,6 +15,11 @@ import {
   $isTextNode,
   DEPRECATED_$isGridSelection,
 } from "lexical";
+
+import { $isLinkNode, LinkNode } from "@lexical/link";
+import { $isMarkNode } from "@lexical/mark";
+import { mergeRegister } from "@lexical/utils";
+import { $generateHtmlFromNodes } from "@lexical/html";
 import { Accessor, createEffect, createSignal, JSX, onCleanup } from "solid-js";
 
 const NON_SINGLE_WIDTH_CHARS_REPLACEMENT: Readonly<Record<string, string>> =
@@ -44,6 +42,7 @@ const SYMBOLS: Record<string, string> = Object.freeze({
 
 export function TreeView(props: {
   editor: LexicalEditor;
+  treeTypeButtonClassName: string;
   timeTravelButtonClass: string;
   timeTravelPanelButtonClass: string;
   timeTravelPanelClass: string;
@@ -55,6 +54,7 @@ export function TreeView(props: {
   >([]);
   const [content, setContent] = createSignal("");
   const [timeTravelEnabled, setTimeTravelEnabled] = createSignal(false);
+  const [showExportDOM, setShowExportDOM] = createSignal(false);
   let playingIndexRef = 0;
   let treeElementRef!: HTMLPreElement;
   let inputRef!: HTMLInputElement;
@@ -66,16 +66,21 @@ export function TreeView(props: {
   const commandsLog = useLexicalCommandsLog(props.editor);
 
   const generateTree = (editorState: EditorState) => {
+    // const treeText = generateContent(
+    //   props.editor.getEditorState(),
+    //   props.editor._config,
+    //   commandsLog(),
+    //   props.editor._compositionKey,
+    //   props.editor._editable
+    // );
     const treeText = generateContent(
-      props.editor.getEditorState(),
-      props.editor._config,
+      props.editor,
       commandsLog(),
-      props.editor._compositionKey,
-      props.editor._editable
+      showExportDOM()
     );
     setContent(treeText);
 
-    if (!timeTravelEnabled) {
+    if (!timeTravelEnabled()) {
       setTimeStampedEditorStates((currentEditorStates) => [
         ...currentEditorStates,
         [Date.now(), editorState],
@@ -85,16 +90,8 @@ export function TreeView(props: {
 
   createEffect(() => {
     const editorState = props.editor.getEditorState();
-    if (!showLimited() && editorState._nodeMap.size > 1000) {
-      setContent(
-        generateContent(
-          editorState,
-          props.editor._config,
-          commandsLog(),
-          props.editor._compositionKey,
-          props.editor._editable
-        )
-      );
+    if (!showLimited() && editorState._nodeMap.size < 1000) {
+      setContent(generateContent(props.editor, commandsLog(), showExportDOM()));
     }
   });
 
@@ -113,11 +110,9 @@ export function TreeView(props: {
         }),
         props.editor.registerEditableListener(() => {
           const treeText = generateContent(
-            props.editor.getEditorState(),
-            props.editor._config,
+            props.editor,
             commandsLog(),
-            props.editor._compositionKey,
-            props.editor._editable
+            showExportDOM()
           );
           setContent(treeText);
         })
@@ -206,6 +201,15 @@ export function TreeView(props: {
             Show full tree
           </button>
         </div>
+      ) : null}
+      {!showLimited() ? (
+        <button
+          onClick={() => setShowExportDOM(!showExportDOM())}
+          class={props.treeTypeButtonClassName}
+          type="button"
+        >
+          {showExportDOM() ? "Tree" : "Export DOM"}
+        </button>
       ) : null}
       {!timeTravelEnabled() &&
         (showLimited() || !isLimited()) &&
@@ -367,12 +371,23 @@ function printGridSelection(selection: GridSelection): string {
 }
 
 function generateContent(
-  editorState: EditorState,
-  editorConfig: EditorConfig,
+  editor: LexicalEditor,
   commandsLog: ReadonlyArray<LexicalCommand<unknown> & { payload: unknown }>,
-  compositionKey: null | string,
-  editable: boolean
+  exportDOM: boolean
 ): string {
+  const editorState = editor.getEditorState();
+  const editorConfig = editor._config;
+  const compositionKey = editor._compositionKey;
+  const editable = editor._editable;
+
+  if (exportDOM) {
+    let htmlString = "";
+    editorState.read(() => {
+      htmlString = printPrettyHTML($generateHtmlFromNodes(editor));
+    });
+    return htmlString;
+  }
+
   let res = " root\n";
 
   const selectionString = editorState.read(() => {
@@ -531,7 +546,11 @@ function printAllTextNodeProperties(node: LexicalNode) {
 }
 
 function printAllLinkNodeProperties(node: LinkNode) {
-  return [printTargetProperties(node), printRelProperties(node)]
+  return [
+    printTargetProperties(node),
+    printRelProperties(node),
+    printTitleProperties(node),
+  ]
     .filter(Boolean)
     .join(", ");
 }
@@ -589,6 +608,15 @@ function printRelProperties(node: LinkNode) {
   // TODO Fix nullish on LinkNode
   if (str != null) {
     str = "rel: " + str;
+  }
+  return str;
+}
+
+function printTitleProperties(node: LinkNode) {
+  let str = node.getTitle();
+  // TODO Fix nullish on LinkNode
+  if (str != null) {
+    str = "title: " + str;
   }
   return str;
 }
@@ -660,6 +688,30 @@ function printSelectedCharsLine({
       [...nodePrintSpaces, ...unselectedChars, ...selectedChars].join(""),
     ].join(" ") + "\n"
   );
+}
+
+function printPrettyHTML(str: string) {
+  const div = document.createElement("div");
+  div.innerHTML = str.trim();
+  return prettifyHTML(div, 0).innerHTML;
+}
+
+function prettifyHTML(node: Element, level: number) {
+  const indentBefore = new Array(level++ + 1).join("  ");
+  const indentAfter = new Array(level - 1).join("  ");
+  let textNode;
+
+  for (let i = 0; i < node.children.length; i++) {
+    textNode = document.createTextNode("\n" + indentBefore);
+    node.insertBefore(textNode, node.children[i]);
+    prettifyHTML(node.children[i], level);
+    if (node.lastElementChild === node.children[i]) {
+      textNode = document.createTextNode("\n" + indentAfter);
+      node.appendChild(textNode);
+    }
+  }
+
+  return node;
 }
 
 function $getSelectionStartEnd(

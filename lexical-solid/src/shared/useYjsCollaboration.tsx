@@ -10,6 +10,7 @@ import {
   syncLexicalUpdateToYjs,
   syncYjsChangesToLexical,
   TOGGLE_CONNECT_COMMAND,
+  ExcludedProperties,
 } from "@lexical/yjs";
 import {
   LexicalEditor,
@@ -25,7 +26,7 @@ import {
 import { Doc, Transaction, YEvent, UndoManager } from "yjs";
 import { mergeRegister } from "@lexical/utils";
 import { InitialEditorStateType } from "../LexicalComposer";
-import { JSX } from "solid-js/jsx-runtime";
+import { JSX } from "solid-js";
 import { Portal } from "solid-js/web";
 import {
   Accessor,
@@ -48,13 +49,14 @@ export function useYjsCollaboration(
   color: string,
   shouldBootstrap: boolean,
   cursorsContainerRef?: CursorsContainerRef,
-  initialEditorState?: InitialEditorStateType
+  initialEditorState?: InitialEditorStateType,
+  excludedProperties?: ExcludedProperties
 ): [JSX.Element, Accessor<Binding>] {
   let isReloadingDoc: boolean = false;
   const [doc, setDoc] = createSignal<Doc>(docMap.get(id)!);
 
   const binding = createMemo(() =>
-    createBinding(editor, provider, id, doc(), docMap)
+    createBinding(editor, provider, id, doc(), docMap, excludedProperties)
   );
 
   const connect = () => {

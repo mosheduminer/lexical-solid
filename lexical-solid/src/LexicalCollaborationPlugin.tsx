@@ -8,18 +8,10 @@ import {
   useYjsFocusTracking,
   useYjsHistory,
 } from "./shared/useYjsCollaboration";
-import { Provider } from "@lexical/yjs";
+import { ExcludedProperties, Provider } from "@lexical/yjs";
 import { createEffect, createMemo, JSX, onCleanup } from "solid-js";
 
-export function CollaborationPlugin({
-  id,
-  providerFactory,
-  shouldBootstrap,
-  username,
-  cursorColor,
-  cursorsContainerRef,
-  initialEditorState,
-}: {
+type Props = {
   id: string;
   providerFactory: (
     // eslint-disable-next-line no-shadow
@@ -31,8 +23,14 @@ export function CollaborationPlugin({
   cursorColor?: string;
   cursorsContainerRef?: CursorsContainerRef;
   initialEditorState?: InitialEditorStateType;
-}): JSX.Element {
-  const collabContext = useCollaborationContext(username, cursorColor);
+  excludedProperties?: ExcludedProperties;
+};
+
+export function CollaborationPlugin(props: Props): JSX.Element {
+  const collabContext = useCollaborationContext(
+    props.username,
+    props.cursorColor
+  );
 
   const { yjsDocMap, name, color } = collabContext;
 
@@ -50,18 +48,19 @@ export function CollaborationPlugin({
     });
   });
 
-  const provider = createMemo(() => providerFactory(id, yjsDocMap));
+  const provider = createMemo(() => props.providerFactory(props.id, yjsDocMap));
 
   const [cursors, binding] = useYjsCollaboration(
     editor,
-    id,
+    props.id,
     provider(),
     yjsDocMap,
     name,
     color,
-    shouldBootstrap,
-    cursorsContainerRef,
-    initialEditorState
+    props.shouldBootstrap,
+    props.cursorsContainerRef,
+    props.initialEditorState,
+    props.excludedProperties
   );
 
   collabContext.clientID = binding().clientID;

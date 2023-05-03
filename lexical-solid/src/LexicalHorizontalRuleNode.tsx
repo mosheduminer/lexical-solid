@@ -23,10 +23,7 @@ import { useLexicalComposerContext } from "./LexicalComposerContext";
 import { useLexicalNodeSelection } from "./useLexicalNodeSelection";
 import { mergeRegister } from "@lexical/utils";
 
-export type SerializedHorizontalRuleNode = SerializedLexicalNode & {
-  type: "horizontalrule";
-  version: 1;
-};
+export type SerializedHorizontalRuleNode = SerializedLexicalNode;
 
 export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> =
   createCommand("INSERT_HORIZONTAL_RULE_COMMAND");

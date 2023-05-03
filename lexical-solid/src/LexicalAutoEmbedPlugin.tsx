@@ -2,6 +2,7 @@ import {
   LexicalNode,
   MutationListener,
   $getNodeByKey,
+  $getSelection,
   COMMAND_PRIORITY_EDITOR,
   createCommand,
   LexicalCommand,
@@ -173,6 +174,9 @@ export function LexicalAutoEmbedPlugin<TEmbedConfig extends EmbedConfig>(
         );
         if (result != null) {
           editor.update(() => {
+            if (!$getSelection()) {
+              linkNode.selectEnd();
+            }
             activeEmbedConfig()!.insertNode(editor, result);
             if (linkNode.isAttached()) {
               linkNode.remove();

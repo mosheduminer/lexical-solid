@@ -49,6 +49,7 @@ type Props = {
 
 export function LexicalComposer(props: Props): JSX.Element {
   const {
+    editable,
     theme,
     namespace,
     nodes,
@@ -62,7 +63,7 @@ export function LexicalComposer(props: Props): JSX.Element {
   );
 
   const editor = createEditor({
-    editable: false,
+    editable,
     namespace,
     nodes,
     onError: (error) => onError(error, editor),

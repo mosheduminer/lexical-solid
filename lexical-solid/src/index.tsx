@@ -2,6 +2,7 @@ export * from "./LexicalComposer";
 export * from "./LexicalComposerContext";
 export * from "./LexicalComposerContext";
 export * from "./LexicalContentEditable";
+export * from "./LexicalClickableLinkPlugin";
 export * from "./LexicalErrorBoundary";
 export * from "./LexicalOnChangePlugin";
 export * from "./LexicalTreeView";
