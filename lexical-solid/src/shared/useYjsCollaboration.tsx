@@ -50,7 +50,8 @@ export function useYjsCollaboration(
   shouldBootstrap: boolean,
   cursorsContainerRef?: CursorsContainerRef,
   initialEditorState?: InitialEditorStateType,
-  excludedProperties?: ExcludedProperties
+  excludedProperties?: ExcludedProperties,
+  awarenessData?: object
 ): [JSX.Element, Accessor<Binding>] {
   let isReloadingDoc: boolean = false;
   const [doc, setDoc] = createSignal<Doc>(docMap.get(id)!);
@@ -120,7 +121,8 @@ export function useYjsCollaboration(
         provider,
         name,
         color,
-        document.activeElement === editor.getRootElement()
+        document.activeElement === editor.getRootElement(),
+        awarenessData || {}
       );
 
       const onProviderDocReload = (ydoc: Doc) => {
@@ -222,14 +224,15 @@ export function useYjsFocusTracking(
   editor: LexicalEditor,
   provider: Provider,
   name: string,
-  color: string
+  color: string,
+  awarenessData?: object
 ) {
   onCleanup(
     mergeRegister(
       editor.registerCommand(
         FOCUS_COMMAND,
         () => {
-          setLocalStateFocus(provider, name, color, true);
+          setLocalStateFocus(provider, name, color, true, awarenessData || {});
           return false;
         },
         COMMAND_PRIORITY_EDITOR
@@ -237,7 +240,7 @@ export function useYjsFocusTracking(
       editor.registerCommand(
         BLUR_COMMAND,
         () => {
-          setLocalStateFocus(provider, name, color, false);
+          setLocalStateFocus(provider, name, color, false, awarenessData || {});
           return false;
         },
         COMMAND_PRIORITY_EDITOR

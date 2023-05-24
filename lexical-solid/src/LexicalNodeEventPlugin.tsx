@@ -1,11 +1,11 @@
+import type { Klass, LexicalEditor, LexicalNode, NodeKey } from "lexical";
+
 import { useLexicalComposerContext } from "./LexicalComposerContext";
-import {
-  type Klass,
-  type LexicalEditor,
-  type LexicalNode,
-  type NodeKey,
-} from "lexical";
-import { createEffect, on, onCleanup } from "solid-js";
+import { $findMatchingParent } from "@lexical/utils";
+import { $getNearestNodeFromDOMNode } from "lexical";
+import { createEffect, untrack } from "solid-js";
+
+const capturedEvents = new Set<string>(["mouseenter", "mouseleave"]);
 
 export function NodeEventPlugin(props: {
   nodeType: Klass<LexicalNode>;
@@ -17,39 +17,41 @@ export function NodeEventPlugin(props: {
   ) => void;
 }): null {
   const [editor] = useLexicalComposerContext();
-  let listenerRef = props.eventListener;
 
-  createEffect(
-    on(
-      () => props.nodeType,
-      () => {
-        onCleanup(
-          editor.registerMutationListener(props.nodeType, (mutations) => {
-            const registedElements: WeakSet<HTMLElement> = new WeakSet();
+  createEffect(() => {
+    const eventType = untrack(() => props.eventType);
+    const isCaptured = capturedEvents.has(eventType);
 
-            editor.getEditorState().read(() => {
-              for (const [key, mutation] of mutations) {
-                const element: null | HTMLElement = editor.getElementByKey(key);
+    const onEvent = (event: Event) => {
+      editor.update(() => {
+        const nearestNode = $getNearestNodeFromDOMNode(event.target as Element);
+        if (nearestNode !== null) {
+          const targetNode = isCaptured
+            ? nearestNode instanceof props.nodeType
+              ? nearestNode
+              : null
+            : $findMatchingParent(
+                nearestNode,
+                (node) => node instanceof props.nodeType
+              );
+          if (targetNode !== null) {
+            props.eventListener(event, editor, targetNode.getKey());
+            return;
+          }
+        }
+      });
+    };
 
-                if (
-                  // Updated might be a move, so that might mean a new DOM element
-                  // is created. In this case, we need to add and event listener too.
-                  (mutation === "created" || mutation === "updated") &&
-                  element !== null &&
-                  !registedElements.has(element)
-                ) {
-                  registedElements.add(element);
-                  element.addEventListener(props.eventType, (event: Event) => {
-                    listenerRef(event, editor, key);
-                  });
-                }
-              }
-            });
-          })
-        );
+    return editor.registerRootListener((rootElement, prevRootElement) => {
+      if (rootElement) {
+        rootElement.addEventListener(eventType, onEvent, isCaptured);
       }
-    )
-  );
+
+      if (prevRootElement) {
+        prevRootElement.removeEventListener(eventType, onEvent, isCaptured);
+      }
+    });
+  });
 
   return null;
 }

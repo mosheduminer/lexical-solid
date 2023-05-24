@@ -10,23 +10,21 @@ import {
 } from "lexical";
 import { createEffect, mergeProps, onCleanup } from "solid-js";
 
-function domGetParent(
-  node: Node,
-  predicate: (predicateNode: Node) => boolean
-): null | Node {
-  let parent = node.parentNode;
-  while (parent != null) {
-    if (predicate(parent)) {
-      return parent;
+function findMatchingDOM<T extends Node>(
+  startNode: Node,
+  predicate: (node: Node) => node is T
+): T | null {
+  let node: Node | null = startNode;
+  while (node != null) {
+    if (predicate(node)) {
+      return node;
     }
-    parent = parent.parentNode;
+    node = node.parentNode;
   }
   return null;
 }
 
-export function LexicalClickableLinkPlugin(props: {
-  newTab?: boolean;
-}): null {
+export function LexicalClickableLinkPlugin(props: { newTab?: boolean }): null {
   const [editor] = useLexicalComposerContext();
   props = mergeProps({ newTab: true }, props);
 
@@ -55,13 +53,11 @@ export function LexicalClickableLinkPlugin(props: {
             url = maybeLinkNode.getURL();
             urlTarget = maybeLinkNode.getTarget();
           } else {
-            const a = (
-              isHTMLAnchorElement(target)
-                ? target
-                : domGetParent(target, isHTMLAnchorElement)
-            ) as HTMLAnchorElement;
-            url = a.href;
-            urlTarget = a.target;
+            const a = findMatchingDOM(target, isHTMLAnchorElement);
+            if (a !== null) {
+              url = a.href;
+              urlTarget = a.target;
+            }
           }
         }
       });
