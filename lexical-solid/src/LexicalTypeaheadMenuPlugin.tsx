@@ -299,17 +299,17 @@ export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
   );
 
   const closeTypeahead = () => {
-    setResolution(null);
     if (props.onClose != null && resolution() !== null) {
       props.onClose();
     }
+    setResolution(null);
   };
 
   const openTypeahead = (res: MenuResolution) => {
-    setResolution(res);
     if (props.onOpen != null && resolution() === null) {
       props.onOpen(res);
     }
+    setResolution(res);
   };
 
   createEffect(
