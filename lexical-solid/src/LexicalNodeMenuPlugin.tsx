@@ -43,17 +43,17 @@ export function LexicalNodeMenuPlugin<TOption extends MenuOption>(
   );
 
   const closeNodeMenu = () => {
-    setResolution(null);
     if (props.onClose != null && resolution() !== null) {
       props.onClose();
     }
+    setResolution(null);
   };
 
   const openNodeMenu = (res: MenuResolution) => {
-    setResolution(res);
     if (props.onOpen != null && resolution() === null) {
       props.onOpen(res);
     }
+    setResolution(res);
   };
 
   const positionOrCloseMenu = () => {

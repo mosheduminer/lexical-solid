@@ -64,17 +64,17 @@ export function LexicalContextMenuPlugin<TOption extends MenuOption>(
   );
 
   const closeNodeMenu = () => {
-    setResolution(null);
     if (props.onClose != null && resolution() !== null) {
       props.onClose();
     }
+    setResolution(null);
   };
 
   const openNodeMenu = (res: MenuResolution) => {
-    setResolution(res);
     if (props.onOpen != null && resolution() === null) {
       props.onOpen(res);
     }
+    setResolution(res);
   };
 
   const handleContextMenu = (event: MouseEvent) => {
@@ -91,7 +91,7 @@ export function LexicalContextMenuPlugin<TOption extends MenuOption>(
   };
   const handleClick = (event: MouseEvent) => {
     if (
-      resolution !== null &&
+      resolution() !== null &&
       menuRef.current != null &&
       event.target != null &&
       !menuRef.current.contains(event.target as Node)
