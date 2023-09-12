@@ -12,11 +12,7 @@ import {
 } from "lexical";
 import { $isLinkNode, AutoLinkNode, LinkNode } from "@lexical/link";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
-import {
-  LexicalNodeMenuPlugin,
-  MenuRenderFn,
-  TypeaheadOption,
-} from "./LexicalTypeaheadMenuPlugin";
+import { MenuRenderFn } from "./LexicalTypeaheadMenuPlugin";
 import { mergeRegister } from "@lexical/utils";
 import {
   createEffect,
@@ -26,7 +22,7 @@ import {
   Show,
   onCleanup,
 } from "solid-js";
-import { MenuOption } from "./LexicalNodeMenuPlugin";
+import { LexicalNodeMenuPlugin, MenuOption } from "./LexicalNodeMenuPlugin";
 
 export type EmbedMatchResult<TEmbedMatchResult = unknown> = {
   url: string;
