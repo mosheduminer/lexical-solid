@@ -62,9 +62,9 @@ export function useCharacterLimit(
 
           const textLength = strlen(text);
           const textLengthAboveThreshold =
-            textLength > maxCharacters ||
+            (textLength > resolve(maxCharacters)) ||
             (lastComputedTextLength !== null &&
-              lastComputedTextLength > maxCharacters);
+              lastComputedTextLength > resolve(maxCharacters));
           const diff = resolve(maxCharacters) - textLength;
 
           remainingCharacters(diff);

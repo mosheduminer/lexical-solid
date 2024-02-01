@@ -4,6 +4,7 @@ import {
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_LOW,
+  CommandListenerPriority,
   createCommand,
   KEY_ARROW_DOWN_COMMAND,
   KEY_ARROW_UP_COMMAND,
@@ -234,7 +235,7 @@ export function useDynamicPositioning(
       onCleanup(() => {
         resizeObserver.unobserve(targetElement);
         window.removeEventListener("resize", onReposition);
-        document.removeEventListener("scroll", handleScroll);
+        document.removeEventListener("scroll", handleScroll, true);
       });
     }
   });
@@ -259,6 +260,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
     closeMenu: () => void,
     matchingString: string
   ) => void;
+  commandPriority?: CommandListenerPriority;
 }): JSX.Element | null {
   const [selectedIndex, setHighlightedIndex] = createSignal<null | number>(
     null
@@ -327,7 +329,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
 
             return false;
           },
-          COMMAND_PRIORITY_LOW
+          props.commandPriority ?? COMMAND_PRIORITY_LOW
         )
       )
     );
@@ -365,7 +367,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
             }
             return true;
           },
-          COMMAND_PRIORITY_LOW
+          props.commandPriority ?? COMMAND_PRIORITY_LOW
         ),
         props.editor.registerCommand<KeyboardEvent>(
           KEY_ARROW_UP_COMMAND,
@@ -390,7 +392,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
             }
             return true;
           },
-          COMMAND_PRIORITY_LOW
+          props.commandPriority ?? COMMAND_PRIORITY_LOW
         ),
         props.editor.registerCommand<KeyboardEvent>(
           KEY_ESCAPE_COMMAND,
@@ -401,7 +403,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
             close();
             return true;
           },
-          COMMAND_PRIORITY_LOW
+          props.commandPriority ?? COMMAND_PRIORITY_LOW
         ),
         props.editor.registerCommand<KeyboardEvent>(
           KEY_TAB_COMMAND,
@@ -419,7 +421,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
             selectOptionAndCleanUp(props.options[selectedIndex()!]);
             return true;
           },
-          COMMAND_PRIORITY_LOW
+          props.commandPriority ?? COMMAND_PRIORITY_LOW
         ),
         props.editor.registerCommand(
           KEY_ENTER_COMMAND,
@@ -438,7 +440,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
             selectOptionAndCleanUp(props.options[selectedIndex()!]);
             return true;
           },
-          COMMAND_PRIORITY_LOW
+          props.commandPriority ?? COMMAND_PRIORITY_LOW
         )
       )
     );
@@ -463,22 +465,26 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
 export function useMenuAnchorRef(
   resolution: Accessor<MenuResolution | null>,
   setResolution: (r: MenuResolution | null) => void,
-  className?: string
+  className?: string,
+  parent: HTMLElement = document.body
 ): MutableRefObject<HTMLElement> {
   const [editor] = useLexicalComposerContext();
   let anchorElementRef = document.createElement("div");
   const positionMenu = () => {
+    anchorElementRef.style.top = anchorElementRef.style.bottom;
     const rootElement = editor.getRootElement();
     const containerDiv = anchorElementRef;
 
-    const menuEle = containerDiv.firstChild as Element;
+    const menuEle = containerDiv.firstChild as HTMLElement;
     if (rootElement !== null && resolution() !== null) {
       const { left, top, width, height } = resolution()!.getRect();
-      containerDiv.style.top = `${top + window.pageYOffset}px`;
+      const anchorHeight = anchorElementRef.offsetHeight; // use to position under anchor
+      containerDiv.style.top = `${top + window.pageYOffset + anchorHeight + 3}px`;
       containerDiv.style.left = `${left + window.pageXOffset}px`;
       containerDiv.style.height = `${height}px`;
       containerDiv.style.width = `${width}px`;
       if (menuEle !== null) {
+        menuEle.style.top = `${top}`;
         const menuRect = menuEle.getBoundingClientRect();
         const menuHeight = menuRect.height;
         const menuWidth = menuRect.width;
@@ -490,14 +496,13 @@ export function useMenuAnchorRef(
             left - menuWidth + window.pageXOffset
           }px`;
         }
-        const margin = 10;
         if (
           (top + menuHeight > window.innerHeight ||
             top + menuHeight > rootElementRect.bottom) &&
           top - rootElementRect.top > menuHeight
         ) {
           containerDiv.style.top = `${
-            top - menuHeight + window.pageYOffset - (height + margin)
+            top - menuHeight + window.pageYOffset - height
           }px`;
         }
       }
@@ -511,7 +516,7 @@ export function useMenuAnchorRef(
         containerDiv.setAttribute("role", "listbox");
         containerDiv.style.display = "block";
         containerDiv.style.position = "absolute";
-        document.body.append(containerDiv);
+        parent.append(containerDiv);
       }
       anchorElementRef = containerDiv;
       rootElement.setAttribute("aria-controls", "typeahead-menu");

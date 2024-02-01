@@ -18,6 +18,8 @@ import {
   $getRoot,
   $getSelection,
   BLUR_COMMAND,
+  CAN_UNDO_COMMAND,
+  CAN_REDO_COMMAND,
   COMMAND_PRIORITY_EDITOR,
   FOCUS_COMMAND,
   REDO_COMMAND,
@@ -52,7 +54,7 @@ export function useYjsCollaboration(
   initialEditorState?: InitialEditorStateType,
   excludedProperties?: ExcludedProperties,
   awarenessData?: object
-): [JSX.Element, Accessor<Binding>] {
+): [Accessor<JSX.Element>, Accessor<Binding>] {
   let isReloadingDoc: boolean = false;
   const [doc, setDoc] = createSignal<Doc>(docMap.get(id)!);
 
@@ -288,6 +290,29 @@ export function useYjsHistory(
   const clearHistory = () => {
     undoManager.clear();
   };
+
+  // Exposing undo and redo states
+  createEffect(() => {
+    const updateUndoRedoStates = () => {
+      editor.dispatchCommand(
+        CAN_UNDO_COMMAND,
+        undoManager.undoStack.length > 0,
+      );
+      editor.dispatchCommand(
+        CAN_REDO_COMMAND,
+        undoManager.redoStack.length > 0,
+      );
+    };
+    undoManager.on('stack-item-added', updateUndoRedoStates);
+    undoManager.on('stack-item-popped', updateUndoRedoStates);
+    undoManager.on('stack-cleared', updateUndoRedoStates);
+    onCleanup(() => {
+      undoManager.off('stack-item-added', updateUndoRedoStates);
+      undoManager.off('stack-item-popped', updateUndoRedoStates);
+      undoManager.off('stack-cleared', updateUndoRedoStates);
+    });
+  });
+
   return clearHistory;
 }
 
