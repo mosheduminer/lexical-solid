@@ -4,11 +4,13 @@ import {
   $getNodeByKey,
   $getSelection,
   COMMAND_PRIORITY_EDITOR,
+  COMMAND_PRIORITY_LOW,
   createCommand,
   LexicalCommand,
   LexicalEditor,
   NodeKey,
   TextNode,
+  CommandListenerPriority,
 } from "lexical";
 import { $isLinkNode, AutoLinkNode, LinkNode } from "@lexical/link";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
@@ -74,6 +76,7 @@ type LexicalAutoEmbedPluginProps<TEmbedConfig extends EmbedConfig> = {
     dismissFn: () => void
   ) => Array<AutoEmbedOption>;
   menuRenderFn: MenuRenderFn<AutoEmbedOption>;
+  menuCommandPriority?: CommandListenerPriority;
 };
 
 export function LexicalAutoEmbedPlugin<TEmbedConfig extends EmbedConfig>(
@@ -213,6 +216,7 @@ export function LexicalAutoEmbedPlugin<TEmbedConfig extends EmbedConfig>(
         onSelectOption={onSelectOption}
         options={options()}
         menuRenderFn={props.menuRenderFn}
+        commandPriority={props.menuCommandPriority ?? COMMAND_PRIORITY_LOW}
       />
     </Show>
   );

@@ -13,8 +13,10 @@ import {
   Klass,
   LexicalEditor,
   LexicalNode,
+  LexicalNodeReplacement,
+  HTMLConfig,
 } from "lexical";
-import { JSX, onMount } from "solid-js";
+import { JSX, ParentProps, onMount } from "solid-js";
 
 const HISTORY_MERGE_OPTIONS = { tag: "history-merge" };
 
@@ -26,26 +28,17 @@ export type InitialEditorStateType =
 
 export type InitialConfigType = Readonly<{
   namespace: string;
-  nodes?: ReadonlyArray<
-    | Klass<LexicalNode>
-    | {
-        replace: Klass<LexicalNode>;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        with: <T extends { new (...args: any): any }>(
-          node: InstanceType<T>
-        ) => LexicalNode;
-      }
-  >;
+  nodes?: ReadonlyArray<Klass<LexicalNode> | LexicalNodeReplacement>;
   onError: (error: Error, editor: LexicalEditor) => void;
   editable?: boolean;
   theme?: EditorThemeClasses;
   editorState?: InitialEditorStateType;
+  html?: HTMLConfig,
 }>;
 
-type Props = {
-  children: JSX.Element | string | (JSX.Element | string)[];
+type Props = ParentProps<{
   initialConfig: InitialConfigType;
-};
+}>;
 
 export function LexicalComposer(props: Props): JSX.Element {
   const {
@@ -55,6 +48,7 @@ export function LexicalComposer(props: Props): JSX.Element {
     nodes,
     onError,
     editorState: initialEditorState,
+    html,
   } = props.initialConfig;
 
   const context: LexicalComposerContextType = createLexicalComposerContext(
@@ -64,6 +58,7 @@ export function LexicalComposer(props: Props): JSX.Element {
 
   const editor = createEditor({
     editable,
+    html,
     namespace,
     nodes,
     onError: (error) => onError(error, editor),

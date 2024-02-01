@@ -5,7 +5,7 @@ import type {
 } from "./shared/LexicalMenu";
 
 import { useLexicalComposerContext } from "./LexicalComposerContext";
-import { LexicalNode } from "lexical";
+import { COMMAND_PRIORITY_LOW, CommandListenerPriority, LexicalNode } from "lexical";
 import {
   createEffect,
   createSignal,
@@ -46,6 +46,8 @@ export type LexicalContextMenuPluginProps<TOption extends MenuOption> = {
   onOpen?: (resolution: MenuResolution) => void;
   menuRenderFn: ContextMenuRenderFn<TOption>;
   anchorClassName?: string;
+  commandPriority?: CommandListenerPriority;
+  parent?: HTMLElement;
 };
 
 const PRE_PORTAL_DIV_SIZE = 1;
@@ -60,7 +62,8 @@ export function LexicalContextMenuPlugin<TOption extends MenuOption>(
   const anchorElementRef = useMenuAnchorRef(
     resolution,
     setResolution,
-    props.anchorClassName
+    props.anchorClassName,
+    props.parent
   );
 
   const closeNodeMenu = () => {
@@ -131,6 +134,7 @@ export function LexicalContextMenuPlugin<TOption extends MenuOption>(
           })
         }
         onSelectOption={props.onSelectOption}
+        commandPriority={props.commandPriority ?? COMMAND_PRIORITY_LOW}
       />
     </Show>
   );

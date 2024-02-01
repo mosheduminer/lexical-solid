@@ -4,14 +4,14 @@ import {
   LexicalComposerContext,
 } from "./LexicalComposerContext";
 import { useCollaborationContext } from "./LexicalCollaborationContext";
-import { EditorThemeClasses, Klass, LexicalEditor, LexicalNode } from "lexical";
+import { EditorThemeClasses, Klass, LexicalEditor, LexicalNode, LexicalNodeReplacement } from "lexical";
 import { createEffect, JSX, onCleanup, useContext } from "solid-js";
 
 export function LexicalNestedComposer(props: {
   children: JSX.Element;
   initialEditor: LexicalEditor;
   initialTheme?: EditorThemeClasses;
-  initialNodes?: ReadonlyArray<Klass<LexicalNode>>;
+  initialNodes?: ReadonlyArray<Klass<LexicalNode> | LexicalNodeReplacement>;
   skipCollabChecks?: true;
 }): JSX.Element {
   let wasCollabPreviouslyReadyRef = false;
@@ -47,15 +47,26 @@ export function LexicalNestedComposer(props: {
         replace: entry.replace,
         replaceWithKlass: entry.replaceWithKlass,
         transforms: new Set(),
+        exportDOM: entry.exportDOM,
       });
     }
   } else {
-    for (const klass of props.initialNodes) {
-      const type = klass.getType();
-      props.initialEditor._nodes.set(type, {
+    for (let klass of props.initialNodes) {
+      let replace = null;
+      let replaceWithKlass = null;
+
+      if (typeof klass !== 'function') {
+        const options = klass;
+        klass = options.replace;
+        replace = options.with;
+        replaceWithKlass = options.withKlass || null;
+      }
+      const registeredKlass = props.initialEditor._nodes.get(klass.getType());
+      props.initialEditor._nodes.set(klass.getType(), {
+        exportDOM: registeredKlass ? registeredKlass.exportDOM : undefined,
         klass,
-        replace: null,
-        replaceWithKlass: null,
+        replace,
+        replaceWithKlass,
         transforms: new Set(),
       });
     }

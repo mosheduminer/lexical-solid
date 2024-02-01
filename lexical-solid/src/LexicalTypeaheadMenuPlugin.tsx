@@ -12,6 +12,8 @@ import {
   $getSelection,
   $isRangeSelection,
   $isTextNode,
+  COMMAND_PRIORITY_LOW,
+  CommandListenerPriority,
   createCommand,
   LexicalCommand,
   LexicalEditor,
@@ -77,8 +79,12 @@ function getTextUpToAnchor(selection: RangeSelection): string | null {
   return anchorNode.getTextContent().slice(0, anchorOffset);
 }
 
-function tryToPositionRange(leadOffset: number, range: Range): boolean {
-  const domSelection = window.getSelection();
+function tryToPositionRange(
+  leadOffset: number,
+  range: Range,
+  editorWindow: Window,
+): boolean {
+  const domSelection = editorWindow.getSelection();
   if (domSelection === null || !domSelection.isCollapsed) {
     return false;
   }
@@ -162,75 +168,7 @@ export function getScrollParent(
   return document.body;
 }
 
-function isTriggerVisibleInNearestScrollContainer(
-  targetElement: HTMLElement,
-  containerElement: HTMLElement
-): boolean {
-  const tRect = targetElement.getBoundingClientRect();
-  const cRect = containerElement.getBoundingClientRect();
-  return tRect.top > cRect.top && tRect.top < cRect.bottom;
-}
-
-// Reposition the menu on scroll, window resize, and element resize.
-export function useDynamicPositioning(
-  resolution: Accessor<MenuResolution | null>,
-  targetElementAccessor: Accessor<HTMLElement | null>,
-  onReposition: () => void,
-  onVisibilityChange?: (isInView: boolean) => void
-) {
-  const [editor] = useLexicalComposerContext();
-  createEffect(
-    on(
-      () => [targetElementAccessor(), resolution()],
-      () => {
-        const targetElement = targetElementAccessor();
-        if (targetElement != null && resolution() != null) {
-          const rootElement = editor.getRootElement();
-          const rootScrollParent =
-            rootElement != null
-              ? getScrollParent(rootElement, false)
-              : document.body;
-          let ticking = false;
-          let previousIsInView = isTriggerVisibleInNearestScrollContainer(
-            targetElement,
-            rootScrollParent
-          );
-          const handleScroll = function () {
-            if (!ticking) {
-              window.requestAnimationFrame(function () {
-                onReposition();
-                ticking = false;
-              });
-              ticking = true;
-            }
-            const isInView = isTriggerVisibleInNearestScrollContainer(
-              targetElement,
-              rootScrollParent
-            );
-            if (isInView !== previousIsInView) {
-              previousIsInView = isInView;
-              if (onVisibilityChange != null) {
-                onVisibilityChange(isInView);
-              }
-            }
-          };
-          const resizeObserver = new ResizeObserver(onReposition);
-          window.addEventListener("resize", onReposition);
-          document.addEventListener("scroll", handleScroll, {
-            capture: true,
-            passive: true,
-          });
-          resizeObserver.observe(targetElement);
-          return () => {
-            resizeObserver.unobserve(targetElement);
-            window.removeEventListener("resize", onReposition);
-            document.removeEventListener("scroll", handleScroll);
-          };
-        }
-      }
-    )
-  );
-}
+export { useDynamicPositioning } from './shared/LexicalMenu';
 
 export const SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND: LexicalCommand<{
   index: number;
@@ -285,6 +223,8 @@ export type TypeaheadMenuPluginProps<TOption extends MenuOption> = {
   onOpen?: (resolution: MenuResolution) => void;
   onClose?: () => void;
   anchorClassName?: string;
+  commandPriority?: CommandListenerPriority;
+  parent?: HTMLElement;
 };
 
 export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
@@ -295,7 +235,8 @@ export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
   const anchorElementRef = useMenuAnchorRef(
     resolution,
     setResolution,
-    props.anchorClassName
+    props.anchorClassName,
+    props.parent
   );
 
   const closeTypeahead = () => {
@@ -316,7 +257,8 @@ export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
     on(resolution, () => {
       const updateListener = () => {
         editor.getEditorState().read(() => {
-          const range = document.createRange();
+          const editorWindow = editor._window || window;
+          const range = editorWindow.document.createRange();
           const selection = $getSelection();
           const text = getQueryTextForSearch(editor);
 
@@ -339,7 +281,8 @@ export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
           ) {
             const isRangePositioned = tryToPositionRange(
               match.leadOffset,
-              range
+              range,
+              editorWindow,
             );
             if (isRangePositioned !== null) {
               startTransition(() =>
@@ -375,6 +318,7 @@ export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
         menuRenderFn={props.menuRenderFn}
         onSelectOption={props.onSelectOption}
         shouldSplitNodeWithQuery={true}
+        commandPriority={props.commandPriority ?? COMMAND_PRIORITY_LOW}
       />
     </Show>
   );

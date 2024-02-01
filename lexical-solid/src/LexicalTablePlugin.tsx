@@ -10,6 +10,11 @@ import {
   TableNode,
   TableRowNode,
   $createTableCellNode,
+  TableObserver,
+  $getNodeTriplet,
+  $isTableRowNode,
+  $computeTableMap,
+  $isTableCellNode,
 } from "@lexical/table";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 import {
@@ -17,12 +22,6 @@ import {
   $isTextNode,
   $nodesOfType,
   COMMAND_PRIORITY_EDITOR,
-  DEPRECATED_$computeGridMap,
-  DEPRECATED_$getNodeTriplet,
-  DEPRECATED_$isGridRowNode,
-  DEPRECATED_GridCellNode,
-  ElementNode,
-  LexicalNode,
   NodeKey,
 } from "lexical";
 import {
@@ -33,20 +32,12 @@ import {
   createEffect,
   on,
 } from "solid-js";
-import { $insertNodeToNearestRoot } from "@lexical/utils";
-
-function $insertFirst(parent: ElementNode, node: LexicalNode): void {
-  const firstChild = parent.getFirstChild();
-  if (firstChild !== null) {
-    firstChild.insertBefore(node);
-  } else {
-    parent.append(node);
-  }
-}
+import { $insertFirst, $insertNodeToNearestRoot } from "@lexical/utils";
 
 export function TablePlugin(props: {
   hasCellMerge?: boolean;
   hasCellBackgroundColor?: boolean;
+  hasTabHandler?: boolean;
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   props = mergeProps(
@@ -84,7 +75,7 @@ export function TablePlugin(props: {
   });
 
   onMount(() => {
-    const tableSelections = new Map<NodeKey, TableSelection>();
+    const tableSelections = new Map<NodeKey, TableObserver>();
 
     const initializeTableNode = (tableNode: TableNode) => {
       const nodeKey = tableNode.getKey();
@@ -95,7 +86,8 @@ export function TablePlugin(props: {
         const tableSelection = applyTableHandlers(
           tableNode,
           tableElement,
-          editor
+          editor,
+          props.hasTabHandler ?? true
         );
         tableSelections.set(nodeKey, tableSelection);
       }
@@ -155,26 +147,24 @@ export function TablePlugin(props: {
         if (node.getColSpan() > 1 || node.getRowSpan() > 1) {
           // When we have rowSpan we have to map the entire Table to understand where the new Cells
           // fit best; let's analyze all Cells at once to save us from further transform iterations
-          const [, , gridNode] = DEPRECATED_$getNodeTriplet(node);
-          const [gridMap] = DEPRECATED_$computeGridMap(gridNode, node, node);
+          const [, , gridNode] = $getNodeTriplet(node);
+          const [gridMap] = $computeTableMap(gridNode, node, node);
           // TODO this function expects Tables to be normalized. Look into this once it exists
           const rowsCount = gridMap.length;
           const columnsCount = gridMap[0].length;
           let row = gridNode.getFirstChild();
-          if (!DEPRECATED_$isGridRowNode(row)) {
+          if (!$isTableRowNode(row)) {
             throw new Error("Expected TableNode first child to be a RowNode");
           }
           const unmerged = [];
           for (let i = 0; i < rowsCount; i++) {
             if (i !== 0) {
               row = row.getNextSibling();
-              if (!DEPRECATED_$isGridRowNode(row)) {
-                throw new Error(
-                  "Expected TableNode first child to be a RowNode"
-                );
+              if (!$isTableRowNode(row)) {
+                throw new Error("Expected TableNode first child to be a RowNode");
               }
             }
-            let lastRowCell: null | DEPRECATED_GridCellNode = null;
+            let lastRowCell: null | TableCellNode = null;
             for (let j = 0; j < columnsCount; j++) {
               const cellMap = gridMap[i][j];
               const cell = cellMap.cell;
@@ -182,6 +172,9 @@ export function TablePlugin(props: {
                 lastRowCell = cell;
                 unmerged.push(cell);
               } else if (cell.getColSpan() > 1 || cell.getRowSpan() > 1) {
+                if (!$isTableCellNode(cell)) {
+                  throw new Error("Expected TableNode cell to be a TableCellNode");
+                }
                 const newCell = $createTableCellNode(cell.__headerState);
                 if (lastRowCell !== null) {
                   lastRowCell.insertAfter(newCell);

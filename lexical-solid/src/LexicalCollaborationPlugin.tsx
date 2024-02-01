@@ -70,5 +70,5 @@ export function CollaborationPlugin(props: Props): JSX.Element {
   useYjsHistory(editor, binding());
   useYjsFocusTracking(editor, provider(), name, color, props.awarenessData);
 
-  return cursors;
+  return cursors();
 }
