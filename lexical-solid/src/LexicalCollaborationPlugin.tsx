@@ -55,7 +55,7 @@ export function CollaborationPlugin(props: Props): JSX.Element {
   const [cursors, binding] = useYjsCollaboration(
     editor,
     props.id,
-    provider(),
+    provider,
     yjsDocMap,
     name,
     color,
@@ -67,8 +67,8 @@ export function CollaborationPlugin(props: Props): JSX.Element {
 
   collabContext.clientID = binding().clientID;
 
-  useYjsHistory(editor, binding());
-  useYjsFocusTracking(editor, provider(), name, color, props.awarenessData);
+  useYjsHistory(editor, binding);
+  useYjsFocusTracking(editor, provider, name, color, props.awarenessData);
 
-  return cursors();
+  return <>{cursors()}</>;
 }
