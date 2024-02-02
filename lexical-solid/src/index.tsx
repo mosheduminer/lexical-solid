@@ -5,6 +5,7 @@ export * from "./LexicalContentEditable";
 export * from "./LexicalContextMenuPlugin";
 export * from "./LexicalClickableLinkPlugin";
 export * from "./LexicalErrorBoundary";
+export * from "./LexicalEditorRefPlugin";
 export * from "./LexicalOnChangePlugin";
 export * from "./LexicalTreeView";
 export * from "./LexicalHistoryPlugin";

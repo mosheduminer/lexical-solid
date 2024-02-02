@@ -52,17 +52,18 @@ export function useCharacterLimit(
         editor.registerTextContentListener((currentText: string) => {
           text = currentText;
         }),
-        editor.registerUpdateListener(({ dirtyLeaves }) => {
+        editor.registerUpdateListener(({ dirtyLeaves, dirtyElements }) => {
           const isComposing = editor.isComposing();
-          const hasDirtyLeaves = dirtyLeaves.size > 0;
+          const hasContentChanges =
+            dirtyLeaves.size > 0 || dirtyElements.size > 0;
 
-          if (isComposing || !hasDirtyLeaves) {
+          if (isComposing || !hasContentChanges) {
             return;
           }
 
           const textLength = strlen(text);
           const textLengthAboveThreshold =
-            (textLength > resolve(maxCharacters)) ||
+            textLength > resolve(maxCharacters) ||
             (lastComputedTextLength !== null &&
               lastComputedTextLength > resolve(maxCharacters));
           const diff = resolve(maxCharacters) - textLength;
