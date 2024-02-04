@@ -7,9 +7,12 @@
     "moduleResolution": "node",
     "jsxImportSource": "solid-js",
     "jsx": "preserve",
-    "types": ["vite/client"],
-    "baseUrl": "./",
-    "paths": {
+		"allowJs": true,
+		"strict": true,
+		"noEmit": true,
+		"types": ["vinxi/client"],
+		"isolatedModules": true,
+		"paths": {
       "~/*": ["./src/*"]
     }
   }
