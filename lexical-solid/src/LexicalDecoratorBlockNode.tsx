@@ -51,6 +51,6 @@ export class DecoratorBlockNode extends DecoratorNode<JSX.Element> {
     return false;
   }
 }
-export function $isDecoratorBlockNode(node?: LexicalNode): boolean {
+export function $isDecoratorBlockNode(node?: LexicalNode): node is DecoratorBlockNode {
   return node instanceof DecoratorBlockNode;
 }

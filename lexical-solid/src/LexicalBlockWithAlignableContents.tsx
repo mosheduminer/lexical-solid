@@ -44,17 +44,10 @@ export function BlockWithAlignableContents(props: Props): JSX.Element {
   const onDelete = (event: KeyboardEvent) => {
     if (isSelected() && $isNodeSelection($getSelection())) {
       event.preventDefault();
-      editor.update(() => {
-        const node = $getNodeByKey(props.nodeKey);
-        if (node === null) return;
-
-        $setSelection(node.selectPrevious());
-        if ($isDecoratorNode(node)) {
-          node.remove();
-        }
-
-        setSelected(false);
-      });
+      const node = $getNodeByKey(props.nodeKey);
+      if ($isDecoratorNode(node)) {
+        node.remove();
+      }
     }
 
     return false;

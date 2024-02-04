@@ -61,6 +61,7 @@ export function ContentEditable(props: Props): JSX.Element {
       aria-labelledby={props.ariaLabelledBy}
       aria-multiline={props.ariaMultiline}
       aria-owns={ifNotReadonly(props.ariaOwns)}
+      aria-readonly={isEditable() ? true : undefined}
       aria-required={props.ariaRequired}
       autoCapitalize={props.autoCapitalize}
       class={props.class}
@@ -68,9 +69,7 @@ export function ContentEditable(props: Props): JSX.Element {
       data-testid={props.testid}
       id={props.id}
       ref={rootElementRef}
-      role={
-        ifNotReadonly(props.role) as JSX.HTMLAttributes<HTMLDivElement>["role"]
-      }
+      role={props.role as JSX.HTMLAttributes<HTMLDivElement>["role"]}
       spellcheck={props.spellCheck}
       style={props.style}
       tabIndex={props.tabIndex}

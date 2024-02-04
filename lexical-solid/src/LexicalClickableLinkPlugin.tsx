@@ -50,7 +50,7 @@ export function LexicalClickableLinkPlugin(props: { newTab?: boolean }): null {
             $isElementNode
           );
           if ($isLinkNode(maybeLinkNode)) {
-            url = maybeLinkNode.getURL();
+            url = maybeLinkNode.sanitizeUrl(maybeLinkNode.getURL());
             urlTarget = maybeLinkNode.getTarget();
           } else {
             const a = findMatchingDOM(target, isHTMLAnchorElement);

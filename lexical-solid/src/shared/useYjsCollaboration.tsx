@@ -18,6 +18,8 @@ import {
   $getRoot,
   $getSelection,
   BLUR_COMMAND,
+  CAN_UNDO_COMMAND,
+  CAN_REDO_COMMAND,
   COMMAND_PRIORITY_EDITOR,
   FOCUS_COMMAND,
   REDO_COMMAND,
@@ -43,7 +45,7 @@ export type CursorsContainerRef = Accessor<HTMLElement | undefined | null>;
 export function useYjsCollaboration(
   editor: LexicalEditor,
   id: string,
-  provider: Provider,
+  provider: Accessor<Provider>,
   docMap: Map<string, Doc>,
   name: string,
   color: string,
@@ -52,21 +54,21 @@ export function useYjsCollaboration(
   initialEditorState?: InitialEditorStateType,
   excludedProperties?: ExcludedProperties,
   awarenessData?: object
-): [JSX.Element, Accessor<Binding>] {
+): [Accessor<JSX.Element>, Accessor<Binding>] {
   let isReloadingDoc: boolean = false;
   const [doc, setDoc] = createSignal<Doc>(docMap.get(id)!);
 
   const binding = createMemo(() =>
-    createBinding(editor, provider, id, doc(), docMap, excludedProperties)
+    createBinding(editor, provider(), id, doc(), docMap, excludedProperties)
   );
 
   const connect = () => {
-    provider.connect();
+    provider().connect();
   };
 
   const disconnect = () => {
     try {
-      provider.disconnect();
+      provider().disconnect();
     } catch (e) {
       // Do nothing
     }
@@ -75,7 +77,7 @@ export function useYjsCollaboration(
   createEffect(
     on(binding, () => {
       const { root } = binding();
-      const { awareness } = provider;
+      const { awareness } = provider();
 
       const onStatus = ({ status }: { status: string }) => {
         editor.dispatchCommand(CONNECTED_COMMAND, status === "connected");
@@ -96,7 +98,7 @@ export function useYjsCollaboration(
       };
 
       const onAwarenessUpdate = () => {
-        syncCursorPositions(binding(), provider);
+        syncCursorPositions(binding(), provider());
       };
 
       const onYjsTreeChanges = (
@@ -110,7 +112,7 @@ export function useYjsCollaboration(
           const isFromUndoManager = origin instanceof UndoManager;
           syncYjsChangesToLexical(
             binding(),
-            provider,
+            provider(),
             events,
             isFromUndoManager
           );
@@ -118,7 +120,7 @@ export function useYjsCollaboration(
       };
 
       initLocalState(
-        provider,
+        provider(),
         name,
         color,
         document.activeElement === editor.getRootElement(),
@@ -132,9 +134,9 @@ export function useYjsCollaboration(
         isReloadingDoc = true;
       };
 
-      provider.on("reload", onProviderDocReload);
-      provider.on("status", onStatus);
-      provider.on("sync", onSync);
+      provider().on("reload", onProviderDocReload);
+      provider().on("status", onStatus);
+      provider().on("sync", onSync);
       awareness.on("update", onAwarenessUpdate);
       // This updates the local editor state when we recieve updates from other clients
       root.getSharedType().observeDeep(onYjsTreeChanges);
@@ -150,7 +152,7 @@ export function useYjsCollaboration(
           if (tags.has("skip-collab") === false) {
             syncLexicalUpdateToYjs(
               binding(),
-              provider,
+              provider(),
               prevEditorState,
               editorState,
               dirtyElements,
@@ -168,9 +170,9 @@ export function useYjsCollaboration(
           disconnect();
         }
 
-        provider.off("sync", onSync);
-        provider.off("status", onStatus);
-        provider.off("reload", onProviderDocReload);
+        provider().off("sync", onSync);
+        provider().off("status", onStatus);
+        provider().off("reload", onProviderDocReload);
         awareness.off("update", onAwarenessUpdate);
         root.getSharedType().unobserveDeep(onYjsTreeChanges);
         docMap.delete(id);
@@ -222,7 +224,7 @@ export function useYjsCollaboration(
 
 export function useYjsFocusTracking(
   editor: LexicalEditor,
-  provider: Provider,
+  provider: Accessor<Provider>,
   name: string,
   color: string,
   awarenessData?: object
@@ -232,7 +234,13 @@ export function useYjsFocusTracking(
       editor.registerCommand(
         FOCUS_COMMAND,
         () => {
-          setLocalStateFocus(provider, name, color, true, awarenessData || {});
+          setLocalStateFocus(
+            provider(),
+            name,
+            color,
+            true,
+            awarenessData || {}
+          );
           return false;
         },
         COMMAND_PRIORITY_EDITOR
@@ -240,7 +248,13 @@ export function useYjsFocusTracking(
       editor.registerCommand(
         BLUR_COMMAND,
         () => {
-          setLocalStateFocus(provider, name, color, false, awarenessData || {});
+          setLocalStateFocus(
+            provider(),
+            name,
+            color,
+            false,
+            awarenessData || {}
+          );
           return false;
         },
         COMMAND_PRIORITY_EDITOR
@@ -251,17 +265,19 @@ export function useYjsFocusTracking(
 
 export function useYjsHistory(
   editor: LexicalEditor,
-  binding: Binding
+  binding: Accessor<Binding>
 ): () => void {
-  const undoManager = createUndoManager(binding, binding.root.getSharedType());
+  const undoManager = createMemo(() =>
+    createUndoManager(binding(), binding().root.getSharedType())
+  );
 
   onMount(() => {
     const undo = () => {
-      undoManager.undo();
+      undoManager().undo();
     };
 
     const redo = () => {
-      undoManager.redo();
+      undoManager().redo();
     };
 
     onCleanup(
@@ -286,8 +302,31 @@ export function useYjsHistory(
     );
   });
   const clearHistory = () => {
-    undoManager.clear();
+    undoManager().clear();
   };
+
+  // Exposing undo and redo states
+  createEffect(() => {
+    const updateUndoRedoStates = () => {
+      editor.dispatchCommand(
+        CAN_UNDO_COMMAND,
+        undoManager().undoStack.length > 0
+      );
+      editor.dispatchCommand(
+        CAN_REDO_COMMAND,
+        undoManager().redoStack.length > 0
+      );
+    };
+    undoManager().on("stack-item-added", updateUndoRedoStates);
+    undoManager().on("stack-item-popped", updateUndoRedoStates);
+    undoManager().on("stack-cleared", updateUndoRedoStates);
+    onCleanup(() => {
+      undoManager().off("stack-item-added", updateUndoRedoStates);
+      undoManager().off("stack-item-popped", updateUndoRedoStates);
+      undoManager().off("stack-cleared", updateUndoRedoStates);
+    });
+  });
+
   return clearHistory;
 }
 

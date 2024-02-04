@@ -12,27 +12,8 @@ import {
   OUTDENT_CONTENT_COMMAND,
 } from "lexical";
 import { createEffect, onCleanup } from "solid-js";
-import type {
-  LexicalCommand,
-  LexicalEditor,
-  LexicalNode,
-  RangeSelection,
-} from "lexical";
-import { $getNearestBlockElementAncestorOrThrow } from "@lexical/utils";
-
-function $filter<T>(
-  nodes: Array<LexicalNode>,
-  filterFn: (node: LexicalNode) => null | T
-): Array<T> {
-  const result: T[] = [];
-  for (let i = 0; i < nodes.length; i++) {
-    const node = filterFn(nodes[i]);
-    if (node !== null) {
-      result.push(node);
-    }
-  }
-  return result;
-}
+import type { LexicalCommand, LexicalEditor, RangeSelection } from "lexical";
+import { $filter, $getNearestBlockElementAncestorOrThrow } from "@lexical/utils";
 
 function indentOverTab(selection: RangeSelection): boolean {
   // const handled = new Set();
