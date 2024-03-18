@@ -47,6 +47,7 @@ export function BlockWithAlignableContents(props: Props): JSX.Element {
       const node = $getNodeByKey(props.nodeKey);
       if ($isDecoratorNode(node)) {
         node.remove();
+        return true;
       }
     }
 

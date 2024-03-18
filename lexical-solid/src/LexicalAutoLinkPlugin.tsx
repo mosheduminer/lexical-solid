@@ -40,7 +40,9 @@ export function createLinkMatcherWithRegExp(
 ) {
   return (text: string) => {
     const match = regExp.exec(text);
-    if (match === null) return null;
+    if (match === null) {
+      return null;
+    }
     return {
       index: match.index,
       length: match[0].length,
@@ -128,13 +130,13 @@ function isContentAroundIsValid(
 function extractMatchingNodes(
   nodes: TextNode[],
   startIndex: number,
-  endIndex: number,
+  endIndex: number
 ): [
-    matchingOffset: number,
-    unmodifiedBeforeNodes: TextNode[],
-    matchingNodes: TextNode[],
-    unmodifiedAfterNodes: TextNode[],
-  ] {
+  matchingOffset: number,
+  unmodifiedBeforeNodes: TextNode[],
+  matchingNodes: TextNode[],
+  unmodifiedAfterNodes: TextNode[]
+] {
   const unmodifiedBeforeNodes: TextNode[] = [];
   const matchingNodes: TextNode[] = [];
   const unmodifiedAfterNodes: TextNode[] = [];
@@ -173,7 +175,7 @@ function createAutoLinkNode(
   nodes: TextNode[],
   startIndex: number,
   endIndex: number,
-  match: LinkMatcherResult,
+  match: LinkMatcherResult
 ): TextNode | undefined {
   const linkNode = $createAutoLinkNode(match.url, match.attributes);
   if (nodes.length === 1) {
@@ -184,7 +186,7 @@ function createAutoLinkNode(
     } else {
       [, linkTextNode, remainingTextNode] = remainingTextNode.splitText(
         startIndex,
-        endIndex,
+        endIndex
       );
     }
     const textNode = $createTextNode(match.text);
@@ -215,7 +217,7 @@ function createAutoLinkNode(
           linkNodes.push(currentNode);
         } else {
           const [linkTextNode, endNode] = currentNode.splitText(
-            endIndex - currentNodeStart,
+            endIndex - currentNodeStart
           );
           linkNodes.push(linkTextNode);
           remainingTextNode = endNode;
@@ -254,7 +256,7 @@ function handleLinkCreation(
   let currentNodes = [...nodes];
   const initialText = currentNodes
     .map((node) => node.getTextContent())
-    .join('');
+    .join("");
   let text = initialText;
   let match;
   let invalidMatchEnd = 0;
@@ -267,7 +269,7 @@ function handleLinkCreation(
       invalidMatchEnd + matchStart,
       invalidMatchEnd + matchEnd,
       initialText,
-      currentNodes,
+      currentNodes
     );
 
     if (isValid) {
@@ -275,16 +277,16 @@ function handleLinkCreation(
         extractMatchingNodes(
           currentNodes,
           invalidMatchEnd + matchStart,
-          invalidMatchEnd + matchEnd,
+          invalidMatchEnd + matchEnd
         );
-      
+
       const actualMatchStart = invalidMatchEnd + matchStart - matchingOffset;
       const actualMatchEnd = invalidMatchEnd + matchEnd - matchingOffset;
       const remainingTextNode = createAutoLinkNode(
         matchingNodes,
         actualMatchStart,
         actualMatchEnd,
-        match,
+        match
       );
       currentNodes = remainingTextNode
         ? [remainingTextNode, ...unmodifiedAfterNodes]

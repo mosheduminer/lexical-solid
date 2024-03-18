@@ -41,6 +41,7 @@ function HorizontalRuleComponent(props: { nodeKey: NodeKey }) {
       const node = $getNodeByKey(props.nodeKey)!;
       if ($isHorizontalRuleNode(node)) {
         node.remove();
+        return true;
       }
       setSelected(false);
     }

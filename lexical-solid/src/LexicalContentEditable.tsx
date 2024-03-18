@@ -31,7 +31,15 @@ export function ContentEditable(props: Props): JSX.Element {
   const [isEditable, setEditable] = createSignal(false);
   let rootElementRef!: HTMLDivElement;
   onMount(() => {
-    editor.setRootElement(rootElementRef);
+    // defaultView is required for a root element.
+    // In multi-window setups, the defaultView may not exist at certain points.
+    if (
+      rootElementRef &&
+      rootElementRef.ownerDocument &&
+      rootElementRef.ownerDocument.defaultView
+    ) {
+      editor.setRootElement(rootElementRef);
+    }
   });
   onMount(() => {
     setEditable(editor.isEditable());

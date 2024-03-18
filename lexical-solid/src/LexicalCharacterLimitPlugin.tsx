@@ -1,6 +1,7 @@
+import { Dynamic } from "solid-js/web";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 import { useCharacterLimit } from "./shared/useCharacterLimit";
-import { createMemo, createSignal, JSX, mergeProps } from "solid-js";
+import { Component, createMemo, createSignal, JSX, mergeProps } from "solid-js";
 
 const CHARACTER_LIMIT = 5;
 let textEncoderInstance: null | TextEncoder = null;
@@ -29,11 +30,31 @@ function utf8Length(text: string) {
   return currentTextEncoder.encode(text).length;
 }
 
+function DefaultRenderer(props: { remainingCharacters: number }) {
+  return (
+    <span
+      class={`characters-limit ${
+        props.remainingCharacters < 0 ? "characters-limit-exceeded" : ""
+      }`}
+    >
+      {props.remainingCharacters}
+    </span>
+  );
+}
+
 export function CharacterLimitPlugin(props: {
   charset: "UTF-8" | "UTF-16";
   maxLength: number;
+  renderer: Component<{ remainingCharacters: number }>;
 }): JSX.Element {
-  props = mergeProps({ charset: "UTF-16", maxLength: CHARACTER_LIMIT }, props);
+  props = mergeProps(
+    {
+      charset: "UTF-16",
+      maxLength: CHARACTER_LIMIT,
+      renderer: DefaultRenderer,
+    },
+    props
+  );
   const [editor] = useLexicalComposerContext();
 
   const [remainingCharacters, setRemainingCharacters] = createSignal(
@@ -56,12 +77,9 @@ export function CharacterLimitPlugin(props: {
   useCharacterLimit(editor, props.maxLength, characterLimitProps);
 
   return (
-    <span
-      class={`characters-limit ${
-        remainingCharacters() < 0 ? "characters-limit-exceeded" : ""
-      }`}
-    >
-      {remainingCharacters()}
-    </span>
+    <Dynamic
+      component={props.renderer}
+      remainingCharacters={remainingCharacters()}
+    />
   );
 }

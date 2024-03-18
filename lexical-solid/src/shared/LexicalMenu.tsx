@@ -70,8 +70,9 @@ export type MenuRenderFn<TOption extends MenuOption> = (
 
 const scrollIntoViewIfNeeded = (target: HTMLElement) => {
   const typeaheadContainerNode = document.getElementById("typeahead-menu");
-  if (!typeaheadContainerNode) return;
-
+  if (!typeaheadContainerNode) {
+    return;
+  }
   const typeaheadRect = typeaheadContainerNode.getBoundingClientRect();
 
   if (typeaheadRect.top + typeaheadRect.height > window.innerHeight) {
