@@ -4,8 +4,24 @@ import {
   LexicalComposerContext,
 } from "./LexicalComposerContext";
 import { useCollaborationContext } from "./LexicalCollaborationContext";
-import { EditorThemeClasses, Klass, LexicalEditor, LexicalNode, LexicalNodeReplacement } from "lexical";
+import {
+  EditorThemeClasses,
+  Klass,
+  LexicalEditor,
+  LexicalNode,
+  LexicalNodeReplacement,
+} from "lexical";
+import type { KlassConstructor, Transform } from "lexical";
 import { createEffect, JSX, onCleanup, useContext } from "solid-js";
+
+function getTransformSetFromKlass(
+  klass: KlassConstructor<typeof LexicalNode>
+): Set<Transform<LexicalNode>> {
+  const transform = klass.transform();
+  return transform !== null
+    ? new Set<Transform<LexicalNode>>([transform])
+    : new Set<Transform<LexicalNode>>();
+}
 
 export function LexicalNestedComposer(props: {
   children: JSX.Element;
@@ -46,7 +62,7 @@ export function LexicalNestedComposer(props: {
         klass: entry.klass,
         replace: entry.replace,
         replaceWithKlass: entry.replaceWithKlass,
-        transforms: new Set(),
+        transforms: getTransformSetFromKlass(entry.klass),
         exportDOM: entry.exportDOM,
       });
     }
@@ -55,7 +71,7 @@ export function LexicalNestedComposer(props: {
       let replace = null;
       let replaceWithKlass = null;
 
-      if (typeof klass !== 'function') {
+      if (typeof klass !== "function") {
         const options = klass;
         klass = options.replace;
         replace = options.with;
@@ -67,7 +83,7 @@ export function LexicalNestedComposer(props: {
         klass,
         replace,
         replaceWithKlass,
-        transforms: new Set(),
+        transforms: getTransformSetFromKlass(klass),
       });
     }
   }

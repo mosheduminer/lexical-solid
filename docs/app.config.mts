@@ -1,6 +1,3 @@
 import { defineConfig } from "@solidjs/start/config";
 
-export default defineConfig({
-  ssr: false,
-  vite: {},
-});
+export default defineConfig();

@@ -21,6 +21,7 @@ import {
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 import {
   $findMatchingParent,
+  calculateZoomLevel,
   isHTMLElement,
   mergeRegister,
 } from "@lexical/utils";
@@ -187,7 +188,7 @@ function handleCheckItemEvent(event: PointerEvent, callback: () => void) {
     return;
   }
 
-  const pageX = event.pageX;
+  const pageX = event.pageX / calculateZoomLevel(target);
   const rect = target.getBoundingClientRect();
 
   if (

@@ -2,7 +2,7 @@
 
 > SolidJS port of `@lexical/react`
 
-Currently based on [@lexical/react](https://www.npmjs.com/package/@lexical/react) version `0.14.2`.
+Currently based on [@lexical/react](https://www.npmjs.com/package/@lexical/react) version `0.14.3`.
 
 # Installing
 
