@@ -37,7 +37,7 @@ export const DEFAULT_TRANSFORMERS = [HR, ...TRANSFORMERS];
 export function LexicalMarkdownShortcutPlugin(
   props: Readonly<{ transformers?: Transformer[] }>
 ): null {
-  props = mergeProps(props, { transformers: DEFAULT_TRANSFORMERS });
+  props = mergeProps({ transformers: DEFAULT_TRANSFORMERS }, props);
   const [editor] = useLexicalComposerContext();
   createEffect(() => {
     const cleanup = registerMarkdownShortcuts(editor, props.transformers);
