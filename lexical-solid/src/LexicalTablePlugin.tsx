@@ -15,9 +15,11 @@ import {
   $isTableRowNode,
   $computeTableMap,
   $isTableCellNode,
+  $computeTableMapSkipCellCheck,
 } from "@lexical/table";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 import {
+  $createParagraphNode,
   $getNodeByKey,
   $isTextNode,
   $nodesOfType,
@@ -32,7 +34,11 @@ import {
   createEffect,
   on,
 } from "solid-js";
-import { $insertFirst, $insertNodeToNearestRoot } from "@lexical/utils";
+import {
+  $insertFirst,
+  $insertNodeToNearestRoot,
+  mergeRegister,
+} from "@lexical/utils";
 
 export function TablePlugin(props: {
   hasCellMerge?: boolean;
@@ -53,23 +59,49 @@ export function TablePlugin(props: {
     }
 
     onCleanup(
-      editor.registerCommand<InsertTableCommandPayload>(
-        INSERT_TABLE_COMMAND,
-        ({ columns, rows, includeHeaders }) => {
-          const tableNode = $createTableNodeWithDimensions(
-            Number(rows),
-            Number(columns),
-            includeHeaders
-          );
-          $insertNodeToNearestRoot(tableNode);
-          const firstDescendant = tableNode.getFirstDescendant();
-          if ($isTextNode(firstDescendant)) {
-            firstDescendant.select();
-          }
+      mergeRegister(
+        editor.registerCommand<InsertTableCommandPayload>(
+          INSERT_TABLE_COMMAND,
+          ({ columns, rows, includeHeaders }) => {
+            const tableNode = $createTableNodeWithDimensions(
+              Number(rows),
+              Number(columns),
+              includeHeaders
+            );
+            $insertNodeToNearestRoot(tableNode);
+            const firstDescendant = tableNode.getFirstDescendant();
+            if ($isTextNode(firstDescendant)) {
+              firstDescendant.select();
+            }
 
-          return true;
-        },
-        COMMAND_PRIORITY_EDITOR
+            return true;
+          },
+          COMMAND_PRIORITY_EDITOR
+        ),
+        editor.registerNodeTransform(TableNode, (node) => {
+          const [gridMap] = $computeTableMapSkipCellCheck(node, null, null);
+          const maxRowLength = gridMap.reduce((curLength, row) => {
+            return Math.max(curLength, row.length);
+          }, 0);
+          for (let i = 0; i < gridMap.length; ++i) {
+            const rowLength = gridMap[i].length;
+            if (rowLength === maxRowLength) {
+              continue;
+            }
+            const lastCellMap = gridMap[i][rowLength - 1];
+            const lastRowCell = lastCellMap.cell;
+            for (let j = rowLength; j < maxRowLength; ++j) {
+              // TODO: inherit header state from another header or body
+              const newCell = $createTableCellNode(0);
+              newCell.append($createParagraphNode());
+              if (lastRowCell !== null) {
+                lastRowCell.insertAfter(newCell);
+              } else {
+                $insertFirst(lastRowCell, newCell);
+              }
+            }
+          }
+        })
       )
     );
   });
@@ -161,7 +193,9 @@ export function TablePlugin(props: {
             if (i !== 0) {
               row = row.getNextSibling();
               if (!$isTableRowNode(row)) {
-                throw new Error("Expected TableNode first child to be a RowNode");
+                throw new Error(
+                  "Expected TableNode first child to be a RowNode"
+                );
               }
             }
             let lastRowCell: null | TableCellNode = null;
@@ -173,7 +207,9 @@ export function TablePlugin(props: {
                 unmerged.push(cell);
               } else if (cell.getColSpan() > 1 || cell.getRowSpan() > 1) {
                 if (!$isTableCellNode(cell)) {
-                  throw new Error("Expected TableNode cell to be a TableCellNode");
+                  throw new Error(
+                    "Expected TableNode cell to be a TableCellNode"
+                  );
                 }
                 const newCell = $createTableCellNode(cell.__headerState);
                 if (lastRowCell !== null) {

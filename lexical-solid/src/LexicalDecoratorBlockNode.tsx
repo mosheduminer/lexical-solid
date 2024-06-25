@@ -33,6 +33,10 @@ export class DecoratorBlockNode extends DecoratorNode<JSX.Element> {
     };
   }
 
+  canIndent(): false {
+    return false;
+  }
+
   createDOM(): HTMLElement {
     return document.createElement("div");
   }
@@ -51,6 +55,8 @@ export class DecoratorBlockNode extends DecoratorNode<JSX.Element> {
     return false;
   }
 }
-export function $isDecoratorBlockNode(node?: LexicalNode): node is DecoratorBlockNode {
+export function $isDecoratorBlockNode(
+  node?: LexicalNode
+): node is DecoratorBlockNode {
   return node instanceof DecoratorBlockNode;
 }

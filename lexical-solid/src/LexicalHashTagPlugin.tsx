@@ -248,7 +248,7 @@ export function HashtagPlugin(): JSX.Element {
     }
   });
 
-  const createHashtagNode = (textNode: TextNode): HashtagNode => {
+  const $createHashtagNode_ = (textNode: TextNode): HashtagNode => {
     return $createHashtagNode(textNode.getTextContent()) as HashtagNode;
   };
 
@@ -266,7 +266,7 @@ export function HashtagPlugin(): JSX.Element {
   useLexicalTextEntity<HashtagNode>(
     getHashtagMatch,
     HashtagNode,
-    createHashtagNode
+    $createHashtagNode_
   );
 
   return null;

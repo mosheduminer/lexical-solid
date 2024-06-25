@@ -1,4 +1,4 @@
-import { LexicalEditor } from "lexical";
+import { LexicalEditor, NodeKey } from "lexical";
 import {
   createMemo,
   createSignal,
@@ -10,7 +10,7 @@ import {
   Suspense,
   onCleanup,
 } from "solid-js";
-import { Portal } from "solid-js/web";
+import { Dynamic, Portal } from "solid-js/web";
 
 type ErrorBoundaryProps = {
   children: JSX.Element;
@@ -22,13 +22,13 @@ export function useDecorators(
   editor: LexicalEditor,
   ErrorBoundary: ErrorBoundaryType
 ): Accessor<JSX.Element[]> {
-  const [decorators, setDecorators] = createSignal<Record<string, JSX.Element>>(
-    editor.getDecorators<JSX.Element>()
-  );
+  const [decorators, setDecorators] = createSignal<
+    Record<NodeKey, () => JSX.Element>
+  >(editor.getDecorators<() => JSX.Element>());
 
   // Subscribe to changes
   onCleanup(
-    editor.registerDecoratorListener<JSX.Element>((nextDecorators) => {
+    editor.registerDecoratorListener<() => JSX.Element>((nextDecorators) => {
       setDecorators(nextDecorators);
     })
   );
@@ -37,7 +37,7 @@ export function useDecorators(
     // If the content editable mounts before the subscription is added, then
     // nothing will be rendered on initial pass. We can get around that by
     // ensuring that we set the value.
-    setDecorators(editor.getDecorators<JSX.Element>());
+    setDecorators(editor.getDecorators<() => JSX.Element>());
   });
 
   // Return decorators defined as React Portals
@@ -51,7 +51,9 @@ export function useDecorators(
         <ErrorBoundary
           onError={(error, reset) => editor._onError(error) as undefined}
         >
-          <Suspense fallback={null}>{decorators()[nodeKey]}</Suspense>
+          <Suspense fallback={null}>
+            <Dynamic component={decorators()[nodeKey]} />
+          </Suspense>
         </ErrorBoundary>
       );
       const element = editor.getElementByKey(nodeKey);

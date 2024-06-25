@@ -1,4 +1,4 @@
-import { LinkNode, TOGGLE_LINK_COMMAND, toggleLink } from "@lexical/link";
+import { LinkNode, TOGGLE_LINK_COMMAND, $toggleLink } from "@lexical/link";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 import { mergeRegister, objectKlassEquals } from "@lexical/utils";
 import {
@@ -31,17 +31,17 @@ export function LinkPlugin(props: Props): null {
               TOGGLE_LINK_COMMAND,
               (payload) => {
                 if (payload === null) {
-                  toggleLink(payload);
+                  $toggleLink(payload);
                   return true;
                 } else if (typeof payload === "string") {
                   if (validateUrl === undefined || validateUrl(payload)) {
-                    toggleLink(payload);
+                    $toggleLink(payload);
                     return true;
                   }
                   return false;
                 } else {
                   const { url, target, rel, title } = payload;
-                  toggleLink(url, { rel, target, title });
+                  $toggleLink(url, { rel, target, title });
                   return true;
                 }
               },

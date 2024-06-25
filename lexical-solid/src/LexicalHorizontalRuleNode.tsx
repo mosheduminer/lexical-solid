@@ -8,6 +8,7 @@ import {
   DOMConversionMap,
   DOMConversionOutput,
   DOMExportOutput,
+  EditorConfig,
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
   LexicalCommand,
@@ -21,7 +22,11 @@ import { createEffect, JSX, onCleanup } from "solid-js";
 import { createCommand, DecoratorNode } from "lexical";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 import { useLexicalNodeSelection } from "./useLexicalNodeSelection";
-import { mergeRegister } from "@lexical/utils";
+import {
+  addClassNamesToElement,
+  mergeRegister,
+  removeClassNamesFromElement,
+} from "@lexical/utils";
 
 export type SerializedHorizontalRuleNode = SerializedLexicalNode;
 
@@ -34,7 +39,7 @@ function HorizontalRuleComponent(props: { nodeKey: NodeKey }) {
     props.nodeKey
   );
 
-  const onDelete = (payload: KeyboardEvent) => {
+  const $onDelete = (payload: KeyboardEvent) => {
     if (isSelected() && $isNodeSelection($getSelection())) {
       const event: KeyboardEvent = payload;
       event.preventDefault();
@@ -70,12 +75,12 @@ function HorizontalRuleComponent(props: { nodeKey: NodeKey }) {
         ),
         editor.registerCommand(
           KEY_DELETE_COMMAND,
-          onDelete,
+          $onDelete,
           COMMAND_PRIORITY_LOW
         ),
         editor.registerCommand(
           KEY_BACKSPACE_COMMAND,
-          onDelete,
+          $onDelete,
           COMMAND_PRIORITY_LOW
         )
       )
@@ -84,8 +89,13 @@ function HorizontalRuleComponent(props: { nodeKey: NodeKey }) {
 
   createEffect(() => {
     const hrElem = editor.getElementByKey(props.nodeKey);
+    const isSelectedClassName = "selected";
     if (hrElem !== null) {
-      hrElem.className = isSelected() ? "selected" : "";
+      if (isSelected()) {
+        addClassNamesToElement(hrElem, isSelectedClassName);
+      } else {
+        removeClassNamesFromElement(hrElem, isSelectedClassName);
+      }
     }
   });
 
@@ -110,7 +120,7 @@ export class HorizontalRuleNode extends DecoratorNode<JSX.Element> {
   static importDOM(): DOMConversionMap | null {
     return {
       hr: () => ({
-        conversion: convertHorizontalRuleElement,
+        conversion: $convertHorizontalRuleElement,
         priority: 0,
       }),
     };
@@ -127,8 +137,10 @@ export class HorizontalRuleNode extends DecoratorNode<JSX.Element> {
     return { element: document.createElement("hr") };
   }
 
-  createDOM(): HTMLElement {
-    return document.createElement("hr");
+  createDOM(config: EditorConfig): HTMLElement {
+    const element = document.createElement("hr");
+    addClassNamesToElement(element, config.theme.hr);
+    return element;
   }
 
   getTextContent(): string {
@@ -148,7 +160,7 @@ export class HorizontalRuleNode extends DecoratorNode<JSX.Element> {
   }
 }
 
-function convertHorizontalRuleElement(): DOMConversionOutput {
+function $convertHorizontalRuleElement(): DOMConversionOutput {
   return { node: $createHorizontalRuleNode() };
 }
 

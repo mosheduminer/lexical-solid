@@ -33,11 +33,6 @@ export function LexicalClickableLinkPlugin(props: {
 
   createEffect(() => {
     const onClick = (event: MouseEvent) => {
-      if (props.disabled) {
-        event.preventDefault();
-        return;
-      }
-
       const target = event.target;
       if (!(target instanceof Node)) {
         return;
@@ -57,14 +52,16 @@ export function LexicalClickableLinkPlugin(props: {
             clickedNode,
             $isElementNode
           );
-          if ($isLinkNode(maybeLinkNode)) {
-            url = maybeLinkNode.sanitizeUrl(maybeLinkNode.getURL());
-            urlTarget = maybeLinkNode.getTarget();
-          } else {
-            const a = findMatchingDOM(target, isHTMLAnchorElement);
-            if (a !== null) {
-              url = a.href;
-              urlTarget = a.target;
+          if (!props.disabled) {
+            if ($isLinkNode(maybeLinkNode)) {
+              url = maybeLinkNode.sanitizeUrl(maybeLinkNode.getURL());
+              urlTarget = maybeLinkNode.getTarget();
+            } else {
+              const a = findMatchingDOM(target, isHTMLAnchorElement);
+              if (a !== null) {
+                url = a.href;
+                urlTarget = a.target;
+              }
             }
           }
         }
@@ -96,7 +93,7 @@ export function LexicalClickableLinkPlugin(props: {
     };
 
     const onMouseUp = (event: MouseEvent) => {
-      if (!props.disabled && event.button === 1) {
+      if (event.button === 1) {
         onClick(event);
       }
     };

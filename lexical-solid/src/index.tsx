@@ -32,7 +32,7 @@ export * from "./LexicalNodeMenuPlugin";
 export * from "./useLexicalIsContentEmpty";
 export * from "./LexicalNestedComposer";
 export * from "./LexicalTabIndentationPlugin";
-export * from "./LexicalTableOfContents";
+export * from "./LexicalTableOfContentsPlugin";
 export * from "./LexicalTablePlugin";
 export * from "./LexicalTypeaheadMenuPlugin";
 export * from "./useLexicalSubscription";

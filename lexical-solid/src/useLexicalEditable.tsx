@@ -12,6 +12,14 @@ function subscription(editor: LexicalEditor): LexicalSubscription<boolean> {
   };
 }
 
+/**
+ * Get the current value for {@link LexicalEditor.isEditable}
+ * using {@link useLexicalSubscription}.
+ * You should prefer this over manually observing the value with
+ * {@link LexicalEditor.registerEditableListener},
+ * which is a bit tricky to do correctly, particularly when using
+ * React StrictMode (the default for development) or concurrency.
+ */
 export function useLexicalEditable(): Accessor<boolean> {
   return useLexicalSubscription(subscription);
 }

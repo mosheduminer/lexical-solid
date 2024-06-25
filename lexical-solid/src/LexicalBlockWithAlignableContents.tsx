@@ -41,7 +41,7 @@ export function BlockWithAlignableContents(props: Props): JSX.Element {
   );
   let ref: HTMLDivElement | undefined;
 
-  const onDelete = (event: KeyboardEvent) => {
+  const $onDelete = (event: KeyboardEvent) => {
     if (isSelected() && $isNodeSelection($getSelection())) {
       event.preventDefault();
       const node = $getNodeByKey(props.nodeKey);
@@ -109,12 +109,12 @@ export function BlockWithAlignableContents(props: Props): JSX.Element {
         ),
         editor.registerCommand(
           KEY_DELETE_COMMAND,
-          onDelete,
+          $onDelete,
           COMMAND_PRIORITY_LOW
         ),
         editor.registerCommand(
           KEY_BACKSPACE_COMMAND,
-          onDelete,
+          $onDelete,
           COMMAND_PRIORITY_LOW
         )
       )

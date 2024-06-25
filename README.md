@@ -2,7 +2,7 @@
 
 > SolidJS port of `@lexical/react`
 
-Currently based on [@lexical/react](https://www.npmjs.com/package/@lexical/react) version `0.14.3`.
+Currently based on [@lexical/react](https://www.npmjs.com/package/@lexical/react) version `0.16.0`.
 
 # Installing
 
@@ -13,10 +13,6 @@ You _may_ need to add `lexical-solid` and the lexical packages (such as `lexical
 # Lexical Dependencies
 
 This package pins `lexical` and the `@lexical/*` packages to specific minor versions. This means that you cannot upgrade your lexical version without upgrading `lexical-solid` (well, maybe you could, but it'd be buggy). See [#5](https://github.com/mosheduminer/lexical-solid/issues/5) for some discussion.
-
-# Known issues
-
-This package can't be loaded in SSR mode. See [this issue](https://github.com/mosheduminer/lexical-solid/issues/14) for details. Help is welcome.
 
 # License
 

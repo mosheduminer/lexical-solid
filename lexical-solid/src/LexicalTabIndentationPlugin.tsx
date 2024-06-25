@@ -15,7 +15,7 @@ import { createEffect, onCleanup } from "solid-js";
 import type { LexicalCommand, LexicalEditor, RangeSelection } from "lexical";
 import { $filter, $getNearestBlockElementAncestorOrThrow } from "@lexical/utils";
 
-function indentOverTab(selection: RangeSelection): boolean {
+function $indentOverTab(selection: RangeSelection): boolean {
   // const handled = new Set();
   const nodes = selection.getNodes();
   const canIndentBlockNodes = $filter(nodes, (node) => {
@@ -58,7 +58,7 @@ export function registerTabIndentation(editor: LexicalEditor) {
       }
 
       event.preventDefault();
-      const command: LexicalCommand<void> = indentOverTab(selection)
+      const command: LexicalCommand<void> = $indentOverTab(selection)
         ? event.shiftKey
           ? OUTDENT_CONTENT_COMMAND
           : INDENT_CONTENT_COMMAND
