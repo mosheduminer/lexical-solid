@@ -8,7 +8,9 @@ Currently based on [@lexical/react](https://www.npmjs.com/package/@lexical/react
 
 `npm install lexical-solid`
 
-You _may_ need to add `lexical-solid` and the lexical packages (such as `lexical-solid > lexical`) to the `optimizeDeps.include` section of your vite config (assuming you are using vite).
+or using the package manager of your choice.
+
+This repository uses `pnpm`, but if you are only a consumer of this library, you do not need it.
 
 # Lexical Dependencies
 
