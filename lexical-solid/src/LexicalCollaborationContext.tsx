@@ -1,7 +1,7 @@
 import { Doc } from "yjs";
 import { createContext, useContext } from "solid-js";
 
-type CollaborationContextType = {
+export type CollaborationContextType = {
   clientID: number;
   color: string;
   isCollabActive: boolean;

@@ -10,7 +10,6 @@ import {
   syncLexicalUpdateToYjs,
   syncYjsChangesToLexical,
   TOGGLE_CONNECT_COMMAND,
-  ExcludedProperties,
 } from "@lexical/yjs";
 import {
   LexicalEditor,
@@ -28,7 +27,7 @@ import {
 import { Doc, Transaction, YEvent, UndoManager } from "yjs";
 import { mergeRegister } from "@lexical/utils";
 import { InitialEditorStateType } from "../LexicalComposer";
-import { JSX } from "solid-js";
+import { JSX, Setter } from "solid-js";
 import { Portal } from "solid-js/web";
 import {
   Accessor,
@@ -50,17 +49,13 @@ export function useYjsCollaboration(
   name: string,
   color: string,
   shouldBootstrap: boolean,
+  binding: Accessor<Binding>,
+  setDoc: Setter<Doc | undefined>,
   cursorsContainerRef?: CursorsContainerRef,
   initialEditorState?: InitialEditorStateType,
-  excludedProperties?: ExcludedProperties,
   awarenessData?: object
-): [Accessor<JSX.Element>, Accessor<Binding>] {
+): Accessor<JSX.Element> {
   let isReloadingDoc: boolean = false;
-  const [doc, setDoc] = createSignal<Doc>(docMap.get(id)!);
-
-  const binding = createMemo(() =>
-    createBinding(editor, provider(), id, doc(), docMap, excludedProperties)
-  );
 
   const connect = () => {
     provider().connect();
@@ -219,7 +214,7 @@ export function useYjsCollaboration(
     )
   );
 
-  return [cursorsContainer, binding];
+  return cursorsContainer;
 }
 
 export function useYjsFocusTracking(

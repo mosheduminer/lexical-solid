@@ -1,9 +1,10 @@
 import {
-  LinkAttributes,
+  AutoLinkAttributes,
   $createAutoLinkNode,
   $isAutoLinkNode,
   $isLinkNode,
   AutoLinkNode,
+  TOGGLE_LINK_COMMAND,
 } from "@lexical/link";
 import {
   ElementNode,
@@ -17,15 +18,16 @@ import {
   $isNodeSelection,
   $isRangeSelection,
   $getSelection,
+  COMMAND_PRIORITY_LOW,
 } from "lexical";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 import { mergeRegister } from "@lexical/utils";
-import { Accessor, createEffect, JSX, on, onCleanup } from "solid-js";
+import { Accessor, createEffect, JSX, onCleanup } from "solid-js";
 
 type ChangeHandler = (url: string | null, prevUrl: string | null) => void;
 
 type LinkMatcherResult = {
-  attributes?: LinkAttributes;
+  attributes?: AutoLinkAttributes;
   index: number;
   length: number;
   text: string;
@@ -79,6 +81,10 @@ function endsWithSeparator(textContent: string): boolean {
 
 function startsWithSeparator(textContent: string): boolean {
   return isSeparator(textContent[0]);
+}
+
+function startsWithFullStop(textContent: string): boolean {
+  return /^\.[a-zA-Z0-9]{1,}/.test(textContent);
 }
 
 function isPreviousNodeValid(node: LexicalNode): boolean {
@@ -367,14 +373,21 @@ function handleBadNeighbors(
   const previousSibling = textNode.getPreviousSibling();
   const nextSibling = textNode.getNextSibling();
   const text = textNode.getTextContent();
-
-  if ($isAutoLinkNode(previousSibling) && !startsWithSeparator(text)) {
+  if (
+    $isAutoLinkNode(previousSibling) &&
+    !previousSibling.getIsUnlinked() &&
+    (!startsWithSeparator(text) || startsWithFullStop(text))
+  ) {
     previousSibling.append(textNode);
     handleLinkEdit(previousSibling, matchers, onChange);
     onChange(null, previousSibling.getURL());
   }
 
-  if ($isAutoLinkNode(nextSibling) && !endsWithSeparator(text)) {
+  if (
+    $isAutoLinkNode(nextSibling) &&
+    !nextSibling.getIsUnlinked() &&
+    !endsWithSeparator(text)
+  ) {
     replaceWithChildren(nextSibling);
     handleLinkEdit(nextSibling, matchers, onChange);
     onChange(null, nextSibling.getURL());
@@ -436,7 +449,7 @@ function useAutoLink(
         editor.registerNodeTransform(TextNode, (textNode: TextNode) => {
           const parent = textNode.getParentOrThrow();
           const previous = textNode.getPreviousSibling();
-          if ($isAutoLinkNode(parent)) {
+          if ($isAutoLinkNode(parent) && !parent.getIsUnlinked()) {
             handleLinkEdit(parent, matchers, onChangeWrapped);
           } else if (!$isLinkNode(parent)) {
             if (
@@ -450,7 +463,29 @@ function useAutoLink(
 
             handleBadNeighbors(textNode, matchers, onChangeWrapped);
           }
-        })
+        }),
+        editor.registerCommand(
+          TOGGLE_LINK_COMMAND,
+          (payload) => {
+            const selection = $getSelection();
+            if (payload !== null || !$isRangeSelection(selection)) {
+              return false;
+            }
+            const nodes = selection.extract();
+            nodes.forEach((node) => {
+              const parent = node.getParent();
+
+              if ($isAutoLinkNode(parent)) {
+                // invert the value
+                parent.setIsUnlinked(!parent.getIsUnlinked());
+                parent.markDirty();
+                return true;
+              }
+            });
+            return false;
+          },
+          COMMAND_PRIORITY_LOW
+        )
       )
     );
   });
