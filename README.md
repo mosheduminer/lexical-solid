@@ -4,6 +4,8 @@
 
 Currently based on [@lexical/react](https://www.npmjs.com/package/@lexical/react) version `0.17.0`.
 
+If you're using this library, I'd appreciate it if you let me know (in the discussions)!
+
 # Installing
 
 `npm install lexical-solid`
