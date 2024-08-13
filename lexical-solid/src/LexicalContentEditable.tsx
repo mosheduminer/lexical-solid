@@ -1,88 +1,70 @@
-import { createSignal, JSX, mergeProps, onCleanup, onMount } from "solid-js";
+import type { Props as ElementProps } from "./shared/LexicalContentEditableElement";
+import type { LexicalEditor } from "lexical";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  JSX,
+  mergeProps,
+  onCleanup,
+  onMount,
+  Show,
+  splitProps,
+} from "solid-js";
+import { ContentEditableElement } from "./shared/LexicalContentEditableElement";
+import { useCanShowPlaceholder } from "./shared/useCanShowPlaceholder";
 
-type Props = Readonly<{
-  ariaActiveDescendant?: string;
-  ariaAutoComplete?: JSX.HTMLAttributes<HTMLDivElement>["aria-autocomplete"];
-  ariaControls?: string;
-  ariaDescribedBy?: string;
-  ariaExpanded?: boolean;
-  ariaLabel?: string;
-  ariaLabelledBy?: string;
-  ariaMultiline?: boolean;
-  ariaOwns?: string;
-  ariaRequired?: JSX.HTMLAttributes<HTMLDivElement>["aria-required"];
-  autoCapitalize?: JSX.HTMLAutocapitalize;
-  autoComplete?: boolean;
-  autoCorrect?: boolean;
-  class?: string;
-  id?: string;
-  readOnly?: boolean;
-  role?: string;
-  style?: JSX.HTMLAttributes<HTMLDivElement>["style"];
-  spellCheck?: boolean;
-  tabIndex?: number;
-  testid?: string;
-}>;
+export type Props = Omit<ElementProps, "editor"> &
+  (
+    | {
+        "aria-placeholder"?: void;
+        placeholder?: null;
+      }
+    | {
+        "aria-placeholder": string;
+        placeholder: (isEditable: boolean) => null | JSX.Element;
+      }
+  );
 
 export function ContentEditable(props: Props): JSX.Element {
-  props = mergeProps({ role: "textbox", spellCheck: true }, props);
+  const [, rest] = splitProps(props, ["placeholder"]);
+  // editor__DEPRECATED will always be defined for non MLC surfaces
   const [editor] = useLexicalComposerContext();
-  const [isEditable, setEditable] = createSignal(false);
-  let rootElementRef!: HTMLDivElement;
-  onMount(() => {
-    // defaultView is required for a root element.
-    // In multi-window setups, the defaultView may not exist at certain points.
-    if (
-      rootElementRef &&
-      rootElementRef.ownerDocument &&
-      rootElementRef.ownerDocument.defaultView
-    ) {
-      editor.setRootElement(rootElementRef);
-    }
-  });
-  onMount(() => {
-    setEditable(editor.isEditable());
-    onCleanup(
-      editor.registerEditableListener((currentIsReadOnly) => {
-        setEditable(currentIsReadOnly);
-      })
-    );
-  });
-  function ifNotReadonly<T, U = undefined>(
-    value: T,
-    fallback?: U
-  ): T | U | undefined {
-    if (!isEditable()) return fallback;
-    return value;
-  }
+
   return (
-    <div
-      aria-activedescendant={ifNotReadonly(props.ariaActiveDescendant)}
-      aria-autocomplete={ifNotReadonly(props.ariaAutoComplete, "none")}
-      aria-controls={ifNotReadonly(props.ariaControls)}
-      aria-describedby={props.ariaDescribedBy}
-      aria-expanded={ifNotReadonly(
-        props.role === "combobox" ? !!props.ariaExpanded : undefined
+    <>
+      <ContentEditableElement editor={editor} {...rest} ref={props.ref} />
+      {props.placeholder != null && (
+        <Placeholder editor={editor} content={props.placeholder} />
       )}
-      aria-label={props.ariaLabel}
-      aria-labelledby={props.ariaLabelledBy}
-      aria-multiline={props.ariaMultiline}
-      aria-owns={ifNotReadonly(props.ariaOwns)}
-      aria-readonly={isEditable() ? true : undefined}
-      aria-required={props.ariaRequired}
-      autoCapitalize={props.autoCapitalize}
-      class={props.class}
-      contentEditable={isEditable()}
-      data-testid={props.testid}
-      id={props.id}
-      ref={rootElementRef}
-      role={props.role as JSX.HTMLAttributes<HTMLDivElement>["role"]}
-      spellcheck={props.spellCheck}
-      style={props.style}
-      tabIndex={props.tabIndex}
-    />
+    </>
   );
 }
 
-export type { Props };
+function Placeholder(props: {
+  editor: LexicalEditor;
+  content: (isEditable: boolean) => null | JSX.Element;
+}): JSX.Element {
+  const showPlaceholder = useCanShowPlaceholder(props.editor);
+
+  const [isEditable, setEditable] = createSignal(props.editor.isEditable());
+  createEffect(() => {
+    setEditable(props.editor.isEditable());
+    onCleanup(
+      props.editor.registerEditableListener((currentIsEditable) => {
+        setEditable(currentIsEditable);
+      })
+    );
+  });
+  const placeholder = createMemo(() => props.content(isEditable()));
+
+  if (placeholder === null) {
+    return null;
+  }
+  return (
+    <Show when={showPlaceholder() && placeholder()}>
+      <div aria-hidden={true}>{placeholder()}</div>
+    </Show>
+  );
+}

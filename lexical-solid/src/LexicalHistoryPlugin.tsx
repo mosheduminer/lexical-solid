@@ -4,10 +4,15 @@ import { useHistory } from "./shared/useHistory";
 import type { HistoryState, HistoryStateEntry } from "@lexical/history";
 
 function HistoryPlugin(props: {
+  delay: number;
   externalHistoryState?: HistoryState;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
-  useHistory(editor, () => props.externalHistoryState);
+  useHistory(
+    editor,
+    () => props.externalHistoryState,
+    () => props.delay
+  );
   return null;
 }
 

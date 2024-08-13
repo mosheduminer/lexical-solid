@@ -93,24 +93,23 @@ export function LexicalAutoEmbedPlugin<TEmbedConfig extends EmbedConfig>(
     setActiveEmbedConfig(null);
   };
 
-  const checkIfLinkNodeIsEmbeddable = (key: NodeKey) => {
-    editor.getEditorState().read(async () => {
+  const checkIfLinkNodeIsEmbeddable = async (key: NodeKey) => {
+    const url = editor.getEditorState().read(() => {
       const linkNode = $getNodeByKey(key);
       if ($isLinkNode(linkNode)) {
-        for (let i = 0; i < props.embedConfigs.length; i++) {
-          const embedConfig = props.embedConfigs[i];
-
-          const urlMatch = await Promise.resolve(
-            embedConfig.parseUrl(linkNode.__url)
-          );
-
-          if (urlMatch != null) {
-            setActiveEmbedConfig(() => embedConfig);
-            setNodeKey(linkNode.getKey());
-          }
-        }
+        return linkNode.getURL();
       }
     });
+    if (url === undefined) {
+      return;
+    }
+    for (const embedConfig of props.embedConfigs) {
+      const urlMatch = await Promise.resolve(embedConfig.parseUrl(url));
+      if (urlMatch != null) {
+        setActiveEmbedConfig(() => embedConfig);
+        setNodeKey(key);
+      }
+    }
   };
 
   createEffect(() => {
@@ -133,7 +132,13 @@ export function LexicalAutoEmbedPlugin<TEmbedConfig extends EmbedConfig>(
     onCleanup(
       mergeRegister(
         ...[LinkNode, AutoLinkNode].map((Klass) =>
-          editor.registerMutationListener(Klass, (...args) => listener(...args))
+          editor.registerMutationListener(
+            Klass,
+            (...args) => listener(...args),
+            {
+              skipInitialization: true,
+            }
+          )
         )
       )
     );

@@ -145,17 +145,21 @@ export function TableOfContentsPlugin({ children }: Props): JSX.Element {
     // Set table of contents initial state
     let currentTableOfContents: Array<TableOfContentsEntry> = [];
     editor.getEditorState().read(() => {
-      const root = $getRoot();
-      const rootChildren = root.getChildren();
-      for (const child of rootChildren) {
-        if ($isHeadingNode(child)) {
-          currentTableOfContents.push([
-            child.getKey(),
-            child.getTextContent(),
-            child.getTag(),
-          ]);
+      const updateCurrentTableOfContents = (node: ElementNode) => {
+        for (const child of node.getChildren()) {
+          if ($isHeadingNode(child)) {
+            currentTableOfContents.push([
+              child.getKey(),
+              child.getTextContent(),
+              child.getTag(),
+            ]);
+          } else if ($isElementNode(child)) {
+            updateCurrentTableOfContents(child);
+          }
         }
-      }
+      };
+
+      updateCurrentTableOfContents($getRoot());
       setTableOfContents(currentTableOfContents);
     });
 
@@ -225,7 +229,9 @@ export function TableOfContentsPlugin({ children }: Props): JSX.Element {
           }
           setTableOfContents(currentTableOfContents);
         });
-      }
+      },
+      // Initialization is handled separately
+      { skipInitialization: true }
     );
 
     // Listen to text node mutation updates
@@ -249,7 +255,9 @@ export function TableOfContentsPlugin({ children }: Props): JSX.Element {
             }
           }
         });
-      }
+      },
+      // Initialization is handled separately
+      { skipInitialization: true }
     );
 
     onCleanup(() => {

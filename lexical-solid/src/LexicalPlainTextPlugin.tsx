@@ -7,7 +7,8 @@ import { createMemo, JSX, Show, untrack } from "solid-js";
 
 export function PlainTextPlugin(params: {
   contentEditable: JSX.Element;
-  placeholder:
+  // TODO Remove. This property is now part of ContentEditable
+  placeholder?:
     | ((isEditable: boolean) => null | JSX.Element)
     | null
     | JSX.Element;
@@ -28,6 +29,7 @@ export function PlainTextPlugin(params: {
 
 type ContentFunction = (isEditable: boolean) => null | JSX.Element;
 
+// TODO remove
 function Placeholder(props: {
   content: ContentFunction | null | JSX.Element;
 }): null | JSX.Element {

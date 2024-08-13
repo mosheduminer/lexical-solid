@@ -9,12 +9,14 @@ import { createEffect, Accessor, onCleanup } from "solid-js";
 export function useHistory(
   editor: LexicalEditor,
   externalHistoryState: Accessor<HistoryState | undefined>,
-  delay = 1000
+  delay: Accessor<number | undefined> | undefined
 ) {
   const historyState = () =>
     externalHistoryState() || createEmptyHistoryState();
 
   createEffect(() => {
-    onCleanup(registerHistory(editor, historyState(), delay));
+    onCleanup(
+      registerHistory(editor, historyState(), (delay && delay()) ?? 1000)
+    );
   });
 }
