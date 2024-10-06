@@ -6,5 +6,10 @@
   ],
   "nohoist": [
     "**/solid-start"
-  ]
+  ],
+  "scripts": {
+    "copy-readme": "copy README.md lexical-solid",
+    "remove-readme-copy": "del \"lexical-solid\\README.md\"",
+    "run-publish": "npm run copy-readme && cd lexical-solid && npm publish && cd .. && npm run remove-readme-copy"
+  }
 }
