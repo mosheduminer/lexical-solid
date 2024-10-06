@@ -6,6 +6,9 @@ import {
   $isRangeSelection,
   $isTextNode,
   $setSelection,
+  DELETE_CHARACTER_COMMAND,
+  COMMAND_PRIORITY_LOW,
+  $isElementNode,
 } from "lexical";
 import {
   $createOverflowNode,
@@ -15,7 +18,7 @@ import {
 import { $rootTextContent } from "@lexical/text";
 import { $dfs, mergeRegister } from "@lexical/utils";
 import { MaybeAccessor, resolve } from "../utils";
-import { createEffect, on, onCleanup, onMount } from "solid-js";
+import { createEffect, onCleanup, onMount } from "solid-js";
 
 type OptionalProps = {
   remainingCharacters?: (characters: number) => void;
@@ -83,7 +86,30 @@ export function useCharacterLimit(
           }
 
           lastComputedTextLength = textLength;
-        })
+        }),
+        editor.registerCommand(
+          DELETE_CHARACTER_COMMAND,
+          (isBackward) => {
+            const selection = $getSelection();
+            if (!$isRangeSelection(selection)) {
+              return false;
+            }
+            const anchorNode = selection.anchor.getNode();
+            const overflow = anchorNode.getParent();
+            const overflowParent = overflow ? overflow.getParent() : null;
+            const parentNext = overflowParent
+              ? overflowParent.getNextSibling()
+              : null;
+            selection.deleteCharacter(isBackward);
+            if (overflowParent && overflowParent.isEmpty()) {
+              overflowParent.remove();
+            } else if ($isElementNode(parentNext) && parentNext.isEmpty()) {
+              parentNext.remove();
+            }
+            return true;
+          },
+          COMMAND_PRIORITY_LOW
+        )
       )
     );
   });

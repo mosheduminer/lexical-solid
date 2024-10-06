@@ -6,9 +6,7 @@ import {
   createMemo,
   createSignal,
   JSX,
-  mergeProps,
   onCleanup,
-  onMount,
   Show,
   splitProps,
 } from "solid-js";
@@ -29,7 +27,6 @@ export type Props = Omit<ElementProps, "editor"> &
 
 export function ContentEditable(props: Props): JSX.Element {
   const [, rest] = splitProps(props, ["placeholder"]);
-  // editor__DEPRECATED will always be defined for non MLC surfaces
   const [editor] = useLexicalComposerContext();
 
   return (

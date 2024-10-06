@@ -28,7 +28,6 @@ import {
   JSX,
   startTransition,
   onCleanup,
-  Accessor,
 } from "solid-js";
 
 export type QueryMatch = {

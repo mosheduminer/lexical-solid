@@ -57,9 +57,7 @@ export function useYjsCollaboration(
 ): Accessor<JSX.Element> {
   let isReloadingDoc: boolean = false;
 
-  const connect = () => {
-    provider().connect();
-  };
+  const connect = () => provider().connect();
 
   const disconnect = () => {
     try {
@@ -158,11 +156,15 @@ export function useYjsCollaboration(
           }
         }
       );
-      connect();
+      const connectionPromise = connect();
 
       onCleanup(() => {
         if (isReloadingDoc === false) {
-          disconnect();
+          if (connectionPromise) {
+            connectionPromise.then(disconnect);
+          } else {
+            disconnect();
+          }
         }
 
         provider().off("sync", onSync);
@@ -194,18 +196,15 @@ export function useYjsCollaboration(
     editor.registerCommand(
       TOGGLE_CONNECT_COMMAND,
       (payload) => {
-        if (connect !== undefined && disconnect !== undefined) {
-          const shouldConnect = payload;
-
-          if (shouldConnect) {
-            // eslint-disable-next-line no-console
-            console.log("Collaboration connected!");
-            connect();
-          } else {
-            // eslint-disable-next-line no-console
-            console.log("Collaboration disconnected!");
-            disconnect();
-          }
+        const shouldConnect = payload;
+        if (shouldConnect) {
+          // eslint-disable-next-line no-console
+          console.log("Collaboration connected!");
+          connect();
+        } else {
+          // eslint-disable-next-line no-console
+          console.log("Collaboration disconnected!");
+          disconnect();
         }
 
         return true;

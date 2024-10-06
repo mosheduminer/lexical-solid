@@ -6,7 +6,6 @@ import {
   $isDecoratorNode,
   $isNodeSelection,
   $isRangeSelection,
-  $setSelection,
   CLICK_COMMAND,
   COMMAND_PRIORITY_LOW,
   FORMAT_ELEMENT_COMMAND,
@@ -42,13 +41,16 @@ export function BlockWithAlignableContents(props: Props): JSX.Element {
   let ref: HTMLDivElement | undefined;
 
   const $onDelete = (event: KeyboardEvent) => {
-    if (isSelected() && $isNodeSelection($getSelection())) {
+    const deleteSelection = $getSelection();
+    if (isSelected() && $isNodeSelection(deleteSelection)) {
       event.preventDefault();
-      const node = $getNodeByKey(props.nodeKey);
-      if ($isDecoratorNode(node)) {
-        node.remove();
-        return true;
-      }
+      editor.update(() => {
+        deleteSelection.getNodes().forEach((node) => {
+          if ($isDecoratorNode(node)) {
+            node.remove();
+          }
+        });
+      });
     }
 
     return false;
