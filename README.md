@@ -1,8 +1,8 @@
 # Lexical-Solid
 
-> SolidJS port of `@lexical/react`
+SolidJS port of `@lexical/react`
 
-Currently based on [@lexical/react](https://www.npmjs.com/package/@lexical/react) version `0.18.0`.
+This is a SolidJS port of [@lexical/react](https://www.npmjs.com/package/@lexical/react) (always based on the same `@lexical/react` version as the pinned [lexical-dependencies](#lexical-dependencies), see that section of the README for the current version).
 
 If you're using this library, I'd appreciate it if you let me know (in github discussions or in the lexical discord)!
 
@@ -16,7 +16,9 @@ This repository uses `pnpm`, but if you are only a consumer of this library, you
 
 # Lexical Dependencies
 
-This package pins `lexical` and the `@lexical/*` packages to specific minor versions. This means that you cannot upgrade your lexical version without upgrading `lexical-solid` (well, maybe you could, but it'd be buggy). See [#5](https://github.com/mosheduminer/lexical-solid/issues/5) for some discussion.
+Currently using lexical packages version `0.18.0`, and ported from [@lexical/react](https://www.npmjs.com/package/@lexical/react) of the same version tag.
+
+This package pins `lexical` and the `@lexical/*` packages to specific minor versions. This means that you can only upgrade your lexical version to the latest _patch_ version compatible with the current version. Attempting to upgrade the minor version will result in a broken state due to mismatched packages. See [#5](https://github.com/mosheduminer/lexical-solid/issues/5) for some discussion of the pinning strategy.
 
 # License
 
