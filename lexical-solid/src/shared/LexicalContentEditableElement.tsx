@@ -7,6 +7,7 @@ import {
   createSignal,
   mergeProps,
   onCleanup,
+  onMount,
   splitProps,
 } from "solid-js";
 import { useLexicalComposerContext } from "../LexicalComposerContext";
@@ -60,17 +61,20 @@ export function ContentEditableElement(props: Props): JSX.Element {
   const [isEditable, setEditable] = createSignal(editor.isEditable());
 
   const handleRef = (rootElement: null | HTMLElement) => {
-    // defaultView is required for a root element.
-    // In multi-window setups, the defaultView may not exist at certain points.
-    if (
-      rootElement &&
-      rootElement.ownerDocument &&
-      rootElement.ownerDocument.defaultView
-    ) {
-      editor.setRootElement(rootElement);
-    } else {
-      editor.setRootElement(null);
-    }
+    // onMount is used here because we want to make sure `rootElement.ownerDocument.defaultView` is defined.
+    onMount(() => {
+      // defaultView is required for a root element.
+      // In multi-window setups, the defaultView may not exist at certain points.
+      if (
+        rootElement &&
+        rootElement.ownerDocument &&
+        rootElement.ownerDocument.defaultView
+      ) {
+        editor.setRootElement(rootElement);
+      } else {
+        editor.setRootElement(null);
+      }
+    });
   };
 
   createEffect(() => {
