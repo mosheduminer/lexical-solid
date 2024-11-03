@@ -18,7 +18,9 @@ export type Props = {
   ariaAutoComplete?: JSX.HTMLAttributes<HTMLDivElement>["aria-autocomplete"];
   ariaControls?: JSX.HTMLAttributes<HTMLDivElement>["aria-controls"];
   ariaDescribedBy?: JSX.HTMLAttributes<HTMLDivElement>["aria-describedby"];
+  ariaErrorMessage?: JSX.HTMLAttributes<HTMLDivElement>["aria-errormessage"];
   ariaExpanded?: JSX.HTMLAttributes<HTMLDivElement>["aria-expanded"];
+  ariaInvalid?: JSX.HTMLAttributes<HTMLDivElement>["aria-invalid"];
   ariaLabel?: JSX.HTMLAttributes<HTMLDivElement>["aria-label"];
   ariaLabelledBy?: JSX.HTMLAttributes<HTMLDivElement>["aria-labelledby"];
   ariaMultiline?: JSX.HTMLAttributes<HTMLDivElement>["aria-multiline"];
@@ -95,11 +97,19 @@ export function ContentEditableElement(props: Props): JSX.Element {
       aria-autocomplete={isEditable() ? props.ariaAutoComplete : "none"}
       aria-controls={isEditable() ? props.ariaControls : undefined}
       aria-describedby={props.ariaDescribedBy}
+      // for compat, only override aria-errormessage if ariaErrorMessage is defined
+      {...(props.ariaErrorMessage != null
+        ? { "aria-errormessage": props.ariaErrorMessage }
+        : {})}
       aria-expanded={
         isEditable() && props.role === "combobox"
           ? !!props.ariaExpanded
           : undefined
       }
+      // for compat, only override aria-invalid if ariaInvalid is defined
+      {...(props.ariaInvalid != null
+        ? { "aria-invalid": props.ariaInvalid }
+        : {})}
       aria-label={props.ariaLabel}
       aria-labelledby={props.ariaLabelledBy}
       aria-multiline={props.ariaMultiline}
