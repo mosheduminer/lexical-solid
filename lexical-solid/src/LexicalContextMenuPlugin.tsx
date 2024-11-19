@@ -131,7 +131,11 @@ export function LexicalContextMenuPlugin<TOption extends MenuOption>(
   });
 
   return (
-    <Show when={resolution() !== null && editor !== null}>
+    <Show
+      when={
+        anchorElementRef.current && resolution() !== null && editor !== null
+      }
+    >
       <LexicalMenu
         close={closeNodeMenu}
         resolution={resolution()!}

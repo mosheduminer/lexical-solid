@@ -81,7 +81,7 @@ function getTextUpToAnchor(selection: RangeSelection): string | null {
 function tryToPositionRange(
   leadOffset: number,
   range: Range,
-  editorWindow: Window,
+  editorWindow: Window
 ): boolean {
   const domSelection = editorWindow.getSelection();
   if (domSelection === null || !domSelection.isCollapsed) {
@@ -167,7 +167,7 @@ export function getScrollParent(
   return document.body;
 }
 
-export { useDynamicPositioning } from './shared/LexicalMenu';
+export { useDynamicPositioning } from "./shared/LexicalMenu";
 
 export const SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND: LexicalCommand<{
   index: number;
@@ -281,7 +281,7 @@ export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
             const isRangePositioned = tryToPositionRange(
               match.leadOffset,
               range,
-              editorWindow,
+              editorWindow
             );
             if (isRangePositioned !== null) {
               startTransition(() =>
@@ -307,7 +307,11 @@ export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
   );
 
   return (
-    <Show when={resolution() !== null && editor !== null}>
+    <Show
+      when={
+        anchorElementRef.current && resolution() !== null && editor !== null
+      }
+    >
       <LexicalMenu<TOption>
         close={closeTypeahead}
         resolution={resolution()!}

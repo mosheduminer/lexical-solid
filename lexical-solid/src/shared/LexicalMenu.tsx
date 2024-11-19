@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from "../LexicalComposerContext";
-import { mergeRegister } from "@lexical/utils";
+import { CAN_USE_DOM, mergeRegister } from "@lexical/utils";
 import {
   $getSelection,
   $isRangeSelection,
@@ -250,7 +250,7 @@ export const SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND: LexicalCommand<{
 export function LexicalMenu<TOption extends MenuOption>(props: {
   close: () => void;
   editor: LexicalEditor;
-  anchorElementRef: MutableRefObject<HTMLElement>;
+  anchorElementRef: MutableRefObject<HTMLElement | null | undefined>;
   resolution: MenuResolution;
   options: Array<TOption>;
   shouldSplitNodeWithQuery?: boolean;
@@ -467,12 +467,13 @@ export function useMenuAnchorRef(
   resolution: Accessor<MenuResolution | null>,
   setResolution: (r: MenuResolution | null) => void,
   className?: string,
-  parent: HTMLElement = document.body,
+  parent: HTMLElement | undefined = CAN_USE_DOM ? document.body : undefined,
   shouldIncludePageYOffset__EXPERIMENTAL: boolean = true
-): MutableRefObject<HTMLElement> {
+): MutableRefObject<HTMLElement | null> {
   const [editor] = useLexicalComposerContext();
-  let anchorElementRef = document.createElement("div");
+  let anchorElementRef = CAN_USE_DOM ? document.createElement("div") : null;
   const positionMenu = () => {
+    if (anchorElementRef == null || parent == null) return;
     anchorElementRef.style.top = anchorElementRef.style.bottom;
     const rootElement = editor.getRootElement();
     const containerDiv = anchorElementRef;
