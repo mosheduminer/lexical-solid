@@ -22,19 +22,21 @@ export function useLexicalSubscription<T>(
 ): Accessor<T> {
   const [editor] = useLexicalComposerContext();
   const initializedSubscription = createMemo(() => subscription(editor));
-  let valueRef = initializedSubscription().initialValueFn();
-  const [value, setValue] = createSignal<T>(valueRef);
+  const [value, setValue] = createSignal<T>(
+    initializedSubscription().initialValueFn()
+  );
+  const valueRef = { current: value() };
   createEffect(() => {
     const { initialValueFn, subscribe } = initializedSubscription();
     const currentValue = initialValueFn();
-    if (valueRef !== currentValue) {
-      valueRef = currentValue;
+    if (valueRef.current !== currentValue) {
+      valueRef.current = currentValue;
       setValue(() => currentValue);
     }
 
     onCleanup(
       subscribe((newValue: T) => {
-        valueRef = newValue;
+        valueRef.current = newValue;
         setValue(() => newValue);
       })
     );

@@ -90,7 +90,6 @@ export function ContentEditableElement(props: Props): JSX.Element {
 
   return (
     <div
-      {...rest}
       aria-activedescendant={
         isEditable() ? props.ariaActiveDescendant : undefined
       }
@@ -126,6 +125,7 @@ export function ContentEditableElement(props: Props): JSX.Element {
       spellcheck={props.spellcheck}
       style={props.style}
       tabIndex={props.tabIndex}
+      {...rest}
     />
   );
 }

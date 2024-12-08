@@ -16,6 +16,9 @@ import {
   $computeTableMap,
   $isTableCellNode,
   $computeTableMapSkipCellCheck,
+  setScrollableTablesActive,
+  getTableElement,
+  $getTableAndElementByKey,
 } from "@lexical/table";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 import {
@@ -40,16 +43,45 @@ import {
   mergeRegister,
 } from "@lexical/utils";
 
-export function TablePlugin(props: {
+export interface TablePluginProps {
+  /**
+   * When `false` (default `true`), merged cell support (colspan and rowspan) will be disabled and all
+   * tables will be forced into a regular grid with 1x1 table cells.
+   */
   hasCellMerge?: boolean;
+  /**
+   * When `false` (default `true`), the background color of TableCellNode will always be removed.
+   */
   hasCellBackgroundColor?: boolean;
+  /**
+   * When `true` (default `true`), the tab key can be used to navigate table cells.
+   */
   hasTabHandler?: boolean;
-}): JSX.Element | null {
-  const [editor] = useLexicalComposerContext();
-  props = mergeProps(
-    { hasCellMerge: true, hasCellBackgroundColor: true },
+  /**
+   * When `true` (default `false`), tables will be wrapped in a `<div>` to enable horizontal scrolling
+   */
+  hasHorizontalScroll?: boolean;
+}
+
+/**
+ * A plugin to enable all of the features of Lexical's TableNode.
+ *
+ * @param mergedProps - See type for documentation
+ * @returns An element to render in your LexicalComposer
+ */
+export function TablePlugin(props: TablePluginProps): JSX.Element | null {
+  const mergedProps = mergeProps(
+    {
+      hasCellMerge: true,
+      hasCellBackgroundColor: true,
+      hasHorizontalScroll: false,
+    },
     props
   );
+  const [editor] = useLexicalComposerContext();
+  createEffect(() => {
+    setScrollableTablesActive(editor, mergedProps.hasHorizontalScroll);
+  });
 
   onMount(() => {
     if (!editor.hasNodes([TableNode, TableCellNode, TableRowNode])) {
@@ -119,12 +151,12 @@ export function TablePlugin(props: {
       nodeKey: NodeKey,
       dom: HTMLElement
     ) => {
-      const tableElement = dom as HTMLTableElementWithWithTableSelectionState;
+      const tableElement = getTableElement(tableNode, dom);
       const tableSelection = applyTableHandlers(
         tableNode,
         tableElement,
         editor,
-        props.hasTabHandler ?? true
+        mergedProps.hasTabHandler ?? true
       );
       tableSelections.set(nodeKey, [tableSelection, tableElement]);
     };
@@ -132,35 +164,56 @@ export function TablePlugin(props: {
     const unregisterMutationListener = editor.registerMutationListener(
       TableNode,
       (nodeMutations) => {
-        for (const [nodeKey, mutation] of nodeMutations) {
-          if (mutation === "created" || mutation === "updated") {
-            const tableSelection = tableSelections.get(nodeKey);
-            const dom = editor.getElementByKey(nodeKey);
-            if (!(tableSelection && dom === tableSelection[1])) {
-              // The update created a new DOM node, destroy the existing TableObserver
-              if (tableSelection) {
-                tableSelection[0].removeListeners();
-                tableSelections.delete(nodeKey);
-              }
-              if (dom !== null) {
-                // Create a new TableObserver
-                editor.getEditorState().read(() => {
-                  const tableNode = $getNodeByKey<TableNode>(nodeKey);
-                  if ($isTableNode(tableNode)) {
-                    initializeTableNode(tableNode, nodeKey, dom);
-                  }
-                });
+        editor.getEditorState().read(
+          () => {
+            for (const [nodeKey, mutation] of nodeMutations) {
+              const tableSelection = tableSelections.get(nodeKey);
+              if (mutation === "created" || mutation === "updated") {
+                const { tableNode, tableElement } =
+                  $getTableAndElementByKey(nodeKey);
+                if (tableSelection === undefined) {
+                  initializeTableNode(tableNode, nodeKey, tableElement);
+                } else if (tableElement !== tableSelection[1]) {
+                  // The update created a new DOM node, destroy the existing TableObserver
+                  tableSelection[0].removeListeners();
+                  tableSelections.delete(nodeKey);
+                  initializeTableNode(tableNode, nodeKey, tableElement);
+                }
+              } else if (mutation === "destroyed") {
+                if (tableSelection !== undefined) {
+                  tableSelection[0].removeListeners();
+                  tableSelections.delete(nodeKey);
+                }
               }
             }
-          } else if (mutation === "destroyed") {
-            const tableSelection = tableSelections.get(nodeKey);
-
-            if (tableSelection !== undefined) {
-              tableSelection[0].removeListeners();
-              tableSelections.delete(nodeKey);
+          },
+          { editor }
+        );
+        editor.getEditorState().read(
+          () => {
+            for (const [nodeKey, mutation] of nodeMutations) {
+              const tableSelection = tableSelections.get(nodeKey);
+              if (mutation === "created" || mutation === "updated") {
+                const { tableNode, tableElement } =
+                  $getTableAndElementByKey(nodeKey);
+                if (tableSelection === undefined) {
+                  initializeTableNode(tableNode, nodeKey, tableElement);
+                } else if (tableElement !== tableSelection[1]) {
+                  // The update created a new DOM node, destroy the existing TableObserver
+                  tableSelection[0].removeListeners();
+                  tableSelections.delete(nodeKey);
+                  initializeTableNode(tableNode, nodeKey, tableElement);
+                }
+              } else if (mutation === "destroyed") {
+                if (tableSelection !== undefined) {
+                  tableSelection[0].removeListeners();
+                  tableSelections.delete(nodeKey);
+                }
+              }
             }
-          }
-        }
+          },
+          { editor }
+        );
       },
       { skipInitialization: true }
     );
@@ -177,7 +230,7 @@ export function TablePlugin(props: {
 
   // Unmerge cells when the feature isn't enabled
   createEffect(() => {
-    if (props.hasCellMerge) {
+    if (mergedProps.hasCellMerge) {
       return;
     }
     onCleanup(
@@ -238,9 +291,9 @@ export function TablePlugin(props: {
   // Remove cell background color when feature is disabled
   createEffect(
     on(
-      () => [props.hasCellBackgroundColor, props.hasCellMerge],
+      () => [mergedProps.hasCellBackgroundColor, mergedProps.hasCellMerge],
       () => {
-        if (props.hasCellBackgroundColor) {
+        if (mergedProps.hasCellBackgroundColor) {
           return;
         }
         return editor.registerNodeTransform(TableCellNode, (node) => {

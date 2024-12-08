@@ -29,6 +29,7 @@ export * from "./LexicalNodeMenuPlugin";
 export * from "./LexicalOnChangePlugin";
 export * from "./LexicalPlainTextPlugin";
 export * from "./LexicalRichTextPlugin";
+export * from "./LexicalSelectionAlwaysOnDisplay";
 export * from "./LexicalTabIndentationPlugin";
 export * from "./LexicalTableOfContentsPlugin";
 export * from "./LexicalTablePlugin";
