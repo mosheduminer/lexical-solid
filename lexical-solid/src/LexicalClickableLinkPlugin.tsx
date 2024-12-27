@@ -7,6 +7,7 @@ import {
   $isElementNode,
   $isRangeSelection,
   getNearestEditorFromDOMNode,
+  isDOMNode,
 } from "lexical";
 import { createEffect, mergeProps, onCleanup } from "solid-js";
 
@@ -34,7 +35,7 @@ export function LexicalClickableLinkPlugin(props: {
   createEffect(() => {
     const onClick = (event: MouseEvent) => {
       const target = event.target;
-      if (!(target instanceof Node)) {
+      if (!isDOMNode(target)) {
         return;
       }
       const nearestEditor = getNearestEditorFromDOMNode(target);

@@ -27,9 +27,8 @@ export class DecoratorBlockNode extends DecoratorNode<JSX.Element> {
 
   exportJSON(): SerializedDecoratorBlockNode {
     return {
+      ...super.exportJSON(),
       format: this.__format || "",
-      type: "decorator-block",
-      version: 1,
     };
   }
 

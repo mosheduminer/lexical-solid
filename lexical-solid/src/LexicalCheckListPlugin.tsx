@@ -167,7 +167,7 @@ function listenPointerDown() {
 function handleCheckItemEvent(event: PointerEvent, callback: () => void) {
   const target = event.target;
 
-  if (target === null || !isHTMLElement(target)) {
+  if (!isHTMLElement(target)) {
     return;
   }
 
@@ -175,7 +175,6 @@ function handleCheckItemEvent(event: PointerEvent, callback: () => void) {
   const firstChild = target.firstChild;
 
   if (
-    firstChild != null &&
     isHTMLElement(firstChild) &&
     (firstChild.tagName === "UL" || firstChild.tagName === "OL")
   ) {
@@ -203,7 +202,7 @@ function handleCheckItemEvent(event: PointerEvent, callback: () => void) {
 
 function handleClick(event: Event) {
   handleCheckItemEvent(event as PointerEvent, () => {
-    if (event.target instanceof HTMLElement) {
+    if (isHTMLElement(event.target)) {
       const domNode = event.target;
       const editor = getNearestEditorFromDOMNode(domNode);
 
@@ -229,9 +228,9 @@ function handlePointerDown(event: PointerEvent) {
 }
 
 function getActiveCheckListItem(): HTMLElement | null {
-  const activeElement = document.activeElement as HTMLElement;
+  const activeElement = document.activeElement;
 
-  return activeElement != null &&
+  return isHTMLElement(activeElement) &&
     activeElement.tagName === "LI" &&
     activeElement.parentNode != null &&
     // @ts-ignore internal field
