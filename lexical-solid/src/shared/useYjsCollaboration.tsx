@@ -10,6 +10,7 @@ import {
   syncLexicalUpdateToYjs,
   syncYjsChangesToLexical,
   TOGGLE_CONNECT_COMMAND,
+  SyncCursorPositionsFn,
 } from "@lexical/yjs";
 import {
   LexicalEditor,
@@ -53,7 +54,8 @@ export function useYjsCollaboration(
   setDoc: Setter<Doc | undefined>,
   cursorsContainerRef?: CursorsContainerRef,
   initialEditorState?: InitialEditorStateType,
-  awarenessData?: object
+  awarenessData?: object,
+  syncCursorPositionsFn: SyncCursorPositionsFn = syncCursorPositions
 ): Accessor<JSX.Element> {
   let isReloadingDoc: boolean = false;
 
@@ -91,7 +93,7 @@ export function useYjsCollaboration(
       };
 
       const onAwarenessUpdate = () => {
-        syncCursorPositions(binding(), provider());
+        syncCursorPositionsFn(binding(), provider());
       };
 
       const onYjsTreeChanges = (
@@ -107,7 +109,8 @@ export function useYjsCollaboration(
             binding(),
             provider(),
             events,
-            isFromUndoManager
+            isFromUndoManager,
+            syncCursorPositionsFn
           );
         }
       };

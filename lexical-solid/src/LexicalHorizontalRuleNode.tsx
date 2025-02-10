@@ -44,12 +44,10 @@ function HorizontalRuleComponent(props: { nodeKey: NodeKey }) {
     if (isSelected() && $isNodeSelection(deleteSelection)) {
       const event: KeyboardEvent = payload;
       event.preventDefault();
-      editor.update(() => {
-        deleteSelection.getNodes().forEach((node) => {
-          if ($isHorizontalRuleNode(node)) {
-            node.remove();
-          }
-        });
+      deleteSelection.getNodes().forEach((node) => {
+        if ($isHorizontalRuleNode(node)) {
+          node.remove();
+        }
       });
     }
     return false;
