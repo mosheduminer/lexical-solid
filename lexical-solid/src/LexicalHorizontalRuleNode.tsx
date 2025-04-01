@@ -89,7 +89,7 @@ function HorizontalRuleComponent(props: { nodeKey: NodeKey }) {
 
   createEffect(() => {
     const hrElem = editor.getElementByKey(props.nodeKey);
-    const isSelectedClassName = "selected";
+    const isSelectedClassName = editor._config.theme.hrSelected ?? "selected";
     if (hrElem !== null) {
       if (isSelected()) {
         addClassNamesToElement(hrElem, isSelectedClassName);

@@ -4,7 +4,7 @@ import { useHistory } from "./shared/useHistory";
 import type { HistoryState, HistoryStateEntry } from "@lexical/history";
 
 function HistoryPlugin(props: {
-  delay: number;
+  delay?: number;
   externalHistoryState?: HistoryState;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();

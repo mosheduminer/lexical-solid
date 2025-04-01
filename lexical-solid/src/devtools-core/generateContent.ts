@@ -59,6 +59,8 @@ const FORMAT_PREDICATES = [
     node.hasFormat("superscript") && "Superscript",
   (node: TextNode | RangeSelection) =>
     node.hasFormat("underline") && "Underline",
+  (node: TextNode | RangeSelection) =>
+    node.hasFormat("highlight") && "Highlight",
 ];
 
 const FORMAT_PREDICATES_PARAGRAPH = [
