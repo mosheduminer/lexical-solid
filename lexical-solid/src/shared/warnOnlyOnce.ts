@@ -1,7 +1,7 @@
-const __DEV__ = true;
+import { DEV } from "solid-js";
 
 export default function warnOnlyOnce(message: string): () => void {
-  if (__DEV__) {
+  if (DEV) {
     let run = false;
     return () => {
       if (!run) {
