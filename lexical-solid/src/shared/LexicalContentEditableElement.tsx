@@ -12,7 +12,7 @@ import {
 } from "solid-js";
 import { useLexicalComposerContext } from "../LexicalComposerContext";
 
-export type Props = {
+export type ContentEditableElementProps = {
   editor: LexicalEditor;
   ariaActiveDescendant?: JSX.HTMLAttributes<HTMLDivElement>["aria-activedescendant"];
   ariaAutoComplete?: JSX.HTMLAttributes<HTMLDivElement>["aria-autocomplete"];
@@ -30,7 +30,7 @@ export type Props = {
   "data-testid"?: string | null | undefined;
 } & Omit<JSX.HTMLAttributes<HTMLDivElement>, "placeholder">;
 
-export function ContentEditableElement(props: Props): JSX.Element {
+export function ContentEditableElement(props: ContentEditableElementProps): JSX.Element {
   props = mergeProps(
     {
       role: "textbox" as JSX.HTMLAttributes<HTMLDivElement>["role"],

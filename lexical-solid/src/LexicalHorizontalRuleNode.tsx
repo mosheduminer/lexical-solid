@@ -1,16 +1,11 @@
 import {
   $applyNodeReplacement,
-  $getNodeByKey,
-  $getSelection,
-  $isNodeSelection,
   CLICK_COMMAND,
   COMMAND_PRIORITY_LOW,
   DOMConversionMap,
   DOMConversionOutput,
   DOMExportOutput,
   EditorConfig,
-  KEY_BACKSPACE_COMMAND,
-  KEY_DELETE_COMMAND,
   LexicalCommand,
   LexicalNode,
   NodeKey,
@@ -39,20 +34,6 @@ function HorizontalRuleComponent(props: { nodeKey: NodeKey }) {
     props.nodeKey
   );
 
-  const $onDelete = (payload: KeyboardEvent) => {
-    const deleteSelection = $getSelection();
-    if (isSelected() && $isNodeSelection(deleteSelection)) {
-      const event: KeyboardEvent = payload;
-      event.preventDefault();
-      deleteSelection.getNodes().forEach((node) => {
-        if ($isHorizontalRuleNode(node)) {
-          node.remove();
-        }
-      });
-    }
-    return false;
-  };
-
   createEffect(() => {
     onCleanup(
       mergeRegister(
@@ -72,16 +53,6 @@ function HorizontalRuleComponent(props: { nodeKey: NodeKey }) {
             return false;
           },
           COMMAND_PRIORITY_LOW
-        ),
-        editor.registerCommand(
-          KEY_DELETE_COMMAND,
-          $onDelete,
-          COMMAND_PRIORITY_LOW
-        ),
-        editor.registerCommand(
-          KEY_BACKSPACE_COMMAND,
-          $onDelete,
-          COMMAND_PRIORITY_LOW
         )
       )
     );
@@ -89,7 +60,7 @@ function HorizontalRuleComponent(props: { nodeKey: NodeKey }) {
 
   createEffect(() => {
     const hrElem = editor.getElementByKey(props.nodeKey);
-    const isSelectedClassName = "selected";
+    const isSelectedClassName = editor._config.theme.hrSelected ?? "selected";
     if (hrElem !== null) {
       if (isSelected()) {
         addClassNamesToElement(hrElem, isSelectedClassName);

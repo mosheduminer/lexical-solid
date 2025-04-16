@@ -257,13 +257,21 @@ function useDraggableBlockMenu(
   isEditable: boolean,
   menuComponent: JSX.Element,
   targetLineComponent: JSX.Element,
-  isOnMenu: (element: HTMLElement) => boolean
+  isOnMenu: (element: HTMLElement) => boolean,
+  onElementChanged?: (element: HTMLElement | null) => void
 ): JSX.Element {
   const scrollerElem = anchorElem.parentElement;
 
   const isDraggingBlockRef = { current: false };
-  const [draggableBlockElem, setDraggableBlockElem] =
+  const [draggableBlockElem, setDraggableBlockElemState] =
     createSignal<HTMLElement | null>(null);
+
+  const setDraggableBlockElem = (elem: HTMLElement | null) => {
+    setDraggableBlockElemState(elem);
+    if (onElementChanged) {
+      onElementChanged(elem);
+    }
+  };
 
   createEffect(() => {
     function onMouseMove(event: MouseEvent) {
@@ -434,6 +442,7 @@ export function DraggableBlockPlugin_EXPERIMENTAL(props: {
   menuComponent: JSX.Element;
   targetLineComponent: JSX.Element;
   isOnMenu: (element: HTMLElement) => boolean;
+  onElementChanged?: (element: HTMLElement | null) => void;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
   return useDraggableBlockMenu(
@@ -444,6 +453,7 @@ export function DraggableBlockPlugin_EXPERIMENTAL(props: {
     editor._editable,
     props.menuComponent,
     props.targetLineComponent,
-    props.isOnMenu
+    props.isOnMenu,
+    props.onElementChanged
   );
 }

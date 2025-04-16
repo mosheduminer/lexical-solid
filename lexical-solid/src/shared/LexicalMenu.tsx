@@ -101,7 +101,7 @@ function getFullMatchOffset(
 ): number {
   let triggerOffset = offset;
   for (let i = triggerOffset; i <= entryText.length; i++) {
-    if (documentText.substr(-i) === entryText.substr(0, i)) {
+    if (documentText.slice(-i) === entryText.substring(0, i)) {
       triggerOffset = i;
     }
   }
@@ -463,6 +463,19 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
   );
 }
 
+function setContainerDivAttributes(
+  containerDiv: HTMLElement,
+  className?: string
+) {
+  if (className != null) {
+    containerDiv.className = className;
+  }
+  containerDiv.setAttribute("aria-label", "Typeahead menu");
+  containerDiv.setAttribute("role", "listbox");
+  containerDiv.style.display = "block";
+  containerDiv.style.position = "absolute";
+}
+
 export function useMenuAnchorRef(
   resolution: Accessor<MenuResolution | null>,
   setResolution: (r: MenuResolution | null) => void,
@@ -519,16 +532,10 @@ export function useMenuAnchorRef(
       }
 
       if (!containerDiv.isConnected) {
-        if (className != null) {
-          containerDiv.className = className;
-        }
-        containerDiv.setAttribute("aria-label", "Typeahead menu");
-        containerDiv.setAttribute("id", "typeahead-menu");
-        containerDiv.setAttribute("role", "listbox");
-        containerDiv.style.display = "block";
-        containerDiv.style.position = "absolute";
+        setContainerDivAttributes(containerDiv, className);
         parent.append(containerDiv);
       }
+      containerDiv.setAttribute("id", "typeahead-menu");
       anchorElementRef = containerDiv;
       rootElement.setAttribute("aria-controls", "typeahead-menu");
     }
@@ -538,17 +545,18 @@ export function useMenuAnchorRef(
     const rootElement = editor.getRootElement();
     if (resolution() !== null) {
       positionMenu();
-      onCleanup(() => {
-        if (rootElement !== null) {
-          rootElement.removeAttribute("aria-controls");
-        }
-
-        const containerDiv = anchorElementRef;
-        if (containerDiv !== null && containerDiv.isConnected) {
-          containerDiv.remove();
-        }
-      });
     }
+    onCleanup(() => {
+      if (rootElement !== null) {
+        rootElement.removeAttribute("aria-controls");
+      }
+
+      const containerDiv = anchorElementRef;
+      if (containerDiv !== null && containerDiv.isConnected) {
+        containerDiv.remove();
+        containerDiv.removeAttribute("id");
+      }
+    });
   });
 
   const onVisibilityChange = (isInView: boolean) => {
@@ -565,6 +573,15 @@ export function useMenuAnchorRef(
     positionMenu,
     onVisibilityChange
   );
+
+  // Append the context for the menu immediately
+  const containerDiv = anchorElementRef;
+  if (containerDiv != null) {
+    setContainerDivAttributes(containerDiv, className);
+    if (parent != null) {
+      parent.append(containerDiv);
+    }
+  }
 
   return {
     get current() {
