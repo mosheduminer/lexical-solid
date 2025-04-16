@@ -3,14 +3,11 @@ import {
   NodeKey,
   $getNodeByKey,
   $getSelection,
-  $isDecoratorNode,
   $isNodeSelection,
   $isRangeSelection,
   CLICK_COMMAND,
   COMMAND_PRIORITY_LOW,
   FORMAT_ELEMENT_COMMAND,
-  KEY_BACKSPACE_COMMAND,
-  KEY_DELETE_COMMAND,
 } from "lexical";
 import { useLexicalComposerContext } from "./LexicalComposerContext";
 import { $isDecoratorBlockNode } from "./LexicalDecoratorBlockNode";
@@ -39,20 +36,6 @@ export function BlockWithAlignableContents(props: Props): JSX.Element {
     props.nodeKey
   );
   let ref: HTMLDivElement | undefined;
-
-  const $onDelete = (event: KeyboardEvent) => {
-    const deleteSelection = $getSelection();
-    if (isSelected() && $isNodeSelection(deleteSelection)) {
-      event.preventDefault();
-      deleteSelection.getNodes().forEach((node) => {
-        if ($isDecoratorNode(node)) {
-          node.remove();
-        }
-      });
-    }
-
-    return false;
-  };
 
   createEffect(() => {
     onCleanup(
@@ -105,16 +88,6 @@ export function BlockWithAlignableContents(props: Props): JSX.Element {
 
             return false;
           },
-          COMMAND_PRIORITY_LOW
-        ),
-        editor.registerCommand(
-          KEY_DELETE_COMMAND,
-          $onDelete,
-          COMMAND_PRIORITY_LOW
-        ),
-        editor.registerCommand(
-          KEY_BACKSPACE_COMMAND,
-          $onDelete,
           COMMAND_PRIORITY_LOW
         )
       )

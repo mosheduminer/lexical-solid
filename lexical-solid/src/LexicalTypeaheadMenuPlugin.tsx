@@ -29,6 +29,7 @@ import {
   JSX,
   startTransition,
   onCleanup,
+  onMount,
 } from "solid-js";
 
 export type QueryMatch = {
@@ -257,6 +258,11 @@ export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
     on(resolution, () => {
       const updateListener = () => {
         editor.getEditorState().read(() => {
+          // Check if editor is in read-only mode
+          if (!editor.isEditable()) {
+            closeTypeahead();
+            return;
+          }
           const editorWindow = editor._window || window;
           const range = editorWindow.document.createRange();
           const selection = $getSelection();
@@ -306,6 +312,16 @@ export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
       });
     })
   );
+
+  onMount(() => {
+    onCleanup(
+      editor.registerEditableListener((isEditable) => {
+        if (!isEditable) {
+          closeTypeahead();
+        }
+      })
+    );
+  });
 
   return (
     <Show

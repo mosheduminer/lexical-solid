@@ -72,6 +72,7 @@ const FORMAT_PREDICATES_PARAGRAPH = [
   (node: ParagraphNode) => node.hasTextFormat("subscript") && "Subscript",
   (node: ParagraphNode) => node.hasTextFormat("superscript") && "Superscript",
   (node: ParagraphNode) => node.hasTextFormat("underline") && "Underline",
+  (node: ParagraphNode) => node.hasTextFormat("highlight") && "Highlight",
 ];
 
 const DETAIL_PREDICATES = [
