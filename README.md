@@ -16,7 +16,7 @@ This repository uses `pnpm`, but if you are only a consumer of this library, you
 
 # Lexical Dependencies
 
-Currently using lexical packages version `0.24.0`, and ported from [@lexical/react](https://www.npmjs.com/package/@lexical/react) of the same version tag.
+Currently using lexical packages version `0.29.0`, and ported from [@lexical/react](https://www.npmjs.com/package/@lexical/react) of the same version tag.
 
 This package pins `lexical` and the `@lexical/*` packages to specific minor versions. This means that you can only upgrade your lexical version to the latest _patch_ version compatible with the current version. Attempting to upgrade the minor version will result in a broken state due to mismatched packages. See [#5](https://github.com/mosheduminer/lexical-solid/issues/5) for some discussion of the pinning strategy.
 
