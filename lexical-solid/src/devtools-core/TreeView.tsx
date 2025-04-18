@@ -1,5 +1,6 @@
 import type { EditorSetOptions, EditorState } from "lexical";
 import { JSX, createEffect, createSignal } from "solid-js";
+import type { LexicalCommandLog } from "./useLexicalCommandsLog";
 
 const LARGE_EDITOR_STATE_SIZE = 1000;
 
@@ -14,6 +15,7 @@ export const TreeView = (props: {
   generateContent: (exportDOM: boolean) => Promise<string>;
   setEditorState: (state: EditorState, options?: EditorSetOptions) => void;
   setEditorReadOnly: (isReadonly: boolean) => void;
+  commandsLog?: LexicalCommandLog;
   ref: (_: HTMLPreElement) => void;
 }): JSX.Element => {
   const [timeStampedEditorStates, setTimeStampedEditorStates] = createSignal<
@@ -27,7 +29,8 @@ export const TreeView = (props: {
   const [isPlaying, setIsPlaying] = createSignal(false);
   const [isLimited, setIsLimited] = createSignal(false);
   const [showLimited, setShowLimited] = createSignal(false);
-  let lastEditorStateRef: null | EditorState = null;
+  let lastEditorStateRef: EditorState | null | undefined = null;
+  let lastCommandsLogRef: LexicalCommandLog | null | undefined = [];
   let lastGenerationID = 0;
 
   const generateTree = (exportDOM: boolean) => {
@@ -59,12 +62,20 @@ export const TreeView = (props: {
       }
     }
 
-    // Prevent re-rendering if the editor state hasn't changed
-    if (lastEditorStateRef !== props.editorState) {
+    // Update view when either editor state changes or new commands are logged
+    const shouldUpdate =
+      lastEditorStateRef !== props.editorState ||
+      lastCommandsLogRef !== props.commandsLog;
+
+    if (shouldUpdate) {
+      // Check if it's a real editor state change
+      const isEditorStateChange = lastEditorStateRef !== props.editorState;
       lastEditorStateRef = props.editorState;
+      lastCommandsLogRef = props.commandsLog;
       generateTree(showExportDOM());
 
-      if (!timeTravelEnabled()) {
+      // Only record in time travel if there was an actual editor state change
+      if (!timeTravelEnabled() && isEditorStateChange) {
         setTimeStampedEditorStates((currentEditorStates) => [
           ...currentEditorStates,
           [Date.now(), props.editorState],

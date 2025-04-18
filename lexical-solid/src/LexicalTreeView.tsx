@@ -111,6 +111,7 @@ export function TreeView(props: {
         );
       }}
       ref={setTreeElementRef}
+      commandsLog={commandsLog()}
     />
   );
 }

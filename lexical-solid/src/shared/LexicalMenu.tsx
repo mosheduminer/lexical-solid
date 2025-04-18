@@ -262,6 +262,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
     matchingString: string
   ) => void;
   commandPriority?: CommandListenerPriority;
+  preselectFirstItem?: boolean;
 }): JSX.Element | null {
   const [selectedIndex, setHighlightedIndex] = createSignal<null | number>(
     null
@@ -269,9 +270,12 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
 
   createEffect(
     on(
-      () => props.resolution.match && props.resolution.match.matchingString,
-      () => {
-        setHighlightedIndex(0);
+      () => [
+        props.preselectFirstItem,
+        props.resolution.match && props.resolution.match.matchingString,
+      ],
+      (preselectFirstItem) => {
+        if (preselectFirstItem) setHighlightedIndex(0);
       }
     )
   );
@@ -312,7 +316,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
   createEffect(() => {
     if (props.options === null) {
       setHighlightedIndex(null);
-    } else if (selectedIndex === null) {
+    } else if (selectedIndex() === null && props.preselectFirstItem) {
       updateSelectedIndex(0);
     }
   });
@@ -343,13 +347,11 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
           KEY_ARROW_DOWN_COMMAND,
           (payload) => {
             const event = payload;
-            if (
-              props.options !== null &&
-              props.options.length &&
-              selectedIndex() !== null
-            ) {
+            if (props.options !== null && props.options.length) {
               const newSelectedIndex =
-                selectedIndex() !== props.options.length - 1
+                selectedIndex() === null
+                  ? 0
+                  : selectedIndex() !== props.options.length - 1
                   ? selectedIndex()! + 1
                   : 0;
               updateSelectedIndex(newSelectedIndex);
@@ -374,13 +376,11 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
           KEY_ARROW_UP_COMMAND,
           (payload) => {
             const event = payload;
-            if (
-              props.options !== null &&
-              props.options.length &&
-              selectedIndex() !== null
-            ) {
+            if (props.options !== null && props.options.length) {
               const newSelectedIndex =
-                selectedIndex() !== 0
+                selectedIndex() === null
+                  ? props.options.length - 1
+                  : selectedIndex() !== 0
                   ? selectedIndex()! - 1
                   : props.options.length - 1;
               updateSelectedIndex(newSelectedIndex);
@@ -412,7 +412,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
             const event = payload;
             if (
               props.options === null ||
-              selectedIndex === null ||
+              selectedIndex() === null ||
               props.options[selectedIndex()!] == null
             ) {
               return false;
@@ -429,7 +429,7 @@ export function LexicalMenu<TOption extends MenuOption>(props: {
           (event: KeyboardEvent | null) => {
             if (
               props.options === null ||
-              selectedIndex === null ||
+              selectedIndex() === null ||
               props.options[selectedIndex()!] == null
             ) {
               return false;

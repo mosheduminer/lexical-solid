@@ -64,7 +64,7 @@ export function CollaborationPlugin(props: Props): JSX.Element {
     collabContext.isCollabActive = true;
 
     return () => {
-      // Reseting flag only when unmount top level editor collab plugin. Nested
+      // Resetting flag only when unmount top level editor collab plugin. Nested
       // editors (e.g. image caption) should unmount without affecting it
       if (editor._parentEditor == null) {
         collabContext.isCollabActive = false;

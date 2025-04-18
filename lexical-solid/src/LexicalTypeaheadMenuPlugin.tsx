@@ -226,6 +226,7 @@ export type TypeaheadMenuPluginProps<TOption extends MenuOption> = {
   anchorClassName?: string;
   commandPriority?: CommandListenerPriority;
   parent?: HTMLElement;
+  preselectFirstItem?: boolean;
 };
 
 export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
@@ -339,6 +340,7 @@ export function LexicalTypeaheadMenuPlugin<TOption extends MenuOption>(
         onSelectOption={props.onSelectOption}
         shouldSplitNodeWithQuery={true}
         commandPriority={props.commandPriority ?? COMMAND_PRIORITY_LOW}
+        preselectFirstItem={props.preselectFirstItem ?? true}
       />
     </Show>
   );
